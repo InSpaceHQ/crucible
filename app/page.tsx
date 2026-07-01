@@ -29,7 +29,7 @@ const teams = [
   {
     name: "Nova",
     game: "FC26",
-    logo: "https://api.dicebear.com/9.x/shapes/svg?seed=Nova&backgroundColor=ff6b6b",
+    logo: "https://api.dicebear.com/9.x/shapes/png?seed=Nova&backgroundColor=ff6b6b",
     players: [
       { name: "Aisha Khan", game: "FC26" },
       { name: "Marcus Chen", game: "FC26" },
@@ -40,7 +40,7 @@ const teams = [
   {
     name: "Vertex",
     game: "MK1",
-    logo: "https://api.dicebear.com/9.x/shapes/svg?seed=Vertex&backgroundColor=4ecdc4",
+    logo: "https://api.dicebear.com/9.x/shapes/png?seed=Vertex&backgroundColor=4ecdc4",
     players: [
       { name: "Zara Patel", game: "MK1" },
       { name: "Leo Torres", game: "MK1" },
@@ -51,7 +51,7 @@ const teams = [
   {
     name: "Pulse",
     game: "FC26",
-    logo: "https://api.dicebear.com/9.x/shapes/svg?seed=Pulse&backgroundColor=ffa502",
+    logo: "https://api.dicebear.com/9.x/shapes/png?seed=Pulse&backgroundColor=ffa502",
     players: [
       { name: "Yuki Tanaka", game: "FC26" },
       { name: "Elena Voss", game: "FC26" },
@@ -62,7 +62,7 @@ const teams = [
   {
     name: "Apex",
     game: "MK1",
-    logo: "https://api.dicebear.com/9.x/shapes/svg?seed=Apex&backgroundColor=7c5cfc",
+    logo: "https://api.dicebear.com/9.x/shapes/png?seed=Apex&backgroundColor=7c5cfc",
     players: [
       { name: "Sofia Reyes", game: "MK1" },
       { name: "Ravi Mehta", game: "MK1" },
@@ -114,7 +114,7 @@ const skills = [
 ];
 
 const fixtures = [
-  { player1: "Aisha Khan", player2: "Zara Patel", game: "FC26", time: "14:00" },
+  { player1: "Aisha Khan", player2: "Zara Patel", game: "FC26", time: "14:00", score: "3 - 1" },
   {
     player1: "Marcus Chen",
     player2: "Leo Torres",
@@ -154,6 +154,29 @@ const fixtures = [
   },
 ];
 
+const standings = [
+  { rank: 1, name: "Nova", w: 6, d: 1, l: 1, gd: 14 },
+  { rank: 2, name: "Vertex", w: 5, d: 2, l: 1, gd: 9 },
+  { rank: 3, name: "Pulse", w: 4, d: 1, l: 3, gd: 5 },
+  { rank: 4, name: "Apex", w: 3, d: 0, l: 5, gd: -3 },
+];
+
+const schedule = [
+  { date: "Jul 06", time: "12:00", activity: "Players Check-in", description: "Registration Opens" },
+  { date: "Jul 06", time: "14:00", activity: "Warmup Arena", description: "Free Play Session" },
+  { date: "Jul 07", time: "10:00", activity: "Draft Lottery", description: "Team Draw Live" },
+  { date: "Jul 07", time: "16:00", activity: "Press Briefing", description: "Coach Interviews" },
+  { date: "Jul 08", time: "14:00", activity: "FC26 Face-off", description: "Nova vs Vertex" },
+  { date: "Jul 08", time: "15:30", activity: "MK1 Brawl", description: "Pulse vs Apex" },
+  { date: "Jul 09", time: "14:00", activity: "FC26 Rematch", description: "Nova vs Pulse" },
+  { date: "Jul 09", time: "15:30", activity: "MK1 Rematch", description: "Vertex vs Apex" },
+  { date: "Jul 10", time: "14:00", activity: "FC26 Semis", description: "Nova vs Vertex" },
+  { date: "Jul 10", time: "15:30", activity: "MK1 Semis", description: "Pulse vs Apex" },
+  { date: "Jul 11", time: "12:00", activity: "All-Star Event", description: "Fan Vote Lineup" },
+  { date: "Jul 11", time: "18:00", activity: "Finals Party", description: "Live Crowd Event" },
+  { date: "Jul 12", time: "16:00", activity: "Title Fight", description: "Championship Decider" },
+];
+
 export default function Home() {
   return (
     <div className="py-12 text-foreground scanline-root relative w-[calc(100svw-30px)] mx-auto min-h-svh">
@@ -172,8 +195,8 @@ export default function Home() {
           </Link>
         </section>
 
-        <div className="grid grid-cols-3 gap-4 scanline-container">
-          <Card>
+        <div className="grid grid-cols-12 gap-4 scanline-container">
+          <Card className="col-span-5">
             <CardHeader>
               <CardTitle>
                 Teams — <span>20</span>
@@ -186,8 +209,10 @@ export default function Home() {
             </CardContent>
             <CardFooter />
           </Card>
-          <SkillsCard />
-          <Card>
+          <div className="col-span-4">
+            <SkillsCard />
+          </div>
+          <Card className="col-span-3">
             <CardHeader>
               <CardTitle>Sponsors</CardTitle>
             </CardHeader>
@@ -195,8 +220,16 @@ export default function Home() {
               <div className="flex"></div>
             </CardContent>
           </Card>
+          <div className="col-span-5">
+            <StandingsCard />
+          </div>
+          <div className="col-span-7">
+            <FixturesCard />
+          </div>
         </div>
-        <FixturesCard />
+
+        <ScheduleSection />
+
       </div>
     </div>
   );
@@ -215,7 +248,7 @@ function TeamRow({ index, team }) {
             alt={`${team.name} logo`}
             fill
             className="object-cover"
-            sizes="24px"
+            sizes="1.5rem"
           />
         </div>
         <span className="font-medium">{team.name}</span>
@@ -293,7 +326,7 @@ function SkillsCard() {
                             alt={`${player.team} logo`}
                             fill
                             className="object-cover"
-                            sizes="24px"
+                            sizes="1.5rem"
                           />
                         </div>
                         <span className="text-xs font-medium">
@@ -349,30 +382,40 @@ function FixturesCard() {
               className="flex items-center gap-2 py-2 font-mono text-sm"
             >
               <span className="text-foreground w-4 text-right text-xs">
-                {i + 1}
+                {String(i + 1).padStart(2, "0")}.
               </span>
               <div className="flex flex-1 items-center gap-1.5">
-                <Avatar className="size-5">
-                  <AvatarImage src={""} />
-                  <AvatarFallback className="text-[9px]">
-                    {getInitials(p1.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="truncate max-w-[60px]">
-                  {p1.name.split(" ")[0]}
-                </span>
+                <div className="relative size-7 shrink-0 overflow-hidden rounded-full bg-muted">
+                  <Image
+                    src={p1.teamLogo}
+                    alt={`${p1.team} logo`}
+                    fill
+                    className="object-cover"
+                    sizes="1.75rem"
+                  />
+                </div>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-xs">{p1.name.split(" ")[0]}</span>
+                  <span className="text-[10px] text-foreground">{p1.team}</span>
+                </div>
               </div>
-              <span className="text-xs text-foreground">vs</span>
+              <span className="text-xs text-foreground min-w-[32px] text-center">
+                {fixture.score ?? "vs"}
+              </span>
               <div className="flex flex-1 items-center gap-1.5 justify-end">
-                <span className="truncate max-w-[60px]">
-                  {p2.name.split(" ")[0]}
-                </span>
-                <Avatar className="size-5">
-                  <AvatarImage src={""} />
-                  <AvatarFallback className="text-[9px]">
-                    {getInitials(p2.name)}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="flex flex-col leading-tight items-end">
+                  <span className="text-xs">{p2.name.split(" ")[0]}</span>
+                  <span className="text-[10px] text-foreground">{p2.team}</span>
+                </div>
+                <div className="relative size-7 shrink-0 overflow-hidden rounded-full bg-muted">
+                  <Image
+                    src={p2.teamLogo}
+                    alt={`${p2.team} logo`}
+                    fill
+                    className="object-cover"
+                    sizes="1.75rem"
+                  />
+                </div>
               </div>
               <span className="text-end text-xs text-foreground min-w-[40px]">
                 {fixture.time}
@@ -382,5 +425,120 @@ function FixturesCard() {
         })}
       </CardContent>
     </Card>
+  );
+}
+
+function StandingsCard() {
+  const pts = (e: typeof standings[number]) => e.w * 3 + e.d;
+
+  const gridCols = "grid-cols-12";
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Standings</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="font-mono text-sm">
+          <div
+            className={`grid ${gridCols} items-center gap-x-1 pb-1.5 text-foreground border-b border-border`}
+          >
+            <span className="col-span-1 text-start">#</span>
+            <span className="col-span-5 flex items-center gap-1.5">
+              <span>Team</span>
+            </span>
+            <span className="col-span-1 text-center">W</span>
+            <span className="col-span-1 text-center">D</span>
+            <span className="col-span-1 text-center">L</span>
+            <span className="col-span-1 text-right">GD</span>
+            <span className="col-span-2 text-right font-bold">Pts</span>
+          </div>
+          <div className="divide-y divide-border">
+            {standings.map((entry) => {
+              const team = teams.find((t) => t.name === entry.name);
+              return (
+                <div
+                  key={entry.name}
+                  className={`grid ${gridCols} items-center gap-x-1 py-2`}
+                >
+                  <span className="col-span-1 text-start text-foreground">
+                    {String(entry.rank).padStart(2, "0")}.
+                  </span>
+                  <div className="col-span-5 flex items-center gap-1.5">
+                    {team && (
+                      <div className="relative size-7 shrink-0 overflow-hidden rounded-full bg-muted">
+                        <Image
+                          src={team.logo}
+                          alt={`${team.name} logo`}
+                          fill
+                          className="object-cover"
+                          sizes="1.75rem"
+                        />
+                      </div>
+                    )}
+                    <span>{entry.name}</span>
+                  </div>
+                  <span className="col-span-1 text-center">{entry.w}</span>
+                  <span className="col-span-1 text-center">{entry.d}</span>
+                  <span className="col-span-1 text-center">{entry.l}</span>
+                  <span className="col-span-1 text-right">{entry.gd > 0 ? `+${entry.gd}` : entry.gd}</span>
+                  <span className="col-span-2 text-right font-medium">{pts(entry)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ScheduleSection() {
+  const grouped = schedule.reduce<Record<string, typeof schedule>>(
+    (acc, item) => {
+      (acc[item.date] ??= []).push(item);
+      return acc;
+    },
+    {},
+  );
+
+  return (
+    <section className="flex gap-4 scanline-container mt-64">
+      <div className="w-1/3 sticky top-12 self-start shrink-0">
+        <h2 className="font-heading font-bold text-6xl">Showdown</h2>
+      </div>
+      <div className="flex-1 min-w-0">
+        {Object.entries(grouped).map(([date, items], gi) => (
+          <div key={date} className="relative pl-0 pb-8 last:pb-0">
+            {gi < Object.entries(grouped).length - 1 && (
+              <div className="absolute left-20 top-6 bottom-0 w-px bg-border" />
+            )}
+            <div className="flex items-center gap-4 mb-5">
+              <span className="font-mono text-xs font-bold text-background bg-foreground px-2 py-1 shrink-0">
+                {date}
+              </span>
+            </div>
+            <div className="space-y-5 pl-0">
+              {items.map((item, i) => (
+                <div key={i} className="relative pl-6">
+                  <div className="absolute left-0 top-1.5 size-1.5 bg-foreground/40" />
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-mono text-sm text-foreground shrink-0">
+                      {item.time}
+                    </span>
+                    <span className="font-mono text-base font-medium">
+                      {item.activity}
+                    </span>
+                  </div>
+                  <p className="font-mono text-sm text-foreground mt-0.5">
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
