@@ -2,7 +2,16 @@
 
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Button } from "~/components/ui/button";
+import {
+  teams,
+  allPlayers,
+  skills,
+  fixtures,
+  standings,
+  schedule,
+} from "~/app/data";
 import {
   Card,
   CardContent,
@@ -24,167 +33,6 @@ function getInitials(name: string) {
     .map((n) => n[0])
     .join("");
 }
-
-const teams = [
-  {
-    name: "Nova",
-    game: "FC26",
-    logo: "https://api.dicebear.com/9.x/shapes/png?seed=Nova&backgroundColor=ff6b6b",
-    players: [
-      { name: "Aisha Khan", game: "FC26" },
-      { name: "Marcus Chen", game: "FC26" },
-      { name: "Priya Singh", game: "MK1" },
-      { name: "James Kim", game: "MK1" },
-    ],
-  },
-  {
-    name: "Vertex",
-    game: "MK1",
-    logo: "https://api.dicebear.com/9.x/shapes/png?seed=Vertex&backgroundColor=4ecdc4",
-    players: [
-      { name: "Zara Patel", game: "MK1" },
-      { name: "Leo Torres", game: "MK1" },
-      { name: "Maya Okafor", game: "FC26" },
-      { name: "Kai Nakamura", game: "FC26" },
-    ],
-  },
-  {
-    name: "Pulse",
-    game: "FC26",
-    logo: "https://api.dicebear.com/9.x/shapes/png?seed=Pulse&backgroundColor=ffa502",
-    players: [
-      { name: "Yuki Tanaka", game: "FC26" },
-      { name: "Elena Voss", game: "FC26" },
-      { name: "Idris Adebayo", game: "MK1" },
-      { name: "Lena Dupont", game: "MK1" },
-    ],
-  },
-  {
-    name: "Apex",
-    game: "MK1",
-    logo: "https://api.dicebear.com/9.x/shapes/png?seed=Apex&backgroundColor=7c5cfc",
-    players: [
-      { name: "Sofia Reyes", game: "MK1" },
-      { name: "Ravi Mehta", game: "MK1" },
-      { name: "Nadia Petrova", game: "FC26" },
-      { name: "Tomás Silva", game: "FC26" },
-    ],
-  },
-];
-
-const allPlayers = teams.flatMap((team) =>
-  team.players.map((player) => ({
-    ...player,
-    team: team.name,
-    teamLogo: team.logo,
-  })),
-);
-
-const skills = [
-  {
-    name: "Best Goal",
-    game: "FC26",
-    description: "Soccer",
-    players: ["Aisha Khan", "Marcus Chen", "Yuki Tanaka", "Nadia Petrova"],
-  },
-  {
-    name: "Most Skilled Player",
-    game: "Both",
-    description: "",
-    players: ["Zara Patel", "Kai Nakamura", "Idris Adebayo", "Ravi Mehta"],
-  },
-  {
-    name: "Longest Combo",
-    game: "MK",
-    description: "",
-    players: ["Priya Singh", "Leo Torres", "Lena Dupont", "Sofia Reyes"],
-  },
-  {
-    name: "Quickest Win",
-    game: "Both",
-    description: "",
-    players: ["Elena Voss", "Maya Okafor", "James Kim", "Tomás Silva"],
-  },
-  {
-    name: "Flawless Warlock",
-    game: "MK",
-    description: "",
-    players: ["James Kim", "Idris Adebayo", "Priya Singh", "Zara Patel"],
-  },
-];
-
-const fixtures = [
-  { player1: "Aisha Khan", player2: "Zara Patel", game: "FC26", time: "14:00", score: "3 - 1" },
-  {
-    player1: "Marcus Chen",
-    player2: "Leo Torres",
-    game: "FC26",
-    time: "14:20",
-  },
-  {
-    player1: "Priya Singh",
-    player2: "Sofia Reyes",
-    game: "MK1",
-    time: "14:40",
-  },
-  { player1: "James Kim", player2: "Ravi Mehta", game: "MK1", time: "15:00" },
-  {
-    player1: "Yuki Tanaka",
-    player2: "Maya Okafor",
-    game: "FC26",
-    time: "15:20",
-  },
-  {
-    player1: "Elena Voss",
-    player2: "Kai Nakamura",
-    game: "FC26",
-    time: "15:40",
-  },
-  {
-    player1: "Idris Adebayo",
-    player2: "Nadia Petrova",
-    game: "MK1",
-    time: "16:00",
-  },
-  {
-    player1: "Lena Dupont",
-    player2: "Tomás Silva",
-    game: "MK1",
-    time: "16:20",
-  },
-];
-
-const standings = [
-  { rank: 1, name: "Nova", w: 6, d: 1, l: 1, gd: 14 },
-  { rank: 2, name: "Vertex", w: 5, d: 2, l: 1, gd: 9 },
-  { rank: 3, name: "Pulse", w: 4, d: 1, l: 3, gd: 5 },
-  { rank: 4, name: "Apex", w: 3, d: 0, l: 5, gd: -3 },
-];
-
-const schedule = [
-  { date: "Jul 05", time: "09:00", activity: "Venue Setup", description: "Stage Assembly" },
-  { date: "Jul 05", time: "14:00", activity: "Tech Rehearsal", description: "Stream Test" },
-  { date: "Jul 05", time: "18:00", activity: "Media Day", description: "Player Photos" },
-  { date: "Jul 06", time: "10:00", activity: "Early Bird Cup", description: "Warm-up Matches" },
-  { date: "Jul 06", time: "12:00", activity: "Players Check-in", description: "Registration Opens" },
-  { date: "Jul 06", time: "14:00", activity: "Warmup Arena", description: "Free Play Session" },
-  { date: "Jul 06", time: "19:00", activity: "Opening Ceremony", description: "Season Kick-off" },
-  { date: "Jul 07", time: "10:00", activity: "Draft Lottery", description: "Team Draw Live" },
-  { date: "Jul 07", time: "13:00", activity: "Roster Lock", description: "Final Submissions" },
-  { date: "Jul 07", time: "16:00", activity: "Press Briefing", description: "Coach Interviews" },
-  { date: "Jul 08", time: "14:00", activity: "FC26 Face-off", description: "Nova vs Vertex" },
-  { date: "Jul 08", time: "15:30", activity: "MK1 Brawl", description: "Pulse vs Apex" },
-  { date: "Jul 09", time: "14:00", activity: "FC26 Rematch", description: "Nova vs Pulse" },
-  { date: "Jul 09", time: "15:30", activity: "MK1 Rematch", description: "Vertex vs Apex" },
-  { date: "Jul 10", time: "14:00", activity: "FC26 Semis", description: "Nova vs Vertex" },
-  { date: "Jul 10", time: "15:30", activity: "MK1 Semis", description: "Pulse vs Apex" },
-  { date: "Jul 11", time: "10:00", activity: "Fan Meet & Greet", description: "Autograph Session" },
-  { date: "Jul 11", time: "12:00", activity: "All-Star Event", description: "Fan Vote Lineup" },
-  { date: "Jul 11", time: "18:00", activity: "Finals Party", description: "Live Crowd Event" },
-  { date: "Jul 12", time: "14:00", activity: "Bronze Match", description: "Third Place Play-off" },
-  { date: "Jul 12", time: "16:00", activity: "Title Fight", description: "Championship Decider" },
-  { date: "Jul 12", time: "18:30", activity: "Awards Night", description: "MVP Ceremony" },
-];
 
 export default function Home() {
   return (
@@ -511,42 +359,64 @@ function ScheduleSection() {
     {},
   );
 
+  const entries = Object.entries(grouped);
+
   return (
     <section className="flex gap-4 scanline-container mt-64">
       <div className="w-1/3 sticky self-start shrink-0">
         <h2 className="font-heading font-bold text-6xl">Showdown</h2>
       </div>
       <div className="flex-1 min-w-0">
-        {Object.entries(grouped).map(([date, items], gi) => (
-          <div key={date} className="relative flex pb-8 last:pb-0">
-            <div className="relative w-24 shrink-0 flex flex-col items-end">
-              {gi < Object.entries(grouped).length - 1 && (
-                <div className="absolute right-0 top-0 -bottom-8 w-px bg-border" />
-              )}
-              <span className="font-mono text-xs font-bold text-background bg-foreground px-2 py-1">
-                {date}
+        {entries.map(([date, items], gi) => (
+          <ScheduleDateGroup
+            key={date}
+            date={date}
+            items={items}
+            isLast={gi === entries.length - 1}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ScheduleDateGroup({ date, items, isLast }: { date: string; items: typeof schedule; isLast: boolean }) {
+  return (
+    <div className="relative flex pb-8 last:pb-0">
+      <div className="relative w-24 shrink-0 flex flex-col items-end overflow-x-clip">
+        {!isLast && (
+          <div className="absolute right-0 top-0 -bottom-8 w-px bg-border" />
+        )}
+        <motion.div
+          initial={{ x: "100%" }}
+          whileInView={{ x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <span className="font-mono text-sm font-bold text-background bg-foreground px-2 py-1 block w-fit">
+            {date}
+          </span>
+        </motion.div>
+      </div>
+      <div className="flex-1 min-w-0 space-y-5 pl-8">
+        {items.map((item, i) => (
+          <div key={i}>
+            <div className="flex items-baseline gap-3">
+              <span className="font-mono text-sm text-foreground/80 shrink-0">
+                {item.time}
               </span>
-            </div>
-            <div className="flex-1 min-w-0 space-y-5 pl-8">
-              {items.map((item, i) => (
-                <div key={i}>
-                  <div className="flex items-baseline gap-3">
-                    <span className="font-mono text-sm text-foreground shrink-0">
-                      {item.time}
-                    </span>
-                    <span className="font-mono text-base font-medium">
-                      {item.activity}
-                    </span>
-                  </div>
-                  <p className="font-mono text-sm text-foreground mt-0.5">
-                    {item.description}
-                  </p>
-                </div>
-              ))}
+              <div>
+                <span className="font-mono text-sm font-bold">
+                  {item.activity}
+                </span>
+                <p className="font-mono text-sm text-foreground/80 max-w-[60ch] text-pretty">
+                  {item.description}
+                </p>
+              </div>
             </div>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
