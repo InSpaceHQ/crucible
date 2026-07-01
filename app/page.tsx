@@ -162,9 +162,15 @@ const standings = [
 ];
 
 const schedule = [
+  { date: "Jul 05", time: "09:00", activity: "Venue Setup", description: "Stage Assembly" },
+  { date: "Jul 05", time: "14:00", activity: "Tech Rehearsal", description: "Stream Test" },
+  { date: "Jul 05", time: "18:00", activity: "Media Day", description: "Player Photos" },
+  { date: "Jul 06", time: "10:00", activity: "Early Bird Cup", description: "Warm-up Matches" },
   { date: "Jul 06", time: "12:00", activity: "Players Check-in", description: "Registration Opens" },
   { date: "Jul 06", time: "14:00", activity: "Warmup Arena", description: "Free Play Session" },
+  { date: "Jul 06", time: "19:00", activity: "Opening Ceremony", description: "Season Kick-off" },
   { date: "Jul 07", time: "10:00", activity: "Draft Lottery", description: "Team Draw Live" },
+  { date: "Jul 07", time: "13:00", activity: "Roster Lock", description: "Final Submissions" },
   { date: "Jul 07", time: "16:00", activity: "Press Briefing", description: "Coach Interviews" },
   { date: "Jul 08", time: "14:00", activity: "FC26 Face-off", description: "Nova vs Vertex" },
   { date: "Jul 08", time: "15:30", activity: "MK1 Brawl", description: "Pulse vs Apex" },
@@ -172,9 +178,12 @@ const schedule = [
   { date: "Jul 09", time: "15:30", activity: "MK1 Rematch", description: "Vertex vs Apex" },
   { date: "Jul 10", time: "14:00", activity: "FC26 Semis", description: "Nova vs Vertex" },
   { date: "Jul 10", time: "15:30", activity: "MK1 Semis", description: "Pulse vs Apex" },
+  { date: "Jul 11", time: "10:00", activity: "Fan Meet & Greet", description: "Autograph Session" },
   { date: "Jul 11", time: "12:00", activity: "All-Star Event", description: "Fan Vote Lineup" },
   { date: "Jul 11", time: "18:00", activity: "Finals Party", description: "Live Crowd Event" },
+  { date: "Jul 12", time: "14:00", activity: "Bronze Match", description: "Third Place Play-off" },
   { date: "Jul 12", time: "16:00", activity: "Title Fight", description: "Championship Decider" },
+  { date: "Jul 12", time: "18:30", activity: "Awards Night", description: "MVP Ceremony" },
 ];
 
 export default function Home() {
@@ -504,24 +513,23 @@ function ScheduleSection() {
 
   return (
     <section className="flex gap-4 scanline-container mt-64">
-      <div className="w-1/3 sticky top-12 self-start shrink-0">
+      <div className="w-1/3 sticky self-start shrink-0">
         <h2 className="font-heading font-bold text-6xl">Showdown</h2>
       </div>
       <div className="flex-1 min-w-0">
         {Object.entries(grouped).map(([date, items], gi) => (
-          <div key={date} className="relative pl-0 pb-8 last:pb-0">
-            {gi < Object.entries(grouped).length - 1 && (
-              <div className="absolute left-20 top-6 bottom-0 w-px bg-border" />
-            )}
-            <div className="flex items-center gap-4 mb-5">
-              <span className="font-mono text-xs font-bold text-background bg-foreground px-2 py-1 shrink-0">
+          <div key={date} className="relative flex pb-8 last:pb-0">
+            <div className="relative w-24 shrink-0 flex flex-col items-end">
+              {gi < Object.entries(grouped).length - 1 && (
+                <div className="absolute right-0 top-0 -bottom-8 w-px bg-border" />
+              )}
+              <span className="font-mono text-xs font-bold text-background bg-foreground px-2 py-1">
                 {date}
               </span>
             </div>
-            <div className="space-y-5 pl-0">
+            <div className="flex-1 min-w-0 space-y-5 pl-8">
               {items.map((item, i) => (
-                <div key={i} className="relative pl-6">
-                  <div className="absolute left-0 top-1.5 size-1.5 bg-foreground/40" />
+                <div key={i}>
                   <div className="flex items-baseline gap-3">
                     <span className="font-mono text-sm text-foreground shrink-0">
                       {item.time}
