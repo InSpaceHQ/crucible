@@ -3,6 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "motion/react";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   teams,
@@ -11,6 +12,7 @@ import {
   fixtures,
   standings,
   schedule,
+  playerLeaderboard,
 } from "~/app/data";
 import {
   Card,
@@ -19,7 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { PlayerAvatar } from "~/components/ui/player-avatar";
 import { useRef } from "react";
 import { Fit } from "~/components/ui/fit";
 import Image from "next/image";
@@ -29,67 +31,113 @@ import {
   HoverCardTrigger,
 } from "~/components/ui/hover-card";
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+function Countdown({ targetDate }: { targetDate: Date }) {
+  const [remaining, setRemaining] = useState("");
+
+  useEffect(() => {
+    function tick() {
+      const diff = targetDate.getTime() - Date.now();
+      if (diff <= 0) {
+        setRemaining("00d : 00h : 00m : 00s");
+        return;
+      }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setRemaining(
+        `${String(d).padStart(2, "0")}d : ${String(h).padStart(2, "0")}h : ${String(m).padStart(2, "0")}m : ${String(s).padStart(2, "0")}s`,
+      );
+    }
+
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [targetDate]);
+
+  return (
+    <span className="font-mono text-sm tabular-nums text-accent-foreground">
+      {remaining}
+    </span>
+  );
 }
 
 export default function Home() {
   return (
-    <div className="py-12 text-foreground scanline-root relative w-[calc(100svw-30px)] mx-auto min-h-svh">
-      <div className="mx-auto container w-full">
-        <section className="flex justify-between pb-32">
-          <h1 className="text-5xl font-[neue_machina] relative font-bold flex-col flex items-start">
-            <span className="font-mono bg-foreground text-background text-[10px] absolute left-[18%] px-1 ">
-              InSpace
-            </span>
-            Crucible
-          </h1>
-          <Link href="bit.ly/crucible-inspace" target="_blank">
-            <Button variant={"ghost"} size={"lg"}>
-              Join the competition <ArrowRight />
-            </Button>
-          </Link>
-        </section>
-
-        <div className="grid grid-cols-12 gap-4 scanline-container z-10">
-          <Card className="col-span-5">
-            <CardHeader>
-              <CardTitle>
-                Teams — <span>20</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y divide-border">
-              {teams.map((team, i) => (
-                <TeamRow key={team.name} index={i + 1} team={team} />
-              ))}
-            </CardContent>
-            <CardFooter />
-          </Card>
-          <div className="col-span-4">
-            <SkillsCard />
-          </div>
-          <Card className="col-span-3">
-            <CardHeader>
-              <CardTitle>Sponsors</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex"></div>
-            </CardContent>
-          </Card>
-          <div className="col-span-5">
-            <StandingsCard />
-          </div>
-          <div className="col-span-7">
-            <FixturesCard />
-          </div>
+    <>
+      <div className="marquee bg-foreground text-background font-mono text-xs md:text-sm py-2 w-svw">
+        <div className="marquee-inner gap-12 px-6 font-bold">
+          <span>
+            Welcome to the most interactive gaming event in Port-Harcourt.
+            starting on the 1st of August.
+          </span>
+          <span>
+            Welcome to the most interactive gaming event in Port-Harcourt.
+            starting on the 1st of August.
+          </span>
+          <span>
+            Welcome to the most interactive gaming event in Port-Harcourt.
+            starting on the 1st of August.
+          </span>
+          <span>
+            Welcome to the most interactive gaming event in Port-Harcourt.
+            starting on the 1st of August.
+          </span>
         </div>
-
-        <ScheduleSection />
       </div>
-    </div>
+
+      <div className="py-12 text-foreground scanline-root relative w-[calc(100svw-30px)] mx-auto min-h-svh">
+        <div className="mx-auto container w-full">
+          <section className="flex justify-between pb-32">
+            <h1 className="text-5xl select-none font-[neue_machina] relative font-bold flex-col flex items-start">
+              <span className="font-mono bg-foreground text-background text-[10px] absolute left-[18%] px-1 ">
+                InSpace
+              </span>
+              Crucible
+            </h1>
+            <div className="flex items-center gap-6">
+              <Countdown targetDate={new Date("2026-08-01T00:00:00")} />
+              <Link href="bit.ly/crucible-inspace" target="_blank">
+                <Button variant={"ghost"} size={"lg"}>
+                  Join the competition <ArrowRight />
+                </Button>
+              </Link>
+            </div>
+          </section>
+
+          <div className="grid grid-cols-12 gap-4 scanline-container z-10">
+            <div className="col-span-6">
+              <StandingsCard />
+            </div>
+            <div className="col-span-6">
+              <FixturesCard />
+            </div>
+            <Card className="col-span-4">
+              <CardHeader>
+                <CardTitle>
+                  Teams — <span>20</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="divide-y divide-border">
+                {teams.map((team, i) => (
+                  <TeamRow key={team.name} index={i + 1} team={team} />
+                ))}
+              </CardContent>
+              <CardFooter className="justify-end font-mono text-xs text-foreground">
+                {teams.reduce((sum, t) => sum + t.players.length, 0)} total
+                players
+              </CardFooter>
+            </Card>
+            <div className="col-span-4">
+              <SkillsCard />
+            </div>
+            <PlayerLeaderboard />
+          </div>
+
+          <ScheduleSection />
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -111,7 +159,7 @@ function TeamRow({ index, team }) {
         </div>
         <span className="font-medium">{team.name}</span>
         <span className="text-end flex-1 text-xs text-foreground">
-          {team.players.length} members
+          {team.players.length} players
         </span>
       </HoverCardTrigger>
       <HoverCardContent side="right" align="start" className="w-56 p-2">
@@ -123,18 +171,72 @@ function TeamRow({ index, team }) {
             key={player.name}
             className="flex items-center gap-2 px-1 py-1.5"
           >
-            <Avatar className="size-6">
-              <AvatarImage src={""} />
-              <AvatarFallback className="text-[10px]">
-                {getInitials(player.name)}
-              </AvatarFallback>
-            </Avatar>
+            <PlayerAvatar name={player.name} size="sm" />
             <span className="text-sm">{player.name}</span>
             <span className="text-end flex-1 text-xs">{player.game}</span>
           </div>
         ))}
       </HoverCardContent>
     </HoverCard>
+  );
+}
+
+function PlayerLeaderboard() {
+  return (
+    <Card className="col-span-4">
+      <CardHeader>
+        <CardTitle>Player Leaderboard</CardTitle>
+      </CardHeader>
+      <CardContent className="divide-y divide-border">
+        {playerLeaderboard.map((player) => (
+          <HoverCard key={player.name} openDelay={200} closeDelay={100}>
+            <HoverCardTrigger className="flex font-mono gap-2 items-center py-2 text-sm w-full cursor-pointer hover:bg-muted/40 px-1 transition-colors">
+              <span className="text-foreground w-4 text-right text-xs">
+                {String(player.rank).padStart(2, "0")}.
+              </span>
+              <div className="flex-1 min-w-0 text-left">
+                <span className="font-medium">{player.name}</span>
+                <span className="text-foreground/50 ml-1.5 text-xs">
+                  {player.team}
+                </span>
+              </div>
+              <span className="text-accent-foreground font-bold tabular-nums">
+                {player.kills}
+              </span>
+            </HoverCardTrigger>
+            <HoverCardContent side="bottom" align="start" className="w-48 p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <PlayerAvatar name={player.name} />
+                <div>
+                  <div className="font-mono text-sm font-medium">
+                    {player.name}
+                  </div>
+                  <div className="font-mono text-xs text-foreground/60">
+                    {player.team}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 space-y-1 font-mono text-xs">
+                <div className="flex justify-between">
+                  <span className="text-foreground/50">Kills</span>
+                  <span className="font-bold text-accent-foreground">
+                    {player.kills}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-foreground/50">Wins</span>
+                  <span className="font-bold">{player.wins}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-foreground/50">Matches</span>
+                  <span className="font-bold">{player.matches}</span>
+                </div>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -165,12 +267,11 @@ function SkillsCard() {
                 {holders.map((player) => (
                   <HoverCard key={player.name} openDelay={200} closeDelay={100}>
                     <HoverCardTrigger className="cursor-pointer">
-                      <Avatar className="size-6 ring-2 ring-background">
-                        <AvatarImage src={""} />
-                        <AvatarFallback className="text-[10px]">
-                          {getInitials(player.name)}
-                        </AvatarFallback>
-                      </Avatar>
+                      <PlayerAvatar
+                        name={player.name}
+                        size="sm"
+                        className="ring-2 ring-background"
+                      />
                     </HoverCardTrigger>
                     <HoverCardContent
                       side="bottom"
@@ -195,12 +296,7 @@ function SkillsCard() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2 px-1 py-1.5">
-                        <Avatar className="size-8">
-                          <AvatarImage src={""} />
-                          <AvatarFallback className="text-xs">
-                            {getInitials(player.name)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <PlayerAvatar name={player.name} />
                         <div>
                           <div className="text-sm font-medium">
                             {player.name}
@@ -393,7 +489,7 @@ function ScheduleSection() {
               style={{ translate: x }}
               className="absolute top-0 left-0 text-[color-mix(in_oklch,var(--background)_100%,rgba(255,255,255,0.9)_11%)]  font-heading tracking-tighter font-bold text-[10vh] origin-top-left text-end whitespace-nowrap rotate-90 leading-[1ex]"
             >
-              Showdown
+              Schedule
             </motion.h2>
           </Fit>
         </div>

@@ -62,7 +62,7 @@
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent-foreground: #ff9900;
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -126,6 +126,11 @@
     @apply border-border outline-ring/50;
   }
 
+  ::selection {
+    color: var(--background);
+    background: var(--foreground);
+  }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -137,6 +142,25 @@
 
 .scanline-root .scanline-container {
   overflow: hidden;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee {
+  overflow: hidden;
+}
+
+.marquee-inner {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll var(--marquee-speed, 30s) linear infinite;
 }
 
 .scanline-root .scanline-container:after {
