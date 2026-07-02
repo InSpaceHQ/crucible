@@ -2,7 +2,7 @@
 
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "motion/react";
 import { Button } from "~/components/ui/button";
 import {
   teams,
@@ -20,6 +20,8 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { useRef } from "react";
+import { Fit } from "~/components/ui/fit";
 import Image from "next/image";
 import {
   HoverCard,
@@ -52,7 +54,7 @@ export default function Home() {
           </Link>
         </section>
 
-        <div className="grid grid-cols-12 gap-4 scanline-container">
+        <div className="grid grid-cols-12 gap-4 scanline-container z-10">
           <Card className="col-span-5">
             <CardHeader>
               <CardTitle>
@@ -86,7 +88,6 @@ export default function Home() {
         </div>
 
         <ScheduleSection />
-
       </div>
     </div>
   );
@@ -286,7 +287,7 @@ function FixturesCard() {
 }
 
 function StandingsCard() {
-  const pts = (e: typeof standings[number]) => e.w * 3 + e.d;
+  const pts = (e: (typeof standings)[number]) => e.w * 3 + e.d;
 
   const gridCols = "grid-cols-12";
 
@@ -338,8 +339,12 @@ function StandingsCard() {
                   <span className="col-span-1 text-center">{entry.w}</span>
                   <span className="col-span-1 text-center">{entry.d}</span>
                   <span className="col-span-1 text-center">{entry.l}</span>
-                  <span className="col-span-1 text-right">{entry.gd > 0 ? `+${entry.gd}` : entry.gd}</span>
-                  <span className="col-span-2 text-right font-medium">{pts(entry)}</span>
+                  <span className="col-span-1 text-right">
+                    {entry.gd > 0 ? `+${entry.gd}` : entry.gd}
+                  </span>
+                  <span className="col-span-2 text-right font-medium">
+                    {pts(entry)}
+                  </span>
                 </div>
               );
             })}
@@ -351,9 +356,22 @@ function StandingsCard() {
 }
 
 function ScheduleSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const x = useTransform(
+    scrollYProgress,
+    [0, 0.4, 0.85, 1],
+    ["-0.5ex", "1.1ex", "1.1ex", "-0.5ex"],
+  );
+
   const grouped = schedule.reduce<Record<string, typeof schedule>>(
     (acc, item) => {
-      (acc[item.date] ??= []).push(item);
+      if (!acc[item.date]) acc[item.date] = [];
+      acc[item.date].push(item);
       return acc;
     },
     {},
@@ -362,11 +380,26 @@ function ScheduleSection() {
   const entries = Object.entries(grouped);
 
   return (
-    <section className="flex gap-4 scanline-container mt-64">
-      <div className="w-1/3 sticky self-start shrink-0">
-        <h2 className="font-heading font-bold text-6xl">Showdown</h2>
+    <section ref={sectionRef} className="flex gap-4 items-start mt-64 relative">
+      <div className="top-0 basis-4/12 sticky self-start flex flex-col justify-center shrink-0 pointer-events-none">
+        <div className="w-screen h-screen fixed top-0 left-0">
+          <Fit
+            options={{
+              maxSize: 200,
+              observeMutations: { subtree: true, childList: true },
+            }}
+          >
+            <motion.h2
+              style={{ translate: x }}
+              className="absolute top-0 left-0 text-[color-mix(in_oklch,var(--background)_100%,rgba(255,255,255,0.9)_11%)]  font-heading tracking-tighter font-bold text-[10vh] origin-top-left text-end whitespace-nowrap rotate-90 leading-[1ex]"
+            >
+              Showdown
+            </motion.h2>
+          </Fit>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
+
+      <div className="flex-1 min-w-0 pl-16">
         {entries.map(([date, items], gi) => (
           <ScheduleDateGroup
             key={date}
@@ -380,7 +413,15 @@ function ScheduleSection() {
   );
 }
 
-function ScheduleDateGroup({ date, items, isLast }: { date: string; items: typeof schedule; isLast: boolean }) {
+function ScheduleDateGroup({
+  date,
+  items,
+  isLast,
+}: {
+  date: string;
+  items: typeof schedule;
+  isLast: boolean;
+}) {
   return (
     <div className="relative flex pb-8 last:pb-0">
       <div className="relative w-24 shrink-0 flex flex-col items-end overflow-x-clip">
@@ -399,8 +440,8 @@ function ScheduleDateGroup({ date, items, isLast }: { date: string; items: typeo
         </motion.div>
       </div>
       <div className="flex-1 min-w-0 space-y-5 pl-8">
-        {items.map((item, i) => (
-          <div key={i}>
+        {items.map((item) => (
+          <div key={`${date}-${item.activity}`}>
             <div className="flex items-baseline gap-3">
               <span className="font-mono text-sm text-foreground/80 shrink-0">
                 {item.time}

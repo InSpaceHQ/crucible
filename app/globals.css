@@ -147,6 +147,7 @@
   z-index: -1;
   transform: translateY(0.25rem);
   background-image: var(--scanline-image);
+  pointer-events: none;
   background-repeat: repeat;
   opacity: 0.5;
   background-blend-mode: soft-light;
