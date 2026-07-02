@@ -1,8 +1,8 @@
 "use client";
 
 import { Slot } from "@radix-ui/react-slot";
-import { useEffect, useRef } from "react";
 import fitty from "fitty";
+import { useEffect, useRef } from "react";
 
 interface FitProps {
   children: React.ReactNode;
