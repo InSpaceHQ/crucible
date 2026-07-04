@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useCachedQuery } from "~/hooks/use-cached-query";
 import { api } from "~/convex/_generated/api";
 import { emitViewProfile } from "~/lib/events";
 import { Button } from "~/components/ui/button";
@@ -17,7 +17,7 @@ export function PlayerLeaderboard({
 }: {
   showHeader?: boolean;
 }) {
-  const entries = useQuery(api.playerStats.list);
+  const entries = useCachedQuery(api.playerStats.list);
 
   if (entries === undefined) {
     return (
@@ -32,6 +32,7 @@ export function PlayerLeaderboard({
         >
           {Array.from({ length: 8 }).map((_, i) => (
             <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: stable skeleton list
               key={i}
               className="flex font-mono gap-2 items-center py-2 text-sm w-full px-1 skeleton-blink"
               style={{ animationDelay: `${i * 0.12}s` }}
@@ -79,11 +80,7 @@ export function PlayerLeaderboard({
                 {entry.kills}
               </span>
             </HoverCardTrigger>
-            <HoverCardContent
-              side="bottom"
-              align="start"
-              className="w-48 p-3"
-            >
+            <HoverCardContent side="bottom" align="start" className="w-48 p-3">
               <div className="flex items-center gap-2 mb-2">
                 <PlayerAvatar name={entry.player?.name ?? ""} />
                 <div>
