@@ -1,4 +1,5 @@
 import { mutation } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 const SEED_GAMES = [
   { name: "FC26", displayName: "FC26", description: "EA Sports FC 26" },
@@ -51,33 +52,153 @@ const SEED_PLAYERS = [
   { name: "Tomás Silva", game: "FC26", team: "Apex" },
 ];
 
+const SEED_SKILLS = [
+  {
+    name: "Best Goal",
+    game: "FC26",
+    description: "Soccer",
+    points: 10,
+    holders: ["Aisha Khan", "Marcus Chen", "Yuki Tanaka", "Nadia Petrova"],
+  },
+  {
+    name: "Most Skilled Player",
+    game: null,
+    description: null,
+    points: 25,
+    holders: ["Zara Patel", "Kai Nakamura", "Idris Adebayo", "Ravi Mehta"],
+  },
+  {
+    name: "Longest Combo",
+    game: "MK1",
+    description: null,
+    points: 15,
+    holders: ["Priya Singh", "Leo Torres", "Lena Dupont", "Sofia Reyes"],
+  },
+  {
+    name: "Quickest Win",
+    game: null,
+    description: null,
+    points: 20,
+    holders: ["Elena Voss", "Maya Okafor", "James Kim", "Tomás Silva"],
+  },
+  {
+    name: "Flawless Warlock",
+    game: "MK1",
+    description: null,
+    points: 30,
+    holders: ["James Kim", "Idris Adebayo", "Priya Singh", "Zara Patel"],
+  },
+];
+
 export const seed = mutation({
   args: {},
   handler: async (ctx) => {
     const existing = await ctx.db.query("games").take(1);
     if (existing.length > 0) return { seeded: false };
 
-    const gameIds: Record<string, string> = {};
+    const gameIds: Record<string, Id<"games">> = {};
     for (const game of SEED_GAMES) {
       gameIds[game.name] = await ctx.db.insert("games", game);
     }
 
-    const teamIds: Record<string, string> = {};
+    const teamIds: Record<string, Id<"teams">> = {};
     for (const team of SEED_TEAMS) {
       teamIds[team.name] = await ctx.db.insert("teams", {
         name: team.name,
-        gameId: gameIds[team.game] as any,
+        gameId: gameIds[team.game] as Id<"games">,
         logo: team.logo,
         order: team.order,
       });
     }
 
+    const playerIds: Record<string, Id<"players">> = {};
     for (const player of SEED_PLAYERS) {
-      await ctx.db.insert("players", {
+      playerIds[player.name] = await ctx.db.insert("players", {
         name: player.name,
-        gameId: gameIds[player.game] as any,
-        teamId: teamIds[player.team] as any,
+        gameId: gameIds[player.game] as Id<"games">,
+        teamId: teamIds[player.team] as Id<"teams">,
       });
+    }
+
+    for (const skill of SEED_SKILLS) {
+      const skillId = await ctx.db.insert("skills", {
+        name: skill.name,
+        gameId: skill.game ? (gameIds[skill.game] as Id<"games">) : undefined,
+        description: skill.description ?? undefined,
+        points: skill.points,
+      });
+
+      for (const holderName of skill.holders) {
+        const playerId = playerIds[holderName];
+        if (playerId) {
+          await ctx.db.insert("skillHolders", {
+            skillId,
+            playerId: playerId as Id<"players">,
+          });
+        }
+      }
+    }
+
+    return { seeded: true };
+  },
+});
+
+export const clearSkills = mutation({
+  args: {},
+  handler: async (ctx) => {
+    while (true) {
+      const holders = await ctx.db.query("skillHolders").take(100);
+      for (const h of holders) {
+        await ctx.db.delete("skillHolders", h._id);
+      }
+      if (holders.length < 100) break;
+    }
+
+    while (true) {
+      const skills = await ctx.db.query("skills").take(100);
+      for (const s of skills) {
+        await ctx.db.delete("skills", s._id);
+      }
+      if (skills.length < 100) break;
+    }
+
+    return { cleared: true };
+  },
+});
+
+export const seedSkills = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const existingSkills = await ctx.db.query("skills").take(1);
+    if (existingSkills.length > 0) return { seeded: false };
+
+    const games = await ctx.db.query("games").collect();
+    const gameIds: Record<string, Id<"games">> = Object.fromEntries(
+      games.map((g) => [g.name, g._id]),
+    );
+
+    const players = await ctx.db.query("players").collect();
+    const playerIds: Record<string, Id<"players">> = Object.fromEntries(
+      players.map((p) => [p.name, p._id]),
+    );
+
+    for (const skill of SEED_SKILLS) {
+      const skillId = await ctx.db.insert("skills", {
+        name: skill.name,
+        gameId: skill.game ? (gameIds[skill.game] as Id<"games">) : undefined,
+        description: skill.description ?? undefined,
+        points: skill.points,
+      });
+
+      for (const holderName of skill.holders) {
+        const playerId = playerIds[holderName];
+        if (playerId) {
+          await ctx.db.insert("skillHolders", {
+            skillId,
+            playerId: playerId as Id<"players">,
+          });
+        }
+      }
     }
 
     return { seeded: true };

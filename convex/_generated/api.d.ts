@@ -8,7 +8,17 @@
  * @module
  */
 
+import type * as fixtures from "../fixtures.js";
+import type * as playerStats from "../playerStats.js";
+import type * as pointsLog from "../pointsLog.js";
+import type * as schedule from "../schedule.js";
 import type * as seed from "../seed.js";
+import type * as seedFixtures from "../seedFixtures.js";
+import type * as seedPlayerStats from "../seedPlayerStats.js";
+import type * as seedPointsLog from "../seedPointsLog.js";
+import type * as seedSchedule from "../seedSchedule.js";
+import type * as skills from "../skills.js";
+import type * as standings from "../standings.js";
 import type * as teams from "../teams.js";
 
 import type {
@@ -18,7 +28,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  fixtures: typeof fixtures;
+  playerStats: typeof playerStats;
+  pointsLog: typeof pointsLog;
+  schedule: typeof schedule;
   seed: typeof seed;
+  seedFixtures: typeof seedFixtures;
+  seedPlayerStats: typeof seedPlayerStats;
+  seedPointsLog: typeof seedPointsLog;
+  seedSchedule: typeof seedSchedule;
+  skills: typeof skills;
+  standings: typeof standings;
   teams: typeof teams;
 }>;
 
