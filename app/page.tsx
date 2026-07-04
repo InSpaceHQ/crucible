@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,7 +18,6 @@ import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
@@ -29,6 +28,7 @@ import {
   HoverCardTrigger,
 } from "~/components/ui/hover-card";
 import { PlayerAvatar } from "~/components/ui/player-avatar";
+import { TeamsCard } from "~/components/teams-card";
 
 function Countdown({ targetDate }: { targetDate: Date }) {
   const [remaining, setRemaining] = useState("");
@@ -96,9 +96,9 @@ export default function Home() {
             </h1>
             <div className="flex items-center gap-3 md:gap-6">
               <Countdown targetDate={new Date("2026-08-01T00:00:00")} />
-              <Link href="bit.ly/crucible-inspace" target="_blank">
+              <Link href="https://bit.ly/crucible-inspace" target="_blank">
                 <Button variant={"ghost"} size={"lg"}>
-                  Join the competition <ArrowRight />
+                  Join the competition <ArrowUpRight />
                 </Button>
               </Link>
             </div>
@@ -111,22 +111,7 @@ export default function Home() {
             <div className="col-span-1 md:col-span-6">
               <FixturesCard />
             </div>
-            <Card className="col-span-1 md:col-span-4">
-              <CardHeader>
-                <CardTitle>
-                  Teams — <span>20</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="divide-y divide-border">
-                {teams.map((team, i) => (
-                  <TeamRow key={team.name} index={i + 1} team={team} />
-                ))}
-              </CardContent>
-              <CardFooter className="justify-end font-mono text-xs text-foreground">
-                {teams.reduce((sum, t) => sum + t.players.length, 0)} total
-                players
-              </CardFooter>
-            </Card>
+            <TeamsCard />
             <div className="col-span-1 md:col-span-4">
               <SkillsCard />
             </div>
@@ -170,46 +155,6 @@ export default function Home() {
         </footer>
       </div>
     </>
-  );
-}
-
-function TeamRow({ index, team }) {
-  return (
-    <HoverCard openDelay={200} closeDelay={100}>
-      <HoverCardTrigger className="flex font-mono gap-2 items-center py-3 w-full cursor-pointer hover:bg-muted/40 px-1 transition-colors">
-        <span className="text-foreground w-5 text-right">
-          {String(index).padStart(2, "0")}.
-        </span>
-        <div className="relative size-6 shrink-0 overflow-hidden rounded-full bg-muted">
-          <Image
-            src={team.logo}
-            alt={`${team.name} logo`}
-            fill
-            className="object-cover"
-            sizes="1.5rem"
-          />
-        </div>
-        <span className="font-medium">{team.name}</span>
-        <span className="text-end flex-1 text-xs text-foreground">
-          {team.players.length} players
-        </span>
-      </HoverCardTrigger>
-      <HoverCardContent side="bottom" align="end" className="w-56 p-2">
-        <div className="text-xs font-medium text-foreground px-1 pb-1.5">
-          {team.name}
-        </div>
-        {team.players.map((player) => (
-          <div
-            key={player.name}
-            className="flex items-center gap-2 px-1 py-1.5"
-          >
-            <PlayerAvatar name={player.name} size="sm" />
-            <span className="text-sm">{player.name}</span>
-            <span className="text-end flex-1 text-xs">{player.game}</span>
-          </div>
-        ))}
-      </HoverCardContent>
-    </HoverCard>
   );
 }
 
