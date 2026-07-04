@@ -1,12 +1,12 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import type { Id } from "~/convex/_generated/dataModel";
 import { api } from "~/convex/_generated/api";
 import { LogItem, LogItemSkeleton } from "~/components/log-item";
+import { useCachedQuery } from "~/hooks/use-cached-query";
 
 export function ActivityLog({ userId }: { userId: Id<"players"> }) {
-  const entries = useQuery(api.pointsLog.list, { playerId: userId });
+  const entries = useCachedQuery(api.pointsLog.list, { playerId: userId });
 
   if (entries === undefined) {
     return (

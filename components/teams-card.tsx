@@ -1,7 +1,7 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import Image from "next/image";
+import type { FunctionReturnType } from "convex/server";
 import {
   Card,
   CardContent,
@@ -16,14 +16,15 @@ import {
 } from "~/components/ui/hover-card";
 import { PlayerAvatar } from "~/components/ui/player-avatar";
 import { api } from "~/convex/_generated/api";
+import { useCachedQuery } from "~/hooks/use-cached-query";
 
 type TeamRowProps = {
   index: number;
-  team: NonNullable<ReturnType<typeof useQuery<typeof api.teams.list>>>[number];
+  team: NonNullable<FunctionReturnType<typeof api.teams.list>>[number];
 };
 
 export function TeamsCard({ showHeader = true }: { showHeader?: boolean }) {
-  const teams = useQuery(api.teams.list);
+  const teams = useCachedQuery(api.teams.list);
 
   if (teams === undefined) {
     return (

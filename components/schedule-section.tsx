@@ -1,17 +1,17 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { format } from "date-fns";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { Fit } from "~/components/ui/fit";
 import { api } from "~/convex/_generated/api";
 import type { Doc } from "~/convex/_generated/dataModel";
+import { useCachedQuery } from "~/hooks/use-cached-query";
 
 type ScheduleItem = Doc<"schedule">;
 
 export function ScheduleSection() {
-  const items = useQuery(api.schedule.list);
+  const items = useCachedQuery(api.schedule.list);
 
   if (items === undefined) return null;
 

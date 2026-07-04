@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import type { Id } from "~/convex/_generated/dataModel";
+import { onViewProfile, type ViewProfileDetail } from "~/lib/events";
 import { useViewport } from "~/hooks/use-viewport";
 import { ActivityLog } from "~/components/activity-log";
 import { PlayerAvatar } from "~/components/ui/player-avatar";
@@ -21,15 +23,7 @@ import {
 function ProfileHeader({
   profile,
 }: {
-  profile: {
-    name: string;
-    teamName: string;
-    teamLogo: string;
-    gameName: string;
-    kills: number;
-    wins: number;
-    matches: number;
-  };
+  profile: ViewProfileDetail["profile"];
 }) {
   return (
     <div className="mb-6 pb-4 border-b border-border">
@@ -77,41 +71,41 @@ function ProfileHeader({
   );
 }
 
-export function PlayerActivityPanel({
-  userId,
-  open,
-  onOpenChange,
-  profile,
-}: {
-  userId?: Id<"players">;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  profile?: {
-    name: string;
-    teamName: string;
-    teamLogo: string;
-    gameName: string;
-    kills: number;
-    wins: number;
-    matches: number;
-  };
-}) {
+export function PlayerActivityPanel() {
   const { isMobile } = useViewport();
+  const [state, setState] = useState<{
+    userId: Id<"players">;
+    profile: ViewProfileDetail["profile"];
+    open: boolean;
+  }>({ userId: undefined as unknown as Id<"players">, open: false, profile: null as unknown as ViewProfileDetail["profile"] });
 
-  if (!userId) return null;
+  useEffect(
+    () =>
+      onViewProfile((detail) => {
+        setState({ userId: detail.id, profile: detail.profile, open: true });
+      }),
+    [],
+  );
 
-  const title = profile ? `${profile.name}'s Activity` : "Activity Log";
+  const title = state.profile
+    ? `${state.profile.name}'s Activity`
+    : "Activity Log";
+
+  if (!state.open || !state.userId) return null;
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer
+        open={state.open}
+        onOpenChange={(open) => setState((s) => ({ ...s, open }))}
+      >
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>{title}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6">
-            {profile && <ProfileHeader profile={profile} />}
-            <ActivityLog userId={userId} />
+            {state.profile && <ProfileHeader profile={state.profile} />}
+            <ActivityLog userId={state.userId} />
           </div>
         </DrawerContent>
       </Drawer>
@@ -119,13 +113,16 @@ export function PlayerActivityPanel({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet
+      open={state.open}
+      onOpenChange={(open) => setState((s) => ({ ...s, open }))}
+    >
       <SheetContent>
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        {profile && <ProfileHeader profile={profile} />}
-        <ActivityLog userId={userId} />
+        {state.profile && <ProfileHeader profile={state.profile} />}
+        <ActivityLog userId={state.userId} />
       </SheetContent>
     </Sheet>
   );

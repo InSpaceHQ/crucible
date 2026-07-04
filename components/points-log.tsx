@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { usePaginatedQuery, useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { Button } from "~/components/ui/button";
 import {
@@ -18,11 +17,12 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { LogItem, LogItemSkeleton } from "~/components/log-item";
+import { useCachedQuery, useCachedPaginatedQuery } from "~/hooks/use-cached-query";
 
 export function PointsLog() {
   const [open, setOpen] = useState(false);
-  const entries = useQuery(api.pointsLog.list, { limit: 5 });
-  const allEntries = usePaginatedQuery(
+  const entries = useCachedQuery(api.pointsLog.list, { limit: 5 });
+  const allEntries = useCachedPaginatedQuery(
     api.pointsLog.listPaginated,
     {},
     { initialNumItems: 20 },

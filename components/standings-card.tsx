@@ -1,14 +1,14 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import Image from "next/image";
 import { api } from "~/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { useCachedQuery } from "~/hooks/use-cached-query";
 
 const gridCols = "grid-cols-12";
 
 export function StandingsCard({ showHeader = true }: { showHeader?: boolean }) {
-  const standings = useQuery(api.standings.list);
+  const standings = useCachedQuery(api.standings.list);
 
   return (
     <Card>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -10,9 +9,10 @@ import {
 } from "~/components/ui/hover-card";
 import { PlayerAvatar } from "~/components/ui/player-avatar";
 import { api } from "~/convex/_generated/api";
+import { useCachedQuery } from "~/hooks/use-cached-query";
 
 export function SkillsCard() {
-  const skills = useQuery(api.skills.list);
+  const skills = useCachedQuery(api.skills.list);
 
   return (
     <Card>
