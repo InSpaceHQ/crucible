@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQuery, usePaginatedQuery } from "convex/react";
-import { serialize } from "ohash";
+import { isEqual, serialize } from "ohash";
 import type { FunctionReference } from "convex/server";
 import { getFunctionName } from "convex/server";
 
@@ -30,6 +30,9 @@ export function useCachedQuery<
 
   const cached = queryCache.get(key) as Q["_returnType"] | undefined;
   if (result === undefined && cached !== undefined) {
+    return cached;
+  }
+  if (result !== undefined && cached !== undefined && isEqual(result, cached)) {
     return cached;
   }
   return result;
@@ -68,6 +71,10 @@ export function useCachedPaginatedQuery(
       // biome-ignore lint/suspicious/noExplicitAny: status string is one of the PaginatedResult literals
       status: (paginatedStatusCache.get(key) ?? "LoadingMore") as any,
     };
+  }
+  // biome-ignore lint/suspicious/noExplicitAny: cached results array is compared structurally
+  if (result.results.length > 0 && cached && isEqual(result.results, cached as any)) {
+    return { ...result, results: cached };
   }
   return result;
 }

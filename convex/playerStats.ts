@@ -1,3 +1,4 @@
+import { v } from "convex/values";
 import { query } from "./_generated/server";
 
 export const list = query({
@@ -35,5 +36,36 @@ export const list = query({
           : null,
       };
     });
+  },
+});
+
+export const getByPlayerId = query({
+  args: { playerId: v.id("players") },
+  handler: async (ctx, args) => {
+    const entry = await ctx.db
+      .query("playerStats")
+      .filter((q) => q.eq(q.field("playerId"), args.playerId))
+      .first();
+
+    if (!entry) return null;
+
+    const player = await ctx.db.get(args.playerId);
+    if (!player) return null;
+
+    const team = player.teamId ? await ctx.db.get(player.teamId) : null;
+    const game = player.gameId ? await ctx.db.get(player.gameId) : null;
+
+    return {
+      kills: entry.kills,
+      wins: entry.wins,
+      matches: entry.matches ?? 0,
+      player: {
+        name: player.name,
+        game: game
+          ? { name: game.name, displayName: game.displayName }
+          : null,
+        team: team ? { name: team.name, logo: team.logo } : null,
+      },
+    };
   },
 });

@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { emitViewProfile } from "~/lib/events";
+import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   HoverCard,
@@ -102,6 +104,23 @@ export function SkillsCard() {
                           </div>
                         </div>
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-2 font-mono text-xs"
+                        onClick={() =>
+                          emitViewProfile({
+                            id: player._id,
+                            name: player.name,
+                            teamName: player.team?.name ?? "",
+                            teamLogo: player.team?.logo ?? "",
+                            gameName:
+                              player.game?.displayName ?? player.gameId,
+                          })
+                        }
+                      >
+                        View Profile
+                      </Button>
                     </HoverCardContent>
                   </HoverCard>
                 ))}

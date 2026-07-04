@@ -2,15 +2,10 @@ import type { Id } from "~/convex/_generated/dataModel";
 
 export type ViewProfileDetail = {
   id: Id<"players">;
-  profile: {
-    name: string;
-    teamName: string;
-    teamLogo: string;
-    gameName: string;
-    kills: number;
-    wins: number;
-    matches: number;
-  };
+  name: string;
+  teamName: string;
+  teamLogo: string;
+  gameName: string;
 };
 
 const bus = new EventTarget();

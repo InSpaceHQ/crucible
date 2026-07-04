@@ -32,7 +32,6 @@ export function PlayerLeaderboard({
         >
           {Array.from({ length: 8 }).map((_, i) => (
             <div
-              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
               key={i}
               className="flex font-mono gap-2 items-center py-2 text-sm w-full px-1 skeleton-blink"
               style={{ animationDelay: `${i * 0.12}s` }}
@@ -119,18 +118,13 @@ export function PlayerLeaderboard({
                 onClick={() =>
                   emitViewProfile({
                     id: entry.playerId,
-                    profile: {
-                      name: entry.player?.name ?? "",
-                      teamName: entry.player?.team?.name ?? "",
-                      teamLogo: entry.player?.team?.logo ?? "",
-                      gameName:
-                        entry.player?.game?.displayName ??
-                        entry.player?.game?.name ??
-                        "",
-                      kills: entry.kills,
-                      wins: entry.wins,
-                      matches: entry.matches,
-                    },
+                    name: entry.player?.name ?? "",
+                    teamName: entry.player?.team?.name ?? "",
+                    teamLogo: entry.player?.team?.logo ?? "",
+                    gameName:
+                      entry.player?.game?.displayName ??
+                      entry.player?.game?.name ??
+                      "",
                   })
                 }
               >

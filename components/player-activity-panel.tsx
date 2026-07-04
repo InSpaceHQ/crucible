@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Id } from "~/convex/_generated/dataModel";
-import { onViewProfile, type ViewProfileDetail } from "~/lib/events";
+import { api } from "~/convex/_generated/api";
+import { onViewProfile } from "~/lib/events";
+import { useCachedQuery } from "~/hooks/use-cached-query";
 import { useViewport } from "~/hooks/use-viewport";
 import { ActivityLog } from "~/components/activity-log";
 import { PlayerAvatar } from "~/components/ui/player-avatar";
@@ -23,7 +25,15 @@ import {
 function ProfileHeader({
   profile,
 }: {
-  profile: ViewProfileDetail["profile"];
+  profile: {
+    name: string;
+    teamName: string;
+    teamLogo: string;
+    gameName: string;
+    kills: number;
+    wins: number;
+    matches: number;
+  };
 }) {
   return (
     <div className="mb-6 pb-4 border-b border-border">
@@ -71,41 +81,46 @@ function ProfileHeader({
   );
 }
 
-export function PlayerActivityPanel() {
+function PanelContent({
+  playerId,
+  info,
+  open,
+  onOpenChange,
+}: {
+  playerId: Id<"players">;
+  info: { name: string; teamName: string; teamLogo: string; gameName: string };
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const { isMobile } = useViewport();
-  const [state, setState] = useState<{
-    userId: Id<"players">;
-    profile: ViewProfileDetail["profile"];
-    open: boolean;
-  }>({ userId: undefined as unknown as Id<"players">, open: false, profile: null as unknown as ViewProfileDetail["profile"] });
+  const stats = useCachedQuery(api.playerStats.getByPlayerId, {
+    playerId,
+  });
 
-  useEffect(
-    () =>
-      onViewProfile((detail) => {
-        setState({ userId: detail.id, profile: detail.profile, open: true });
-      }),
-    [],
-  );
+  const profile = stats
+    ? {
+        name: info.name,
+        teamName: info.teamName,
+        teamLogo: info.teamLogo,
+        gameName: info.gameName,
+        kills: stats.kills,
+        wins: stats.wins,
+        matches: stats.matches,
+      }
+    : null;
 
-  const title = state.profile
-    ? `${state.profile.name}'s Activity`
-    : "Activity Log";
-
-  if (!state.open || !state.userId) return null;
+  const title = `${info.name}'s Activity`;
 
   if (isMobile) {
     return (
-      <Drawer
-        open={state.open}
-        onOpenChange={(open) => setState((s) => ({ ...s, open }))}
-      >
+      <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>{title}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6">
-            {state.profile && <ProfileHeader profile={state.profile} />}
-            <ActivityLog userId={state.userId} />
+            {profile && <ProfileHeader profile={profile} />}
+            <ActivityLog userId={playerId} />
           </div>
         </DrawerContent>
       </Drawer>
@@ -113,17 +128,52 @@ export function PlayerActivityPanel() {
   }
 
   return (
-    <Sheet
-      open={state.open}
-      onOpenChange={(open) => setState((s) => ({ ...s, open }))}
-    >
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        {state.profile && <ProfileHeader profile={state.profile} />}
-        <ActivityLog userId={state.userId} />
+        {profile && <ProfileHeader profile={profile} />}
+        <ActivityLog userId={playerId} />
       </SheetContent>
     </Sheet>
+  );
+}
+
+export function PlayerActivityPanel() {
+  const [state, setState] = useState<{
+    open: boolean;
+    info: { name: string; teamName: string; teamLogo: string; gameName: string };
+    playerId: Id<"players">;
+  } | null>(null);
+
+  useEffect(
+    () =>
+      onViewProfile((detail) => {
+        setState({
+          open: true,
+          info: {
+            name: detail.name,
+            teamName: detail.teamName,
+            teamLogo: detail.teamLogo,
+            gameName: detail.gameName,
+          },
+          playerId: detail.id,
+        });
+      }),
+    [],
+  );
+
+  if (!state) return null;
+
+  return (
+    <PanelContent
+      playerId={state.playerId}
+      info={state.info}
+      open={state.open}
+      onOpenChange={(open) => {
+        if (!open) setState(null);
+      }}
+    />
   );
 }
