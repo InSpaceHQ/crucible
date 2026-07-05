@@ -9,7 +9,13 @@ import type { Id } from "~/convex/_generated/dataModel";
 import { GameMatch } from "~/lib/game-match";
 import { format } from "date-fns";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
 type Match = NonNullable<
   ReturnType<typeof useQuery<typeof api.competition.listMatches>>
@@ -272,35 +278,36 @@ function MatchManager() {
                 ))
               )}
             </div>
-
-            <div className="flex items-center gap-3 pt-2 font-mono text-sm">
-              <span className="text-xs text-foreground/50 shrink-0">
-                {checked.size} selected
-              </span>
-              <input
-                type="date"
-                className="flex-1 border border-border bg-background px-2 py-1.5 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground min-w-0"
-                value={dateVal}
-                onChange={(e) => setDateVal(e.target.value)}
-              />
-              <input
-                type="time"
-                className="w-28 border border-border bg-background px-2 py-1.5 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground shrink-0"
-                value={timeVal}
-                onChange={(e) => setTimeVal(e.target.value)}
-              />
-              <Button
-                variant="default"
-                size="sm"
-                disabled={checked.size === 0}
-                onClick={handleApply}
-              >
-                Apply
-              </Button>
-            </div>
           </>
         )}
       </CardContent>
+      {selectedCompId && !loadingMatches && matches.length > 0 && (
+        <CardFooter className="font-mono text-sm">
+          <span className="text-xs text-foreground/50 shrink-0">
+            {checked.size} selected
+          </span>
+          <input
+            type="date"
+            className="flex-1 border border-border bg-background px-2 py-1.5 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground min-w-0"
+            value={dateVal}
+            onChange={(e) => setDateVal(e.target.value)}
+          />
+          <input
+            type="time"
+            className="w-28 border border-border bg-background px-2 py-1.5 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground shrink-0"
+            value={timeVal}
+            onChange={(e) => setTimeVal(e.target.value)}
+          />
+          <Button
+            variant="default"
+            size="sm"
+            disabled={checked.size === 0}
+            onClick={handleApply}
+          >
+            Apply
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }
