@@ -201,8 +201,9 @@ function CompetitionMatchesSection({
         </div>
       ) : (
         (() => {
-          const groupMatches = matches.filter((m) => m.phase === "group");
-          const knockoutMatches = matches.filter((m) => m.phase === "knockout");
+          const actual = matches.filter((m) => m.homeTeam && m.awayTeam);
+          const groupMatches = actual.filter((m) => m.phase === "group");
+          const knockoutMatches = actual.filter((m) => m.phase === "knockout");
 
           const groups: Record<string, typeof groupMatches> = {};
           for (const m of groupMatches) {

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { CompetitionList } from "~/components/controls/competition-list";
 import { CreateCompetitionIntegrated } from "~/components/controls/create-competition-integrated";
 import { FixturesByCompetition } from "~/components/controls/fixtures-by-competition";
+import { MatchManager } from "~/components/controls/match-manager";
 
 function formatTime(ts: number) {
   return new Date(ts).toLocaleTimeString("en-US", {
@@ -68,6 +69,8 @@ export default function ControlsPage() {
       </Card>
 
       <CompetitionList />
+
+      <MatchManager />
 
       <FixturesByCompetition />
 

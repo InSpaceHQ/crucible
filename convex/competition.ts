@@ -992,3 +992,15 @@ export const clearCompetition = mutation({
     await ctx.db.delete(args.competitionId);
   },
 });
+
+export const rescheduleMatches = mutation({
+  args: {
+    matchIds: v.array(v.id("competitionMatches")),
+    startTime: v.number(),
+  },
+  handler: async (ctx, args) => {
+    for (const id of args.matchIds) {
+      await ctx.db.patch(id, { startTime: args.startTime });
+    }
+  },
+});
