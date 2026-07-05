@@ -123,12 +123,6 @@ export default function Home() {
           </span>
           <div className="flex items-center gap-4">
             <Link
-              href="/controls"
-              className="font-mono text-xs text-foreground/60 hover:text-foreground transition-colors"
-            >
-              Controls
-            </Link>
-            <Link
               href="https://github.com/InSpaceHQ/crucible"
               target="_blank"
               className="inline-flex items-center gap-2 font-mono text-xs text-foreground/60 hover:text-foreground transition-colors"

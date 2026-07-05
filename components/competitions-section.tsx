@@ -46,7 +46,7 @@ function CompetitionsSection() {
           {competitions.map((c) => (
             <Link
               key={c._id}
-              href="/competitions"
+              href={`/competitions/${c._id}`}
               className="flex items-center gap-3 px-3 py-2 hover:bg-muted/30 transition-colors"
             >
               <span className="flex-1 truncate">{c.name}</span>

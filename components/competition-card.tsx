@@ -10,7 +10,7 @@ import type { Id } from "~/convex/_generated/dataModel";
 import { useCachedQuery } from "~/hooks/use-cached-query";
 import { useSimStore } from "~/stores/use-sim-store";
 
-function CompetitionDetails({
+export function CompetitionDetails({
   competitionId,
 }: {
   competitionId: Id<"competitions">;
