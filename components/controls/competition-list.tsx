@@ -1,7 +1,23 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
 import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 const statusStyles: Record<string, string> = {
@@ -13,6 +29,8 @@ const statusStyles: Record<string, string> = {
 function CompetitionList() {
   const competitions = useQuery(api.competition.list);
   const games = useQuery(api.games.list);
+  const clearCompetition = useMutation(api.competition.clearCompetition);
+  const [deleting, setDeleting] = useState<Record<string, boolean>>({});
 
   if (competitions === undefined || games === undefined) {
     return (
@@ -35,6 +53,20 @@ function CompetitionList() {
   }
 
   const gamesById = Object.fromEntries(games.map((g) => [g._id, g.name]));
+
+  async function handleClear(id: Id<"competitions">) {
+    setDeleting((prev) => ({ ...prev, [id]: true }));
+    try {
+      await clearCompetition({ competitionId: id });
+      toast.success("Competition deleted");
+    } catch (error) {
+      toast.error("Failed to delete competition", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setDeleting((prev) => ({ ...prev, [id]: false }));
+    }
+  }
 
   return (
     <Card>
@@ -65,6 +97,40 @@ function CompetitionList() {
                     day: "numeric",
                   })}
                 </span>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      type="button"
+                      className="text-foreground/30 hover:text-destructive transition-colors"
+                      disabled={deleting[c._id]}
+                    >
+                      {deleting[c._id] ? (
+                        <span className="text-xs">...</span>
+                      ) : (
+                        <Trash2 className="size-3.5" />
+                      )}
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Competition</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete &ldquo;{c.name}&rdquo;?
+                        This will remove all matches, standings, and linked
+                        fixtures.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        disabled={deleting[c._id]}
+                        onClick={() => handleClear(c._id)}
+                      >
+                        {deleting[c._id] ? "Deleting..." : "Delete"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             ))}
           </div>

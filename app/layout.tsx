@@ -30,7 +30,19 @@ export default function RootLayout({
       >
         <ConvexClientProvider>
           {children}
-          <Toaster />
+          <Toaster
+            theme="light"
+            style={{ "--toast-radius": "0" } as React.CSSProperties}
+            toastOptions={{
+              className: "border font-mono text-sm",
+              style: {
+                background: "var(--background)",
+                color: "var(--foreground)",
+                borderColor: "var(--border)",
+                borderRadius: 0,
+              },
+            }}
+          />
         </ConvexClientProvider>
       </body>
     </html>
