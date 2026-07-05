@@ -1,8 +1,6 @@
 "use client";
 
-import { useCachedQuery } from "~/hooks/use-cached-query";
-import { api } from "~/convex/_generated/api";
-import { emitViewProfile } from "~/lib/events";
+import { range } from "effect/Array";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -11,6 +9,9 @@ import {
   HoverCardTrigger,
 } from "~/components/ui/hover-card";
 import { PlayerAvatar } from "~/components/ui/player-avatar";
+import { api } from "~/convex/_generated/api";
+import { useCachedQuery } from "~/hooks/use-cached-query";
+import { emitViewProfile } from "~/lib/events";
 
 export function PlayerLeaderboard({
   showHeader = true,
@@ -30,9 +31,8 @@ export function PlayerLeaderboard({
         <CardContent
           className={`divide-y divide-border${!showHeader ? " py-4" : ""}`}
         >
-          {Array.from({ length: 8 }).map((_, i) => (
+          {range(0, 8).map((i) => (
             <div
-              // biome-ignore lint/suspicious/noArrayIndexKey: stable skeleton list
               key={i}
               className="flex font-mono gap-2 items-center py-2 text-sm w-full px-1 skeleton-blink"
               style={{ animationDelay: `${i * 0.12}s` }}

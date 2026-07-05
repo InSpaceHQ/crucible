@@ -1,7 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import type { FunctionReturnType } from "convex/server";
+import { range } from "effect/Array";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -37,9 +38,8 @@ export function TeamsCard({ showHeader = true }: { showHeader?: boolean }) {
         <CardContent
           className={`divide-y divide-border${!showHeader ? " py-4" : ""}`}
         >
-          {Array.from({ length: 4 }).map((_, i) => (
+          {range(0, 4).map((i) => (
             <div
-              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
               key={i}
               className="flex font-mono gap-2 items-center py-3 w-full px-1 skeleton-blink"
               style={{ animationDelay: `${i * 0.12}s` }}

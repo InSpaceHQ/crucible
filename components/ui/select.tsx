@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "~/lib/utils";
 import { Check, ChevronDown } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
 import type * as React from "react";
+import { cn } from "~/lib/utils";
 
 function SelectRoot({
   ...props
@@ -114,11 +114,11 @@ function SelectLabel({
 }
 
 export {
-  SelectRoot as Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
+  SelectRoot as Select,
   SelectTrigger,
   SelectValue,
 };

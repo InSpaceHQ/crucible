@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
+import { range } from "effect/Array";
 import Image from "next/image";
 import { useEffect } from "react";
 import { GroupStandings } from "~/components/group-standings";
@@ -29,11 +30,11 @@ export function CompetitionDetails({
   if (loading) {
     return (
       <CardContent className="space-y-6">
-        {Array.from({ length: 4 }).map((_, gi) => (
+        {range(0, 4).map((gi) => (
           <div key={gi}>
             <div className="h-4 w-8 bg-muted mb-2 skeleton-blink" />
             <div className="divide-y divide-border">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {range(0, 5).map((i) => (
                 <div
                   key={i}
                   className="flex items-center gap-2 py-1.5 font-mono text-sm skeleton-blink"
@@ -54,11 +55,9 @@ export function CompetitionDetails({
 
   if (empty) {
     return (
-      <>
-        <div className="py-4 text-center text-sm text-foreground">
-          No competition data available.
-        </div>
-      </>
+      <div className="py-4 text-center text-sm text-foreground">
+        No competition data available.
+      </div>
     );
   }
 
@@ -103,9 +102,9 @@ export function CompetitionDetails({
                       {round.matches.map((m) => {
                         const completed = m.status === "completed";
                         const homeWin =
-                          completed && m.homeScore! > m.awayScore!;
+                          completed && (m.homeScore ?? 0) > (m.awayScore ?? 0);
                         const awayWin =
-                          completed && m.awayScore! > m.homeScore!;
+                          completed && (m.awayScore ?? 0) > (m.homeScore ?? 0);
 
                         return (
                           <div
@@ -203,9 +202,9 @@ export function CompetitionCard({
     competitionId ? { key: `sim_state:${competitionId}` } : "skip",
   );
 
-  const phase = simState?.phase;
+  const _phase = simState?.phase;
 
-  const phaseLabels: Record<string, string> = {
+  const _phaseLabels: Record<string, string> = {
     round_1: "Round 1/5",
     round_2: "Round 2/5",
     round_3: "Round 3/5",
@@ -228,11 +227,11 @@ export function CompetitionCard({
           </CardHeader>
         )}
         <CardContent className={`space-y-6 ${!showHeader ? "py-4" : ""}`}>
-          {Array.from({ length: 4 }).map((_, gi) => (
+          {range(0, 4).map((gi) => (
             <div key={gi}>
               <div className="h-4 w-8 bg-muted mb-2 skeleton-blink" />
               <div className="divide-y divide-border">
-                {Array.from({ length: 5 }).map((_, i) => (
+                {range(0, 5).map((i) => (
                   <div
                     key={i}
                     className="flex items-center gap-2 py-1.5 font-mono text-sm skeleton-blink"

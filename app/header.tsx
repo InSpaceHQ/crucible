@@ -1,8 +1,8 @@
 "use client";
 import { ArrowUpRight } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Button } from "~/components/ui/button";
 
 function Countdown({ targetDate }: { targetDate: Date }) {
   const [remaining, setRemaining] = useState("");

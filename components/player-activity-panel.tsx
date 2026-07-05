@@ -2,11 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { Id } from "~/convex/_generated/dataModel";
-import { api } from "~/convex/_generated/api";
-import { onViewProfile } from "~/lib/events";
-import { useCachedQuery } from "~/hooks/use-cached-query";
-import { useViewport } from "~/hooks/use-viewport";
 import { ActivityLog } from "~/components/activity-log";
 import { PlayerAvatar } from "~/components/ui/player-avatar";
 import {
@@ -21,6 +16,11 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "~/components/ui/vaul-drawer";
+import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
+import { useCachedQuery } from "~/hooks/use-cached-query";
+import { useViewport } from "~/hooks/use-viewport";
+import { onViewProfile } from "~/lib/events";
 
 function ProfileHeader({
   profile,

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { api } from "~/convex/_generated/api";
-import type { Id } from "~/convex/_generated/dataModel";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { isDevelopment } from "~/config/constants";
+import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
 
 const PHASE_LABELS: Record<string, string> = {
   round_1: "Round 1/5",
@@ -53,6 +53,7 @@ function CircularProgress({ competitionId }: { competitionId: string }) {
         height="18"
         viewBox="0 0 18 18"
         className="-rotate-90 shrink-0"
+        aria-hidden={true}
       >
         <circle
           cx="9"

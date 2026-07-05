@@ -1,8 +1,8 @@
-import { useEffect } from "react";
-import { useQuery, usePaginatedQuery } from "convex/react";
-import { isEqual, serialize } from "ohash";
+import { usePaginatedQuery, useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
 import { getFunctionName } from "convex/server";
+import { isEqual, serialize } from "ohash";
+import { useEffect } from "react";
 
 const queryCache = new Map<string, unknown>();
 const paginatedCache = new Map<string, unknown[]>();
@@ -17,7 +17,6 @@ export function useCachedQuery<Q extends FunctionReference<"query", "public">>(
   args?: Omit<Q["_args"], "paginationOpts">,
 ): Q["_returnType"] | undefined {
   const key = makeKey(query, args);
-  // biome-ignore lint/suspicious/noExplicitAny: args type is safely constrained by Q
   const result = useQuery(query, args as any);
 
   useEffect(() => {
@@ -47,10 +46,8 @@ export function useCachedPaginatedQuery(
   query: FunctionReference<"query", "public">,
   args: Record<string, unknown>,
   opts: { initialNumItems: number },
-  // biome-ignore lint/suspicious/noExplicitAny: paginated item type is inferred from the query function
 ): PaginatedResult<any> {
   const key = makeKey(query, args);
-  // biome-ignore lint/suspicious/noExplicitAny: args type is constrained by the paginated query signature
   const result = usePaginatedQuery(query, args as any, opts);
 
   useEffect(() => {
@@ -66,11 +63,9 @@ export function useCachedPaginatedQuery(
       ...result,
       results: cached,
       isLoading: false,
-      // biome-ignore lint/suspicious/noExplicitAny: status string is one of the PaginatedResult literals
       status: (paginatedStatusCache.get(key) ?? "LoadingMore") as any,
     };
   }
-  // biome-ignore lint/suspicious/noExplicitAny: cached results array is compared structurally
   if (
     result.results.length > 0 &&
     cached &&

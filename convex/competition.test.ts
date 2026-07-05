@@ -18,7 +18,7 @@ test("seedCompetition creates a competition document", async () => {
     });
   });
 
-  const teamIds = await t.run(async (ctx) => {
+  const _teamIds = await t.run(async (ctx) => {
     const ids: string[] = [];
     for (let i = 0; i < 20; i++) {
       const id = await ctx.db.insert("teams", {
@@ -147,9 +147,9 @@ test("updateMatchResult recalculates group standings", async () => {
   const updated = await t.run(async (ctx) => {
     return await ctx.db.get(groupMatch._id);
   });
-  expect(updated!.homeScore).toBe(3);
-  expect(updated!.awayScore).toBe(1);
-  expect(updated!.status).toBe("completed");
+  expect(updated?.homeScore).toBe(3);
+  expect(updated?.awayScore).toBe(1);
+  expect(updated?.status).toBe("completed");
 
   const standings = await t.run(async (ctx) => {
     return await ctx.db
@@ -165,20 +165,20 @@ test("updateMatchResult recalculates group standings", async () => {
     (s) => s.teamId === groupMatch.awayTeamId,
   );
 
-  expect(homeStanding!.played).toBe(1);
-  expect(homeStanding!.won).toBe(1);
-  expect(homeStanding!.points).toBe(3);
-  expect(homeStanding!.goalsFor).toBe(3);
-  expect(homeStanding!.goalsAgainst).toBe(1);
+  expect(homeStanding?.played).toBe(1);
+  expect(homeStanding?.won).toBe(1);
+  expect(homeStanding?.points).toBe(3);
+  expect(homeStanding?.goalsFor).toBe(3);
+  expect(homeStanding?.goalsAgainst).toBe(1);
 
-  expect(awayStanding!.played).toBe(1);
-  expect(awayStanding!.lost).toBe(1);
-  expect(awayStanding!.points).toBe(0);
-  expect(awayStanding!.goalsFor).toBe(1);
-  expect(awayStanding!.goalsAgainst).toBe(3);
+  expect(awayStanding?.played).toBe(1);
+  expect(awayStanding?.lost).toBe(1);
+  expect(awayStanding?.points).toBe(0);
+  expect(awayStanding?.goalsFor).toBe(1);
+  expect(awayStanding?.goalsAgainst).toBe(3);
 
-  expect(homeStanding!.goalDifference).toBe(2);
-  expect(awayStanding!.goalDifference).toBe(-2);
+  expect(homeStanding?.goalDifference).toBe(2);
+  expect(awayStanding?.goalDifference).toBe(-2);
 });
 
 test("advanceKnockout fills bracket after all group matches complete", async () => {
@@ -356,7 +356,7 @@ test("advanceKnockout fills entire bracket through to Final", async () => {
   );
   for (const m of qfMatches) {
     const updated = await t.run(async (ctx) => await ctx.db.get(m._id));
-    expect(updated!.homeTeamId).not.toBe(updated!.awayTeamId);
+    expect(updated?.homeTeamId).not.toBe(updated?.awayTeamId);
   }
 
   for (const m of qfMatches) {
@@ -374,7 +374,7 @@ test("advanceKnockout fills entire bracket through to Final", async () => {
   );
   for (const m of sfMatches) {
     const updated = await t.run(async (ctx) => await ctx.db.get(m._id));
-    expect(updated!.homeTeamId).not.toBe(updated!.awayTeamId);
+    expect(updated?.homeTeamId).not.toBe(updated?.awayTeamId);
   }
 
   for (const m of sfMatches) {
@@ -393,9 +393,9 @@ test("advanceKnockout fills entire bracket through to Final", async () => {
   const finalUpdated = await t.run(
     async (ctx) => await ctx.db.get(finalMatch._id),
   );
-  expect(finalUpdated!.homeTeamId).toBeDefined();
-  expect(finalUpdated!.awayTeamId).toBeDefined();
-  expect(finalUpdated!.homeTeamId).not.toBe(finalUpdated!.awayTeamId);
+  expect(finalUpdated?.homeTeamId).toBeDefined();
+  expect(finalUpdated?.awayTeamId).toBeDefined();
+  expect(finalUpdated?.homeTeamId).not.toBe(finalUpdated?.awayTeamId);
 });
 
 test("simulateCompetition produces deterministic results with a champion", async () => {
@@ -515,15 +515,15 @@ test("startSimulation creates competition with round_1 phase", async () => {
     return await ctx.db
       .query("kv")
       .withIndex("by_key", (q: any) =>
-        q.eq("key", "sim_state:" + competitionId),
+        q.eq("key", `sim_state:${competitionId}`),
       )
       .first();
   });
-  expect(kvEntry!.value.phase).toBe("round_1");
+  expect(kvEntry?.value.phase).toBe("round_1");
   const competition = await t.run(async (ctx) => {
     return await ctx.db.get(competitionId);
   });
-  expect(competition!.status).toBe("active");
+  expect(competition?.status).toBe("active");
 });
 
 test("advancePhase walks through all phases to completion", async () => {
@@ -566,11 +566,11 @@ test("advancePhase walks through all phases to completion", async () => {
       return await ctx.db
         .query("kv")
         .withIndex("by_key", (q: any) =>
-          q.eq("key", "sim_state:" + competitionId),
+          q.eq("key", `sim_state:${competitionId}`),
         )
         .first();
     });
-    expect(kvEntry!.value.phase).toBe(phase);
+    expect(kvEntry?.value.phase).toBe(phase);
     await t.mutation(api.competition.advancePhase, { competitionId });
   }
 
@@ -578,13 +578,13 @@ test("advancePhase walks through all phases to completion", async () => {
     return await ctx.db
       .query("kv")
       .withIndex("by_key", (q: any) =>
-        q.eq("key", "sim_state:" + competitionId),
+        q.eq("key", `sim_state:${competitionId}`),
       )
       .first();
   });
-  expect(finalKv!.value.phase).toBe("completed");
+  expect(finalKv?.value.phase).toBe("completed");
   const final = await t.run(async (ctx) => await ctx.db.get(competitionId));
-  expect(final!.status).toBe("completed");
+  expect(final?.status).toBe("completed");
 
   const allMatches = await t.run(async (ctx) => {
     return await ctx.db

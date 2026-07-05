@@ -1,7 +1,7 @@
 import { paginationOptsValidator } from "convex/server";
-import { query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
+import { query } from "./_generated/server";
 
 export const list = query({
   args: {

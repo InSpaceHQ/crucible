@@ -1,7 +1,7 @@
 "use client";
 
+import { range } from "effect/Array";
 import Image from "next/image";
-import { emitViewProfile } from "~/lib/events";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -12,6 +12,7 @@ import {
 import { PlayerAvatar } from "~/components/ui/player-avatar";
 import { api } from "~/convex/_generated/api";
 import { useCachedQuery } from "~/hooks/use-cached-query";
+import { emitViewProfile } from "~/lib/events";
 
 export function SkillsCard() {
   const skills = useCachedQuery(api.skills.list);
@@ -23,21 +24,16 @@ export function SkillsCard() {
       </CardHeader>
       <CardContent className="divide-y divide-border">
         {skills === undefined ? (
-          Array.from({ length: 5 }).map((_, i) => (
+          range(0, 5).map((i) => (
             <div
-              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
               key={i}
               className="flex items-center gap-2 py-2 font-mono text-sm skeleton-blink"
               style={{ animationDelay: `${i * 0.12}s` }}
             >
               <div className="h-4 w-24 bg-muted" />
               <div className="flex flex-1 justify-end gap-0.5">
-                {Array.from({ length: 4 }).map((_, j) => (
-                  <div
-                    // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
-                    key={j}
-                    className="size-6 bg-muted"
-                  />
+                {range(0, 4).map((j) => (
+                  <div key={j} className="size-6 bg-muted" />
                 ))}
               </div>
             </div>

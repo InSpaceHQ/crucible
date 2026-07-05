@@ -1,6 +1,6 @@
 "use client";
-
 import { useQuery } from "convex/react";
+import { range } from "effect/Array";
 import Link from "next/link";
 
 import { api } from "~/convex/_generated/api";
@@ -29,7 +29,7 @@ function CompetitionsSection() {
 
       {loading ? (
         <div className="divide-y divide-border font-mono text-sm border border-border">
-          {Array.from({ length: 3 }).map((_, i) => (
+          {range(0, 3).map((i) => (
             <div key={i} className="flex items-center gap-3 px-3 py-2">
               <div className="h-4 w-32 bg-muted skeleton-blink" />
               <div className="h-4 w-16 bg-muted skeleton-blink" />

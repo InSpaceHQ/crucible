@@ -1,7 +1,7 @@
-import { action, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
 import { api } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
+import { action, mutation, query } from "./_generated/server";
 
 const GROUP_NAMES = ["A", "B", "C", "D"];
 
@@ -786,7 +786,7 @@ async function kvGet(ctx: any, key: string) {
   return doc?.value ?? null;
 }
 
-async function kvRemove(ctx: any, key: string) {
+async function _kvRemove(ctx: any, key: string) {
   const existing = await ctx.db
     .query("kv")
     .withIndex("by_key", (q: any) => q.eq("key", key))
@@ -804,7 +804,7 @@ export const startSimulation = mutation({
       args.gameId,
       args.name,
     );
-    await kvSet(ctx, "sim_state:" + competitionId, {
+    await kvSet(ctx, `sim_state:${competitionId}`, {
       phase: "round_1",
       startedAt: Date.now(),
     });
@@ -818,7 +818,7 @@ export const startSimulation = mutation({
 export const advancePhase = mutation({
   args: { competitionId: v.id("competitions") },
   handler: async (ctx, args) => {
-    const state = await kvGet(ctx, "sim_state:" + args.competitionId);
+    const state = await kvGet(ctx, `sim_state:${args.competitionId}`);
     const phase = state?.phase ?? "round_1";
 
     if (
@@ -870,7 +870,7 @@ export const advancePhase = mutation({
               | "round_4"
               | "round_5")
           : "knockout_qf";
-      await kvSet(ctx, "sim_state:" + args.competitionId, {
+      await kvSet(ctx, `sim_state:${args.competitionId}`, {
         phase: nextPhase,
         startedAt: Date.now(),
       });
@@ -896,7 +896,7 @@ export const advancePhase = mutation({
         );
         await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
       }
-      await kvSet(ctx, "sim_state:" + args.competitionId, {
+      await kvSet(ctx, `sim_state:${args.competitionId}`, {
         phase: "knockout_sf",
         startedAt: Date.now(),
       });
@@ -922,7 +922,7 @@ export const advancePhase = mutation({
         );
         await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
       }
-      await kvSet(ctx, "sim_state:" + args.competitionId, {
+      await kvSet(ctx, `sim_state:${args.competitionId}`, {
         phase: "knockout_final",
         startedAt: Date.now(),
       });
@@ -949,7 +949,7 @@ export const advancePhase = mutation({
           await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
         }
       }
-      await kvSet(ctx, "sim_state:" + args.competitionId, {
+      await kvSet(ctx, `sim_state:${args.competitionId}`, {
         phase: "completed",
         startedAt: Date.now(),
       });
@@ -992,7 +992,7 @@ export const clearCompetition = mutation({
       await ctx.db.delete(f._id);
     }
 
-    await kvSet(ctx, "sim_state:" + args.competitionId, {
+    await kvSet(ctx, `sim_state:${args.competitionId}`, {
       phase: "cancelled",
       startedAt: Date.now(),
     });

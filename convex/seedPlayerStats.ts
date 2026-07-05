@@ -1,5 +1,5 @@
-import { mutation } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { mutation } from "./_generated/server";
 
 const SEED_STATS: Record<
   string,

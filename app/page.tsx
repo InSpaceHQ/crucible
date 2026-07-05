@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { GameTabs } from "~/components/game-tabs";
 import { CompetitionsSection } from "~/components/competitions-section";
+import { GameTabs } from "~/components/game-tabs";
+import { PlayerActivityPanel } from "~/components/player-activity-panel";
 import { PointsLog } from "~/components/points-log";
 import { ScheduleSection } from "~/components/schedule-section";
-import { SkillsCard } from "~/components/skills-card";
 import { SimulateCompetition } from "~/components/simulate-competition";
-import { PlayerActivityPanel } from "~/components/player-activity-panel";
+import { SkillsCard } from "~/components/skills-card";
 
 export default function Home() {
   return (

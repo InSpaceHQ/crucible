@@ -1,12 +1,12 @@
 "use client";
 
-import React, { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { StandingsCard } from "~/components/standings-card";
+import React, { Suspense } from "react";
 import { FixturesCard } from "~/components/fixtures-card";
-import { TeamsCard } from "~/components/teams-card";
 import { PlayerLeaderboard } from "~/components/player-leaderboard";
+import { StandingsCard } from "~/components/standings-card";
+import { TeamsCard } from "~/components/teams-card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 const TABS = [
   { value: "standings", label: "Standings", Component: StandingsCard },

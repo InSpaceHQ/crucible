@@ -1,9 +1,10 @@
 "use client";
 
+import { range } from "effect/Array";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { api } from "~/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { api } from "~/convex/_generated/api";
 import { useCachedQuery } from "~/hooks/use-cached-query";
 
 const gridCols = "grid-cols-12";
@@ -35,9 +36,8 @@ export function StandingsCard({ showHeader = true }: { showHeader?: boolean }) {
           </div>
           <motion.div layout className="divide-y divide-border">
             {standings === undefined ? (
-              Array.from({ length: 4 }).map((_, i) => (
+              range(0, 4).map((i) => (
                 <div
-                  // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
                   key={i}
                   className={`grid ${gridCols} items-center gap-x-1 py-2 skeleton-blink`}
                   style={{ animationDelay: `${i * 0.12}s` }}

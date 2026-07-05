@@ -1,13 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
+import { format } from "date-fns";
+import { range } from "effect/Array";
 import { useState } from "react";
 import { toast } from "sonner";
-
-import { api } from "~/convex/_generated/api";
-import type { Id } from "~/convex/_generated/dataModel";
-import { GameMatch } from "~/lib/game-match";
-import { format } from "date-fns";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -16,6 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
+import { GameMatch } from "~/lib/game-match";
 
 type Match = NonNullable<
   ReturnType<typeof useQuery<typeof api.competition.listMatches>>
@@ -198,9 +198,9 @@ function MatchManager() {
             </div>
           ) : loadingMatches ? (
             <div className="space-y-2">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {range(0, 4).map((i) => (
                 <div
-                  key={i}
+                  key={`sk-${i}`}
                   className="grid grid-cols-(--match-grid) items-center gap-3 py-2"
                 >
                   <div className="size-3.5 bg-muted skeleton-blink" />

@@ -1,14 +1,14 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
+import { range } from "effect/Array";
 import { Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-
-import { api } from "~/convex/_generated/api";
-import type { Id } from "~/convex/_generated/dataModel";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
 import { GameMatch } from "~/lib/game-match";
 
 type Match = NonNullable<
@@ -150,7 +150,7 @@ function CompetitionMatchesSection({
 }) {
   const matches = useQuery(api.competition.listMatches, { competitionId });
   const updateMatchResult = useMutation(api.competition.updateMatchResult);
-  const [pending, setPending] = useState<Record<string, boolean>>({});
+  const [_pending, setPending] = useState<Record<string, boolean>>({});
 
   async function handleScoreChange(
     matchId: Id<"competitionMatches">,
@@ -188,8 +188,8 @@ function CompetitionMatchesSection({
 
       {loading ? (
         <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3 py-2 px-3">
+          {range(0, 3).map((i) => (
+            <div key={`sk-${i}`} className="flex items-center gap-3 py-2 px-3">
               <div className="h-5 w-5 bg-muted skeleton-blink rounded-full" />
               <div className="h-3 w-20 bg-muted skeleton-blink" />
               <div className="h-3 w-12 bg-muted skeleton-blink ml-auto" />
@@ -281,8 +281,8 @@ function FixturesByCompetition() {
           <CardTitle>Fixtures by Competition</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3 py-2">
+          {range(0, 3).map((i) => (
+            <div key={`sk-${i}`} className="flex items-center gap-3 py-2">
               <div className="h-4 w-24 bg-muted skeleton-blink" />
               <div className="h-4 w-12 bg-muted skeleton-blink" />
               <div className="h-4 w-16 bg-muted skeleton-blink ml-auto" />

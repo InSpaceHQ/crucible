@@ -1,8 +1,9 @@
 "use client";
 
-import type { Id } from "~/convex/_generated/dataModel";
-import { api } from "~/convex/_generated/api";
+import { range } from "effect/Array";
 import { LogItem, LogItemSkeleton } from "~/components/log-item";
+import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
 import { useCachedQuery } from "~/hooks/use-cached-query";
 
 export function ActivityLog({ userId }: { userId: Id<"players"> }) {
@@ -11,8 +12,7 @@ export function ActivityLog({ userId }: { userId: Id<"players"> }) {
   if (entries === undefined) {
     return (
       <div className="divide-y divide-border">
-        {Array.from({ length: 6 }).map((_, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
+        {range(0, 6).map((i) => (
           <LogItemSkeleton key={i} />
         ))}
       </div>

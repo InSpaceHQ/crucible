@@ -1,5 +1,5 @@
-import { mutation } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { mutation } from "./_generated/server";
 
 const SEED_GAMES = [
   { name: "FC26", displayName: "FC26", description: "EA Sports FC 26" },

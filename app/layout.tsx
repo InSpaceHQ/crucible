@@ -47,7 +47,7 @@ export default function RootLayout({
             }}
           />
         </ConvexClientProvider>
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID ?? ""} />
       </body>
     </html>
   );

@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
+import { range } from "effect/Array";
 import { Trash2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-
-import { api } from "~/convex/_generated/api";
-import type { Id } from "~/convex/_generated/dataModel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +17,8 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
 
 const statusStyles: Record<string, string> = {
   upcoming: "text-yellow-500 border-yellow-500/30",
@@ -39,8 +39,7 @@ function CompetitionList() {
           <CardTitle>Competitions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
+          {range(0, 3).map((i) => (
             <div key={i} className="flex items-center gap-3">
               <div className="h-4 w-32 bg-muted skeleton-blink" />
               <div className="h-4 w-16 bg-muted skeleton-blink" />

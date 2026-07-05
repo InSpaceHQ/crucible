@@ -1,9 +1,9 @@
 "use client";
 
+import { range } from "effect/Array";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
 import { MatchRow } from "~/components/competition-matches";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -34,7 +34,7 @@ function TodayMatches({ competition }: { competition: Doc<"competitions"> }) {
   if (matches === undefined) {
     return (
       <div className="divide-y divide-border">
-        {Array.from({ length: 3 }).map((_, i) => (
+        {range(0, 3).map((i) => (
           <div
             key={i}
             className="flex items-center gap-3 py-2.5 font-mono text-sm skeleton-blink"
@@ -92,9 +92,8 @@ export function FixturesCard({ showHeader = true }: { showHeader?: boolean }) {
         <CardContent
           className={`divide-y divide-border${!showHeader ? " py-4" : ""}`}
         >
-          {Array.from({ length: 8 }).map((_, i) => (
+          {range(0, 8).map((i) => (
             <div
-              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
               key={i}
               className="flex items-center gap-2 py-2 font-mono text-sm skeleton-blink"
               style={{ animationDelay: `${i * 0.12}s` }}

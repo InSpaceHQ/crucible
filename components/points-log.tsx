@@ -1,7 +1,8 @@
 "use client";
 
+import { range } from "effect/Array";
 import { useState } from "react";
-import { api } from "~/convex/_generated/api";
+import { LogItem, LogItemSkeleton } from "~/components/log-item";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -16,10 +17,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { LogItem, LogItemSkeleton } from "~/components/log-item";
+import { api } from "~/convex/_generated/api";
 import {
-  useCachedQuery,
   useCachedPaginatedQuery,
+  useCachedQuery,
 } from "~/hooks/use-cached-query";
 
 export function PointsLog() {
@@ -38,8 +39,7 @@ export function PointsLog() {
           <CardTitle>Points Log</CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-border">
-          {Array.from({ length: 5 }).map((_, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
+          {range(0, 5).map((i) => (
             <LogItemSkeleton key={i} />
           ))}
         </CardContent>
