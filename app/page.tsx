@@ -1,97 +1,21 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { GameTabs } from "~/components/game-tabs";
 import { CompetitionsSection } from "~/components/competitions-section";
-import { PlayerActivityPanel } from "~/components/player-activity-panel";
 import { PointsLog } from "~/components/points-log";
 import { ScheduleSection } from "~/components/schedule-section";
-import { SimulateCompetition } from "~/components/simulate-competition";
 import { SkillsCard } from "~/components/skills-card";
-import { Button } from "~/components/ui/button";
-
-function Countdown({ targetDate }: { targetDate: Date }) {
-  const [remaining, setRemaining] = useState("");
-
-  useEffect(() => {
-    function tick() {
-      const diff = targetDate.getTime() - Date.now();
-      if (diff <= 0) {
-        setRemaining("00d : 00h : 00m : 00s");
-        return;
-      }
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setRemaining(
-        `${String(d).padStart(2, "0")}d : ${String(h).padStart(2, "0")}h : ${String(m).padStart(2, "0")}m : ${String(s).padStart(2, "0")}s`,
-      );
-    }
-
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [targetDate]);
-
-  return (
-    <span className="font-mono text-sm tabular-nums text-accent-foreground">
-      {remaining}
-    </span>
-  );
-}
+import { SimulateCompetition } from "~/components/simulate-competition";
+import { PlayerActivityPanel } from "~/components/player-activity-panel";
 
 export default function Home() {
   return (
     <>
-      <div className="marquee bg-foreground text-background font-mono text-xs md:text-sm py-2 w-svw">
-        <div className="marquee-inner gap-12 px-6 font-bold">
-          <span>
-            Welcome to the most interactive gaming event in Port-Harcourt.
-            starting on the{" "}
-            <span className="text-accent-foreground">1st of August</span>.
-          </span>
-          <span>
-            Welcome to the most interactive gaming event in Port-Harcourt.
-            starting on the{" "}
-            <span className="text-accent-foreground">1st of August</span>.
-          </span>
-          <span>
-            Welcome to the most interactive gaming event in Port-Harcourt.
-            starting on the{" "}
-            <span className="text-accent-foreground">1st of August</span>.
-          </span>
-          <span>
-            Welcome to the most interactive gaming event in Port-Harcourt.
-            starting on the{" "}
-            <span className="text-accent-foreground">1st of August</span>.
-          </span>
-        </div>
-      </div>
       <PlayerActivityPanel />
 
       <div className="py-8 md:py-12 text-foreground scanline-root relative w-[calc(100svw-30px)] mx-auto min-h-svh">
-        <div className="mx-auto container w-full">
-          <section className="flex flex-col md:flex-row justify-between pb-16 md:pb-32 gap-4">
-            <h1 className="text-3xl md:text-5xl select-none font-[neue_machina] relative font-bold inline-block self-start">
-              <span className="font-mono bg-foreground text-background text-[8px] md:text-[10px] absolute left-[18%] px-1 ">
-                InSpace
-              </span>
-              Crucible
-            </h1>
-            <div className="flex items-center gap-3 md:gap-6">
-              <Countdown targetDate={new Date("2026-08-01T00:00:00")} />
-              <Link href="https://bit.ly/crucible-inspace" target="_blank">
-                <Button variant={"ghost"} size={"lg"}>
-                  Join the competition <ArrowUpRight />
-                </Button>
-              </Link>
-            </div>
-          </section>
-
+        <div className="mx-auto px-4 w-full mt-32">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 scanline-container z-10">
             <div className="md:col-span-8">
               <div className="border border-border">
@@ -105,9 +29,9 @@ export default function Home() {
           </div>
 
           <CompetitionsSection />
-
-          <ScheduleSection />
         </div>
+
+        <ScheduleSection />
 
         <footer className="flex flex-col items-center gap-2 py-12 md:py-16 border-t border-border mt-16">
           <span className="font-mono text-xs text-foreground">

@@ -4,13 +4,7 @@ import { useQuery } from "convex/react";
 import Image from "next/image";
 import { useEffect } from "react";
 import { GroupStandings } from "~/components/group-standings";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { useCachedQuery } from "~/hooks/use-cached-query";
@@ -192,7 +186,7 @@ export function CompetitionCard({
   showHeader?: boolean;
 }) {
   const competitions = useCachedQuery(api.competition.list);
-  const games = useQuery(api.games.list);
+  const games = useCachedQuery(api.games.list);
   const lastCompetitionId = useSimStore((s) => s.lastCompetitionId);
   const setLastCompetitionId = useSimStore((s) => s.setLastCompetitionId);
   const liveCompetitionId = competitions?.[0]?._id ?? null;
@@ -206,7 +200,7 @@ export function CompetitionCard({
 
   const simState = useQuery(
     api.kv.get,
-    competitionId ? { key: "sim_state:" + competitionId } : "skip",
+    competitionId ? { key: `sim_state:${competitionId}` } : "skip",
   );
 
   const phase = simState?.phase;

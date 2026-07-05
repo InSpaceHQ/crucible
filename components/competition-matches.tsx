@@ -8,6 +8,8 @@ import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { GameMatch } from "~/lib/game-match";
 import { CreativeWrapper } from "./schedule-section";
+import { useCachedQuery } from "~/hooks/use-cached-query";
+import React from "react";
 
 type Match = NonNullable<
   ReturnType<typeof useQuery<typeof api.competition.listMatches>>
@@ -19,7 +21,7 @@ const ROUND_LABELS: Record<number, string> = {
   8: "Final",
 };
 
-function MatchRow({ match }: { match: Match }) {
+export function MatchRow({ match }: { match: Match }) {
   const completed = match.status === "completed";
   const homeWin = completed && match.homeScore! > match.awayScore!;
   const awayWin = completed && match.awayScore! > match.homeScore!;
@@ -92,7 +94,9 @@ export function CompetitionMatches({
 }: {
   competitionId: Id<"competitions">;
 }) {
-  const matches = useQuery(api.competition.listMatches, { competitionId });
+  const matches = useCachedQuery(api.competition.listMatches, {
+    competitionId,
+  });
 
   const active = (matches || []).filter(
     (m) => !GameMatch.isTBD(m.homeTeam, m.awayTeam),
@@ -113,28 +117,27 @@ export function CompetitionMatches({
   );
 
   return (
-    <CreativeWrapper heading="Matchdays" subHeading="">
-      {unscheduled.length > 0 && (
-        <div className="mb-6">
-          <h5 className="font-mono text-xxs text-foreground/40 uppercase tracking-wider mb-2">
-            Unscheduled
-          </h5>
-          <div className="divide-y divide-border/20">
-            {unscheduled.map((m) => (
-              <MatchRow key={m._id} match={m} />
-            ))}
+    <>
+      <span id="matches" className="mb-8 absolute invisible">
+        Fixtures
+      </span>
+
+      <CreativeWrapper heading="Matchdays" subHeading="">
+        {unscheduled.length > 0 && (
+          <div className="mb-6">
+            <h5 className="font-mono text-xxs text-foreground/40 uppercase tracking-wider mb-2">
+              Unscheduled
+            </h5>
+            <div className="divide-y divide-border/20">
+              {unscheduled.map((m) => (
+                <MatchRow key={m._id} match={m} />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {active.length === 0 ? (
-        <div className="py-4 text-center text-sm text-foreground/60">
-          No matches yet.
-        </div>
-      ) : null}
-
-      {matches === undefined
-        ? Array.from({ length: 3 }).map((_, i) => (
+        {matches === undefined ? (
+          Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
               className="flex items-center gap-3 py-2.5 font-mono text-sm skeleton-blink"
@@ -148,7 +151,12 @@ export function CompetitionMatches({
               </div>
             </div>
           ))
-        : sortedDays.length > 0 && (
+        ) : active.length === 0 ? (
+          <div className="py-4 text-center text-sm text-foreground/60">
+            No matches yet.
+          </div>
+        ) : (
+          sortedDays.length > 0 && (
             <div>
               {sortedDays.map(([day, dayMatches]) => (
                 <div key={day} className="mb-6 last:mb-0">
@@ -165,7 +173,9 @@ export function CompetitionMatches({
                 </div>
               ))}
             </div>
-          )}
-    </CreativeWrapper>
+          )
+        )}
+      </CreativeWrapper>
+    </>
   );
 }

@@ -20,7 +20,7 @@ const PHASE_LABELS: Record<string, string> = {
 };
 
 function CircularProgress({ competitionId }: { competitionId: string }) {
-  const state = useQuery(api.kv.get, { key: "sim_state:" + competitionId });
+  const state = useQuery(api.kv.get, { key: `sim_state:${competitionId}` });
   const phase = state?.phase;
   const startedAt = state?.startedAt as number | undefined;
   const [now, setNow] = useState(() => Date.now());
@@ -124,16 +124,15 @@ function SimulateButton({ gameId }: { gameId: Id<"games"> }) {
 }
 
 export function SimulateCompetition() {
-  if (!isDevelopment) return null;
-
   const games = useQuery(api.games.list);
   const competitions = useQuery(api.competition.list);
   const gameId = games?.[0]?._id;
 
+  if (!isDevelopment) return null;
   if (!gameId) return null;
 
   return (
-    <div className="bottom-2 fixed left-1/2 -translate-x-1/2 bg-foreground py-2 px-4 flex items-center gap-3">
+    <div className="bottom-2 fixed left-1/2 z-60 -translate-x-1/2 bg-foreground py-2 px-4 flex items-center gap-3">
       {competitions?.map((c) => (
         <div key={c._id} className="flex items-center gap-2">
           <span className="text-sm font-mono text-background/80 whitespace-nowrap">

@@ -1,14 +1,87 @@
 "use client";
 
-import Image from "next/image";
-import { api } from "~/convex/_generated/api";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+
+import { MatchRow } from "~/components/competition-matches";
+import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { api } from "~/convex/_generated/api";
+import type { Doc } from "~/convex/_generated/dataModel";
 import { useCachedQuery } from "~/hooks/use-cached-query";
 
-export function FixturesCard({ showHeader = true }: { showHeader?: boolean }) {
-  const fixtures = useCachedQuery(api.fixtures.list);
+function TodayMatches({ competition }: { competition: Doc<"competitions"> }) {
+  const matches = useCachedQuery(api.competition.listMatches, {
+    competitionId: competition._id,
+  });
 
-  if (fixtures === undefined) {
+  const [now] = useState(() => Date.now());
+  const todayStart = new Date(
+    new Date(now).getFullYear(),
+    new Date(now).getMonth(),
+    new Date(now).getDate(),
+  ).getTime();
+  const todayEnd = todayStart + 86_400_000;
+
+  const todayMatches = (matches ?? []).filter(
+    (m) =>
+      m.startTime != null &&
+      m.startTime >= todayStart &&
+      m.startTime < todayEnd,
+  );
+
+  if (matches === undefined) {
+    return (
+      <div className="divide-y divide-border">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 py-2.5 font-mono text-sm skeleton-blink"
+          >
+            <div className="flex-1 flex justify-end">
+              <div className="h-3 w-16 bg-muted" />
+            </div>
+            <div className="h-3 w-8 bg-muted" />
+            <div className="flex-1">
+              <div className="h-3 w-16 bg-muted" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-4">
+      <h4 className="font-mono text-xs text-foreground/60 font-bold uppercase tracking-wider px-1 py-2">
+        {competition.name}
+      </h4>
+
+      <div className="divide-y divide-border">
+        {todayMatches.length > 0 ? (
+          todayMatches.map((m) => <MatchRow key={m._id} match={m} />)
+        ) : (
+          <div className="py-4 px-1 space-y-3">
+            <p className="text-sm italic text-foreground/60 font-mono">
+              No matches today.
+            </p>
+            <Button variant="link" size="sm" asChild className="px-0">
+              <Link href={`/competitions/${competition._id}#matches`}>
+                See future matches <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function FixturesCard({ showHeader = true }: { showHeader?: boolean }) {
+  const competitions = useCachedQuery(api.competition.list);
+
+  if (competitions === undefined) {
     return (
       <Card>
         {showHeader && (
@@ -52,7 +125,7 @@ export function FixturesCard({ showHeader = true }: { showHeader?: boolean }) {
     );
   }
 
-  if (fixtures.length === 0) return null;
+  if (competitions.length === 0) return null;
 
   return (
     <Card>
@@ -64,75 +137,9 @@ export function FixturesCard({ showHeader = true }: { showHeader?: boolean }) {
       <CardContent
         className={`divide-y divide-border${!showHeader ? " py-4" : ""}`}
       >
-        {fixtures.map((fixture, i) => {
-          const p1 = fixture.entries[0];
-          const p2 = fixture.entries[1];
-          const started = p1.score !== 0 || p2.score !== 0;
-          const scoreDisplay = started ? `${p1.score} - ${p2.score}` : "vs";
-
-          return (
-            <div
-              key={fixture._id}
-              className="flex items-center gap-2 py-2 font-mono text-sm"
-            >
-              <span className="text-foreground w-4 text-right text-xs">
-                {String(i + 1).padStart(2, "0")}.
-              </span>
-              <div className="flex flex-1 items-center gap-1.5">
-                <div className="relative size-7 shrink-0 overflow-hidden rounded-full bg-muted">
-                  {p1.player?.team && (
-                    <Image
-                      src={p1.player.team.logo}
-                      alt={`${p1.player.team.name} logo`}
-                      fill
-                      className="object-cover"
-                      sizes="1.75rem"
-                    />
-                  )}
-                </div>
-                <div className="flex flex-col leading-tight">
-                  <span className="text-xs">
-                    {p1.player?.name.split(" ")[0]}
-                  </span>
-                  <span className="text-[10px] text-foreground">
-                    {p1.player?.team?.name}
-                  </span>
-                </div>
-              </div>
-              <span className="text-xs text-foreground min-w-[32px] text-center">
-                {scoreDisplay}
-              </span>
-              <div className="flex flex-1 items-center gap-1.5 justify-end">
-                <div className="flex flex-col leading-tight items-end">
-                  <span className="text-xs">
-                    {p2.player?.name.split(" ")[0]}
-                  </span>
-                  <span className="text-[10px] text-foreground">
-                    {p2.player?.team?.name}
-                  </span>
-                </div>
-                <div className="relative size-7 shrink-0 overflow-hidden rounded-full bg-muted">
-                  {p2.player?.team && (
-                    <Image
-                      src={p2.player.team.logo}
-                      alt={`${p2.player.team.name} logo`}
-                      fill
-                      className="object-cover"
-                      sizes="1.75rem"
-                    />
-                  )}
-                </div>
-              </div>
-              <span className="text-end text-xs text-foreground min-w-[40px]">
-                {new Date(fixture.startTime).toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  timeZone: "Africa/Lagos",
-                })}
-              </span>
-            </div>
-          );
-        })}
+        {competitions.map((c) => (
+          <TodayMatches key={c._id} competition={c} />
+        ))}
       </CardContent>
     </Card>
   );

@@ -75,10 +75,9 @@ export function CreativeWrapper({
 function CreativeSectionDesktop({
   children,
   heading,
-  subHeading,
 }: {
   children: React.ReactNode;
-  heading?: string;
+  heading: string;
   subHeading?: string;
 }) {
   const sectionRef = useRef<HTMLElement>(null);

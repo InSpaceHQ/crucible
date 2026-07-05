@@ -67,7 +67,7 @@ function MatchManager() {
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
 
-  const now = Date.now();
+  const [now] = useState(() => Date.now());
   const [dateVal, setDateVal] = useState(() => formatDateForInput(now));
   const [timeVal, setTimeVal] = useState(() => formatTimeForInput(now));
 

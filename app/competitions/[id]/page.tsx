@@ -1,17 +1,17 @@
 "use client";
 
-import { use } from "react";
-import { useQuery } from "convex/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { use } from "react";
 
 import { CompetitionDetails } from "~/components/competition-card";
+import { CompetitionMatches } from "~/components/competition-matches";
 import { SimulateCompetition } from "~/components/simulate-competition";
 import { Button } from "~/components/ui/button";
+import { Fit } from "~/components/ui/fit";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
-import { CompetitionMatches } from "~/components/competition-matches";
-import { Fit } from "~/components/ui/fit";
+import { useCachedQuery } from "~/hooks/use-cached-query";
 
 export default function CompetitionDetailPage({
   params,
@@ -19,7 +19,8 @@ export default function CompetitionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const competition = useQuery(api.competition.get, {
+
+  const competition = useCachedQuery(api.competition.get, {
     competitionId: id as Id<"competitions">,
   });
 
@@ -29,23 +30,29 @@ export default function CompetitionDetailPage({
 
   return (
     <div className="scanline-root">
-      <div className="py-12 px-4 space-y-8 scanline-container">
-        <Link href="/competitions">
-          <Button variant="fill" size="sm">
-            Back
-          </Button>
-        </Link>
+      <div className="scanline-container fixed z-1 pointer-events-none inset-0" />
 
-        <div className="mt-8 flex items-center justify-between">
-          <Fit options={{ maxSize: 72 }}>
-            <h1 className="font-bold">{competition?.name ?? "Competition"}</h1>
-          </Fit>
+      <div className="z-10 relative">
+        <div className="py-12 px-4 space-y-8 z-10">
+          <Link href="/competitions">
+            <Button variant="fill" size="sm">
+              Back
+            </Button>
+          </Link>
+
+          <div className="mt-8 flex items-center justify-between">
+            <Fit options={{ maxSize: 72 }}>
+              <h1 className="font-bold">
+                {competition?.name ?? "Competition"}
+              </h1>
+            </Fit>
+          </div>
+
+          <CompetitionDetails competitionId={id as Id<"competitions">} />
         </div>
 
-        <CompetitionDetails competitionId={id as Id<"competitions">} />
+        <CompetitionMatches competitionId={id as Id<"competitions">} />
       </div>
-
-      <CompetitionMatches competitionId={id as Id<"competitions">} />
 
       <SimulateCompetition />
     </div>
