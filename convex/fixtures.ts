@@ -1,4 +1,5 @@
-import { query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
 
 export const list = query({
   args: {},
@@ -35,5 +36,24 @@ export const list = query({
         };
       }),
     }));
+  },
+});
+
+export const updateScore = mutation({
+  args: {
+    fixtureId: v.id("fixtures"),
+    entryIndex: v.number(),
+    delta: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const fixture = await ctx.db.get(args.fixtureId);
+    if (!fixture) throw new Error("Fixture not found");
+
+    const entries = fixture.entries.map((e, i) => {
+      if (i !== args.entryIndex) return e;
+      return { ...e, score: Math.max(0, e.score + args.delta) };
+    });
+
+    await ctx.db.patch(args.fixtureId, { entries });
   },
 });
