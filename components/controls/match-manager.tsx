@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { GameMatch } from "~/lib/game-match";
+import { format } from "date-fns";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
@@ -23,14 +24,6 @@ const ROUND_LABELS: Record<number, string> = {
 function roundLabel(m: Match): string {
   if (m.phase === "knockout") return ROUND_LABELS[m.round] ?? `R${m.round}`;
   return `R${m.round}`;
-}
-
-function formatTime(ts: number) {
-  return new Date(ts).toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Africa/Lagos",
-  });
 }
 
 function formatDateForInput(ts: number) {
@@ -149,7 +142,7 @@ function MatchManager() {
 
   return (
     <Card
-      style={{ "--match-grid": "4ch 3ch 5ch 1fr 8ch" } as React.CSSProperties}
+      style={{ "--match-grid": "8ch 8ch 8ch 1fr 16ch" } as React.CSSProperties}
     >
       <CardHeader>
         <CardTitle>Match Manager</CardTitle>
@@ -180,7 +173,7 @@ function MatchManager() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="grid grid-cols-[var(--match-grid)] items-center gap-3 py-2"
+                className="grid grid-cols-(--match-grid) items-center gap-3 py-2"
               >
                 <div className="size-3.5 bg-muted skeleton-blink" />
                 <div className="h-3 w-6 bg-muted skeleton-blink" />
@@ -197,7 +190,7 @@ function MatchManager() {
         ) : (
           <>
             <div className="divide-y divide-border border border-border font-mono text-sm">
-              <div className="grid grid-cols-[var(--match-grid)] items-center gap-3 px-3 py-2 text-[11px] text-foreground/50 uppercase tracking-wider">
+              <div className="grid grid-cols-(--match-grid) items-center gap-3 px-3 py-2 text-foreground/50 uppercase tracking-wider">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -242,8 +235,17 @@ function MatchManager() {
                       <span className="text-foreground/30 mx-1">vs</span>
                       {m.awayTeam?.name ?? "TBD"}
                     </span>
-                    <span className="text-right text-xs text-foreground/40">
-                      {m.startTime ? formatTime(m.startTime) : "—"}
+                    <span
+                      className="text-right text-xs text-foreground/40"
+                      title={
+                        m.startTime
+                          ? format(new Date(m.startTime), "EEE HH:mm")
+                          : undefined
+                      }
+                    >
+                      {m.startTime
+                        ? format(new Date(m.startTime), "do MMM HH:mm")
+                        : "—"}
                     </span>
                   </label>
                 ))
