@@ -115,6 +115,11 @@ matches: number
 player: Option<{ name, game: Option<{ name, displayName }>, team: Option<{ name, logo }> }>
 ```
 
+### `playerStats.getByPlayerId` → `Option<PlayerStatsWithPlayer>`
+
+Returns player stats (kills, wins, matches) plus resolved player info for a single player.
+Args: `playerId: Id<"players">`
+
 ### `standings.list` → `StandingRow[]`
 
 ```
@@ -166,8 +171,8 @@ Index: `by_timestamp` (desc)
 ### `seed.seed`
 
 Games: FC26 (`FC26`), MK1 (`Mortal Kombat 1`)
-Teams: Nova, Vertex, Pulse, Apex (same logos as `app/data.ts`)
-Players: all 16 players from `app/data.ts`
+Teams: 20 teams (Nova, Vertex, Pulse, Apex, Blaze, Shadow, Eclipse, Reaper, Frost, Phantom, Storm, Vanguard, Comet, Warden, Fury, Raven, Thunder, Hydra, Vapor, Phoenix)
+Players: 48 players (2 per team, 1 FC26 + 1 MK1)
 
 ### `seedFixtures.seed`
 
