@@ -424,6 +424,32 @@ async function applyMatchResult(
   const match = await ctx.db.get(matchId);
   if (!match) throw new Error("Match not found");
   await ctx.db.patch(matchId, { homeScore, awayScore, status: "completed" });
+
+  const competition = await ctx.db.get(match.competitionId);
+  if (competition) {
+    const players = await ctx.db.query("players").collect();
+    const homePlayer = players.find(
+      (p: any) =>
+        p.teamId === match.homeTeamId && p.gameId === competition.gameId,
+    );
+    const awayPlayer = players.find(
+      (p: any) =>
+        p.teamId === match.awayTeamId && p.gameId === competition.gameId,
+    );
+    if (homePlayer && awayPlayer) {
+      await ctx.db.insert("fixtures", {
+        gameId: competition.gameId,
+        startTime: Date.now(),
+        endTime: Date.now(),
+        competitionId: match.competitionId,
+        entries: [
+          { playerId: homePlayer._id, score: homeScore },
+          { playerId: awayPlayer._id, score: awayScore },
+        ],
+      });
+    }
+  }
+
   if (match.phase === "group" && match.group) {
     await recalculateGroupStandings(ctx, match.competitionId, match.group);
   }
@@ -932,6 +958,16 @@ export const clearCompetition = mutation({
       .collect();
     for (const s of standings) {
       await ctx.db.delete(s._id);
+    }
+
+    const fixtures = await ctx.db
+      .query("fixtures")
+      .withIndex("by_competition", (q: any) =>
+        q.eq("competitionId", args.competitionId),
+      )
+      .collect();
+    for (const f of fixtures) {
+      await ctx.db.delete(f._id);
     }
 
     await kvRemove(ctx, "sim_state:" + args.competitionId);

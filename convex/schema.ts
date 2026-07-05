@@ -50,13 +50,16 @@ export default defineSchema({
     gameId: v.id("games"),
     startTime: v.number(),
     endTime: v.number(),
+    competitionId: v.optional(v.id("competitions")),
     entries: v.array(
       v.object({
         playerId: v.id("players"),
         score: v.number(),
       }),
     ),
-  }).index("by_start_time", ["startTime"]),
+  })
+    .index("by_start_time", ["startTime"])
+    .index("by_competition", ["competitionId"]),
 
   playerStats: defineTable({
     playerId: v.id("players"),
