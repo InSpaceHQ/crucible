@@ -7,16 +7,10 @@ import { StandingsCard } from "~/components/standings-card";
 import { FixturesCard } from "~/components/fixtures-card";
 import { TeamsCard } from "~/components/teams-card";
 import { PlayerLeaderboard } from "~/components/player-leaderboard";
-import { CompetitionCard } from "~/components/competition-card";
 
 const TABS = [
   { value: "standings", label: "Standings", Component: StandingsCard },
   { value: "fixtures", label: "Fixtures", Component: FixturesCard },
-  {
-    value: "competition",
-    label: "Competition",
-    Component: () => <CompetitionCard />,
-  },
   { value: "teams", label: "Teams", Component: TeamsCard },
   { value: "leaderboard", label: "Leaderboard", Component: PlayerLeaderboard },
 ] as const;

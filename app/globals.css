@@ -64,7 +64,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: #ff9900;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
+  --border: oklch(1 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
@@ -148,6 +148,7 @@
   from {
     transform: translateX(0);
   }
+
   to {
     transform: translateX(-50%);
   }
@@ -184,6 +185,7 @@
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.15;
   }
