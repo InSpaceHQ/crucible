@@ -128,7 +128,7 @@ function CreativeSection({
   subHeading: string;
 }) {
   return (
-    <section className="grid grid-cols-1 gap-4 mt-24 px-4 relative">
+    <section className="grid grid-cols-1 gap-4 mt-16 md:mt-24 px-4 relative">
       <div className="mb-6">
         <h2 className="font-heading tracking-tighter font-bold text-3xl">
           {heading}

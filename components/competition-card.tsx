@@ -4,10 +4,17 @@ import { useQuery } from "convex/react";
 import Image from "next/image";
 import { useEffect } from "react";
 import { GroupStandings } from "~/components/group-standings";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { useCachedQuery } from "~/hooks/use-cached-query";
+import { GameMatch } from "~/lib/game-match";
 import { useSimStore } from "~/stores/use-sim-store";
 
 export function CompetitionDetails({
@@ -61,6 +68,10 @@ export function CompetitionDetails({
     );
   }
 
+  const isKnockoutPhase = !bracket.every((round) =>
+    round.matches.every((e) => GameMatch.isTBD(e.awayTeam, e.homeTeam)),
+  );
+
   return (
     <>
       {standings && standings.length > 0 && (
@@ -75,93 +86,101 @@ export function CompetitionDetails({
         </div>
       )}
 
-      {bracket && bracket.length > 0 && (
-        <div className="mt-6 border-t border-border pt-6">
-          <h4 className="font-mono text-xs text-foreground/60 font-bold uppercase tracking-wider mb-4">
-            Knockout Bracket
-          </h4>
-          <div className="space-y-4">
-            {bracket.map((round) => (
-              <div key={round.round}>
-                <h5 className="font-mono text-[10px] text-foreground/40 uppercase tracking-wider mb-2">
-                  {round.round === 6
-                    ? "Quarter-Finals"
-                    : round.round === 7
-                      ? "Semi-Finals"
-                      : "Final"}
-                </h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {round.matches.map((m) => {
-                    const completed = m.status === "completed";
-                    const homeWin = completed && m.homeScore! > m.awayScore!;
-                    const awayWin = completed && m.awayScore! > m.homeScore!;
+      {isKnockoutPhase && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Knockout Bracket</CardTitle>
+          </CardHeader>
 
-                    return (
-                      <div
-                        key={m._id}
-                        className="border border-border p-2.5 flex items-center gap-2 font-mono text-sm"
-                      >
-                        <div className="flex flex-col gap-1 flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <div className="relative size-4 shrink-0 overflow-hidden rounded-full bg-muted">
-                              {m.homeTeam && (
-                                <Image
-                                  src={m.homeTeam.logo}
-                                  alt=""
-                                  fill
-                                  className="object-cover"
-                                  sizes="1rem"
-                                />
+          <CardContent className="pb-12 text-xs">
+            <div className="space-y-4">
+              {bracket.map((round) => {
+                return (
+                  <div key={round.round}>
+                    <h5 className="font-mono text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">
+                      {round.round === 6
+                        ? "Quarter-Finals"
+                        : round.round === 7
+                          ? "Semi-Finals"
+                          : "Final"}
+                    </h5>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {round.matches.map((m) => {
+                        const completed = m.status === "completed";
+                        const homeWin =
+                          completed && m.homeScore! > m.awayScore!;
+                        const awayWin =
+                          completed && m.awayScore! > m.homeScore!;
+
+                        return (
+                          <div
+                            key={m._id}
+                            className="border border-border p-2.5 flex items-center gap-2 font-mono"
+                          >
+                            <div className="flex flex-col gap-1 flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <div className="relative size-4 shrink-0 overflow-hidden rounded-full bg-muted">
+                                  {m.homeTeam && (
+                                    <Image
+                                      src={m.homeTeam.logo}
+                                      alt=""
+                                      fill
+                                      className="object-cover"
+                                      sizes="1rem"
+                                    />
+                                  )}
+                                </div>
+                                <span
+                                  className={
+                                    homeWin ? "font-bold" : "text-foreground/60"
+                                  }
+                                >
+                                  {m.homeTeam?.name ?? "TBD"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <div className="relative size-4 shrink-0 overflow-hidden rounded-full bg-muted">
+                                  {m.awayTeam && (
+                                    <Image
+                                      src={m.awayTeam.logo}
+                                      alt=""
+                                      fill
+                                      className="object-cover"
+                                      sizes="1rem"
+                                    />
+                                  )}
+                                </div>
+                                <span
+                                  className={
+                                    awayWin ? "font-bold" : "text-foreground/60"
+                                  }
+                                >
+                                  {m.awayTeam?.name ?? "TBD"}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-right min-w-8">
+                              {completed ? (
+                                <span className="font-bold text-xs">
+                                  {m.homeScore}–{m.awayScore}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-foreground/30">
+                                  vs
+                                </span>
                               )}
                             </div>
-                            <span
-                              className={
-                                homeWin ? "font-bold" : "text-foreground/60"
-                              }
-                            >
-                              {m.homeTeam?.name ?? "TBD"}
-                            </span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="relative size-4 shrink-0 overflow-hidden rounded-full bg-muted">
-                              {m.awayTeam && (
-                                <Image
-                                  src={m.awayTeam.logo}
-                                  alt=""
-                                  fill
-                                  className="object-cover"
-                                  sizes="1rem"
-                                />
-                              )}
-                            </div>
-                            <span
-                              className={
-                                awayWin ? "font-bold" : "text-foreground/60"
-                              }
-                            >
-                              {m.awayTeam?.name ?? "TBD"}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="text-right min-w-8">
-                          {completed ? (
-                            <span className="font-bold text-xs">
-                              {m.homeScore}–{m.awayScore}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-foreground/30">
-                              vs
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       )}
     </>
   );

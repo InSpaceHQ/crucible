@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { format } from "date-fns";
+import { format, formatDate } from "date-fns";
 import Image from "next/image";
 
 import { api } from "~/convex/_generated/api";
@@ -26,9 +26,13 @@ function MatchRow({ match }: { match: Match }) {
 
   return (
     <div className="flex items-center gap-3 py-2.5 font-mono text-sm">
+      <span className="text-xxs text-foreground/40">
+        {match.startTime ? formatDate(match.startTime, "HH:mm aa") : "--"}
+      </span>
+
       <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
         <span
-          className={`truncate ${homeWin ? "font-bold" : "text-foreground/80"}`}
+          className={`truncate ${homeWin ? "text-accent-foreground" : "text-foreground"}`}
         >
           {match.homeTeam?.name ?? "TBD"}
         </span>
@@ -47,8 +51,8 @@ function MatchRow({ match }: { match: Match }) {
 
       <div className="flex items-center gap-1.5 shrink-0">
         {completed ? (
-          <span className="tabular-nums font-bold min-w-[4ch] text-center">
-            {match.homeScore}–{match.awayScore}
+          <span className="tabular-nums font-mono min-w-[4ch] text-center">
+            {match.homeScore} : {match.awayScore}
           </span>
         ) : (
           <span className="text-foreground/30 text-xs">vs</span>
@@ -68,13 +72,13 @@ function MatchRow({ match }: { match: Match }) {
           )}
         </div>
         <span
-          className={`truncate ${awayWin ? "font-bold" : "text-foreground/80"}`}
+          className={`truncate ${awayWin ? "text-accent-foreground" : "text-foreground/80"}`}
         >
           {match.awayTeam?.name ?? "TBD"}
         </span>
       </div>
 
-      <span className="hidden text-[10px] md:inline text-muted-foreground shrink-0 w-20 text-right">
+      <span className=" text-xxs text-foreground/40 shrink-0 w-20 text-right">
         {match.phase === "knockout"
           ? (ROUND_LABELS[match.round] ?? `Round ${match.round}`)
           : `Group Stage`}
@@ -112,10 +116,10 @@ export function CompetitionMatches({
     <CreativeWrapper heading="Matchdays" subHeading="">
       {unscheduled.length > 0 && (
         <div className="mb-6">
-          <h5 className="font-mono text-[10px] text-foreground/40 uppercase tracking-wider mb-2">
+          <h5 className="font-mono text-xxs text-foreground/40 uppercase tracking-wider mb-2">
             Unscheduled
           </h5>
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border/20">
             {unscheduled.map((m) => (
               <MatchRow key={m._id} match={m} />
             ))}
@@ -148,12 +152,12 @@ export function CompetitionMatches({
             <div>
               {sortedDays.map(([day, dayMatches]) => (
                 <div key={day} className="mb-6 last:mb-0">
-                  <div className="flex items-center mb-3">
+                  <div className="flex items-center mb-3 border-b">
                     <span className="font-mono text-xs font-bold text-background bg-foreground px-1.5 py-0.5">
                       {format(new Date(day), "MMM dd")}
                     </span>
                   </div>
-                  <div className="divide-y divide-border">
+                  <div className="divide-y divide-border/20">
                     {dayMatches.map((m) => (
                       <MatchRow key={m._id} match={m} />
                     ))}

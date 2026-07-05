@@ -46,6 +46,7 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --text-xxs: 0.625rem;
 }
 
 :root {
@@ -83,6 +84,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   --card-spacing: 0.5rem;
   --scanline-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAGUlEQVR4AbXIIQEAAACDMPqX/gOgmRzYijj+agT8kW3HnQAAAABJRU5ErkJggg==);
+  --text-xxs: 0.625rem;
 }
 
 /*.dark {

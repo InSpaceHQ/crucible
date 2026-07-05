@@ -11,6 +11,7 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { CompetitionMatches } from "~/components/competition-matches";
+import { Fit } from "~/components/ui/fit";
 
 export default function CompetitionDetailPage({
   params,
@@ -27,18 +28,18 @@ export default function CompetitionDetailPage({
   }
 
   return (
-    <>
-      <div className="container mx-auto py-12 px-4 space-y-8">
+    <div className="scanline-root">
+      <div className="py-12 px-4 space-y-8 scanline-container">
         <Link href="/competitions">
-          <Button variant="outline" size="sm">
+          <Button variant="fill" size="sm">
             Back
           </Button>
         </Link>
 
         <div className="mt-8 flex items-center justify-between">
-          <h1 className="text-4xl font-bold">
-            {competition?.name ?? "Competition"}
-          </h1>
+          <Fit options={{ maxSize: 72 }}>
+            <h1 className="font-bold">{competition?.name ?? "Competition"}</h1>
+          </Fit>
         </div>
 
         <CompetitionDetails competitionId={id as Id<"competitions">} />
@@ -47,6 +48,6 @@ export default function CompetitionDetailPage({
       <CompetitionMatches competitionId={id as Id<"competitions">} />
 
       <SimulateCompetition />
-    </>
+    </div>
   );
 }

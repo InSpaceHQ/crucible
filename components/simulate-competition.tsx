@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { Button } from "~/components/ui/button";
+import { isDevelopment } from "~/config/constants";
 
 const PHASE_LABELS: Record<string, string> = {
   round_1: "Round 1/5",
@@ -123,6 +124,8 @@ function SimulateButton({ gameId }: { gameId: Id<"games"> }) {
 }
 
 export function SimulateCompetition() {
+  if (!isDevelopment) return null;
+
   const games = useQuery(api.games.list);
   const competitions = useQuery(api.competition.list);
   const gameId = games?.[0]?._id;
