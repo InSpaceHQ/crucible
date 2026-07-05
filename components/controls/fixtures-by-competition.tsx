@@ -3,13 +3,15 @@
 import { useMutation, useQuery } from "convex/react";
 import { Minus, Plus } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 
 import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
-type Fixture = NonNullable<
-  ReturnType<typeof useQuery<typeof api.fixtures.list>>
+type Match = NonNullable<
+  ReturnType<typeof useQuery<typeof api.competition.listMatches>>
 >[number];
 
 const statusStyles: Record<string, string> = {
@@ -18,47 +20,46 @@ const statusStyles: Record<string, string> = {
   completed: "text-foreground/40 border-border",
 };
 
-function formatDate(ts: number) {
-  return new Date(ts).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    timeZone: "Africa/Lagos",
-  });
-}
+const ROUND_LABELS: Record<number, string> = {
+  6: "Quarter-Finals",
+  7: "Semi-Finals",
+  8: "Final",
+};
 
-function formatTime(ts: number) {
-  return new Date(ts).toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Africa/Lagos",
-  });
-}
-
-function FixtureRow({
-  fixture,
-  updateScore,
+function MatchRow({
+  match,
+  onScoreChange,
 }: {
-  fixture: Fixture;
-  updateScore: ReturnType<typeof useMutation<typeof api.fixtures.updateScore>>;
+  match: Match;
+  onScoreChange: (
+    matchId: Id<"competitionMatches">,
+    homeScore: number,
+    awayScore: number,
+  ) => void;
 }) {
-  const p1 = fixture.entries[0];
-  const p2 = fixture.entries[1];
+  const homeScore = match.homeScore ?? 0;
+  const awayScore = match.awayScore ?? 0;
+  const completed = match.status === "completed";
 
   return (
     <div className="flex items-center gap-3 py-3 px-3 font-mono text-sm">
       <div className="flex flex-1 items-center gap-2 min-w-0">
         <div className="relative size-7 shrink-0 overflow-hidden rounded-full bg-muted">
-          {p1.player?.team && (
+          {match.homeTeam && (
             <Image
-              src={p1.player.team.logo}
-              alt={`${p1.player.team.name} logo`}
+              src={match.homeTeam.logo}
+              alt={`${match.homeTeam.name} logo`}
               fill
               className="object-cover"
               sizes="1.75rem"
             />
           )}
         </div>
-        <span className="truncate">{p1.player?.name.split(" ")[0]}</span>
+        <span
+          className={`truncate ${completed && homeScore > awayScore ? "font-bold" : ""}`}
+        >
+          {match.homeTeam?.name ?? "TBD"}
+        </span>
       </div>
 
       <div className="flex items-center gap-1">
@@ -66,19 +67,17 @@ function FixtureRow({
           variant="ghost"
           size="icon-xs"
           onClick={() =>
-            updateScore({ fixtureId: fixture._id, entryIndex: 0, delta: -1 })
+            onScoreChange(match._id, Math.max(0, homeScore - 1), awayScore)
           }
-          disabled={p1.score <= 0}
+          disabled={homeScore <= 0}
         >
           <Minus />
         </Button>
-        <span className="tabular-nums w-6 text-center">{p1.score}</span>
+        <span className="tabular-nums w-6 text-center">{homeScore}</span>
         <Button
           variant="ghost"
           size="icon-xs"
-          onClick={() =>
-            updateScore({ fixtureId: fixture._id, entryIndex: 0, delta: 1 })
-          }
+          onClick={() => onScoreChange(match._id, homeScore + 1, awayScore)}
         >
           <Plus />
         </Button>
@@ -91,31 +90,33 @@ function FixtureRow({
           variant="ghost"
           size="icon-xs"
           onClick={() =>
-            updateScore({ fixtureId: fixture._id, entryIndex: 1, delta: -1 })
+            onScoreChange(match._id, homeScore, Math.max(0, awayScore - 1))
           }
-          disabled={p2.score <= 0}
+          disabled={awayScore <= 0}
         >
           <Minus />
         </Button>
-        <span className="tabular-nums w-6 text-center">{p2.score}</span>
+        <span className="tabular-nums w-6 text-center">{awayScore}</span>
         <Button
           variant="ghost"
           size="icon-xs"
-          onClick={() =>
-            updateScore({ fixtureId: fixture._id, entryIndex: 1, delta: 1 })
-          }
+          onClick={() => onScoreChange(match._id, homeScore, awayScore + 1)}
         >
           <Plus />
         </Button>
       </div>
 
       <div className="flex flex-1 items-center gap-2 justify-end min-w-0">
-        <span className="truncate">{p2.player?.name.split(" ")[0]}</span>
+        <span
+          className={`truncate ${completed && awayScore > homeScore ? "font-bold" : ""}`}
+        >
+          {match.awayTeam?.name ?? "TBD"}
+        </span>
         <div className="relative size-7 shrink-0 overflow-hidden rounded-full bg-muted">
-          {p2.player?.team && (
+          {match.awayTeam && (
             <Image
-              src={p2.player.team.logo}
-              alt={`${p2.player.team.name} logo`}
+              src={match.awayTeam.logo}
+              alt={`${match.awayTeam.name} logo`}
               fill
               className="object-cover"
               sizes="1.75rem"
@@ -124,21 +125,150 @@ function FixtureRow({
         </div>
       </div>
 
-      <span className="text-foreground/40 text-xs shrink-0 w-10 text-right">
-        {formatTime(fixture.startTime)}
+      <span className="text-[10px] text-foreground/40 shrink-0 w-16 text-right">
+        {match.phase === "knockout"
+          ? (ROUND_LABELS[match.round] ?? `Round ${match.round}`)
+          : `Group ${match.group ?? "?"} R${match.round}`}
       </span>
     </div>
+  );
+}
+
+function CompetitionMatchesSection({
+  competitionId,
+  name,
+  gameName,
+  status,
+  createdAt,
+}: {
+  competitionId: Id<"competitions">;
+  name: string;
+  gameName: string;
+  status: string;
+  createdAt: number;
+}) {
+  const matches = useQuery(api.competition.listMatches, { competitionId });
+  const updateMatchResult = useMutation(api.competition.updateMatchResult);
+  const [pending, setPending] = useState<Record<string, boolean>>({});
+
+  async function handleScoreChange(
+    matchId: Id<"competitionMatches">,
+    homeScore: number,
+    awayScore: number,
+  ) {
+    setPending((prev) => ({ ...prev, [matchId]: true }));
+    try {
+      await updateMatchResult({ matchId, homeScore, awayScore });
+    } finally {
+      setPending((prev) => ({ ...prev, [matchId]: false }));
+    }
+  }
+
+  const loading = matches === undefined;
+
+  return (
+    <section className="py-4 first:pt-0 last:pb-0">
+      <div className="flex items-center gap-3 mb-3 font-mono text-sm">
+        <span className="font-bold">{name}</span>
+        <span className="text-xs text-foreground/50">{gameName}</span>
+        <span
+          className={`border px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${statusStyles[status] ?? ""}`}
+        >
+          {status}
+        </span>
+        <span className="text-xs text-foreground/30 ml-auto">
+          {new Date(createdAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            timeZone: "Africa/Lagos",
+          })}
+        </span>
+      </div>
+
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 py-2 px-3">
+              <div className="h-5 w-5 bg-muted skeleton-blink rounded-full" />
+              <div className="h-3 w-20 bg-muted skeleton-blink" />
+              <div className="h-3 w-12 bg-muted skeleton-blink ml-auto" />
+            </div>
+          ))}
+        </div>
+      ) : matches.length === 0 ? (
+        <div className="py-3 text-center text-xs text-foreground/40">
+          No matches for this competition.
+        </div>
+      ) : (
+        (() => {
+          const groupMatches = matches.filter((m) => m.phase === "group");
+          const knockoutMatches = matches.filter((m) => m.phase === "knockout");
+
+          const groups: Record<string, typeof groupMatches> = {};
+          for (const m of groupMatches) {
+            const key = `${m.group ?? "?"}`;
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(m);
+          }
+
+          const rounds: Record<number, typeof knockoutMatches> = {};
+          for (const m of knockoutMatches) {
+            if (!rounds[m.round]) rounds[m.round] = [];
+            rounds[m.round].push(m);
+          }
+
+          return (
+            <div className="divide-y divide-border border border-border">
+              {Object.entries(groups).map(([groupName, groupMatches]) => {
+                const byRound: Record<number, typeof groupMatches> = {};
+                for (const m of groupMatches) {
+                  if (!byRound[m.round]) byRound[m.round] = [];
+                  byRound[m.round].push(m);
+                }
+                return Object.entries(byRound).map(([round, roundMatches]) => (
+                  <div key={`group-${groupName}-${round}`}>
+                    <div className="px-3 pt-2 pb-1 text-[10px] font-mono text-foreground/40 uppercase tracking-wider">
+                      Group {groupName} &mdash; Round {round}
+                    </div>
+                    {roundMatches.map((m) => (
+                      <MatchRow
+                        key={m._id}
+                        match={m}
+                        onScoreChange={handleScoreChange}
+                      />
+                    ))}
+                  </div>
+                ));
+              })}
+              {Object.entries(rounds)
+                .sort(([a], [b]) => Number(a) - Number(b))
+                .map(([round, roundMatches]) => (
+                  <div key={`knockout-${round}`}>
+                    <div className="px-3 pt-2 pb-1 text-[10px] font-mono text-foreground/40 uppercase tracking-wider">
+                      {ROUND_LABELS[Number(round)] ?? `Round ${round}`}
+                    </div>
+                    {roundMatches.map((m) => (
+                      <MatchRow
+                        key={m._id}
+                        match={m}
+                        onScoreChange={handleScoreChange}
+                      />
+                    ))}
+                  </div>
+                ))}
+            </div>
+          );
+        })()
+      )}
+    </section>
   );
 }
 
 function FixturesByCompetition() {
   const competitions = useQuery(api.competition.list);
   const games = useQuery(api.games.list);
-  const fixtures = useQuery(api.fixtures.list);
-  const updateScore = useMutation(api.fixtures.updateScore);
 
-  const loading =
-    competitions === undefined || games === undefined || fixtures === undefined;
+  const loading = competitions === undefined || games === undefined;
 
   if (loading) {
     return (
@@ -159,17 +289,22 @@ function FixturesByCompetition() {
     );
   }
 
-  const gamesById = Object.fromEntries(games.map((g) => [g._id, g.name]));
-  const compById = Object.fromEntries(competitions.map((c) => [c._id, c]));
-
-  const byCompetition: Record<string, Fixture[]> = {};
-  for (const f of fixtures) {
-    const key = f.competitionId ?? "__unassigned__";
-    if (!byCompetition[key]) byCompetition[key] = [];
-    byCompetition[key].push(f);
+  if (competitions.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Fixtures by Competition</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="py-4 text-center text-sm text-foreground/60">
+            No competitions yet.
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
-  const hasAny = fixtures.length > 0;
+  const gamesById = Object.fromEntries(games.map((g) => [g._id, g.name]));
 
   return (
     <Card>
@@ -177,110 +312,18 @@ function FixturesByCompetition() {
         <CardTitle>Fixtures by Competition</CardTitle>
       </CardHeader>
       <CardContent>
-        {!hasAny ? (
-          <div className="py-4 text-center text-sm text-foreground/60">
-            No fixtures in the system.
-          </div>
-        ) : (
-          <div className="divide-y divide-border">
-            {competitions.map((c) => {
-              const compFixtures = byCompetition[c._id];
-              return (
-                <section key={c._id} className="py-4 first:pt-0 last:pb-0">
-                  <div className="flex items-center gap-3 mb-3 font-mono text-sm">
-                    <span className="font-bold">{c.name}</span>
-                    <span className="text-xs text-foreground/50">
-                      {gamesById[c.gameId] ?? "—"}
-                    </span>
-                    <span
-                      className={`border px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${statusStyles[c.status] ?? ""}`}
-                    >
-                      {c.status}
-                    </span>
-                    <span className="text-xs text-foreground/30 ml-auto">
-                      {new Date(c._creationTime).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        timeZone: "Africa/Lagos",
-                      })}
-                    </span>
-                  </div>
-
-                  {!compFixtures || compFixtures.length === 0 ? (
-                    <div className="py-3 text-center text-xs text-foreground/40">
-                      No fixtures for this competition.
-                    </div>
-                  ) : (
-                    (() => {
-                      const dateGroups: Record<string, Fixture[]> = {};
-                      for (const f of compFixtures) {
-                        const d = formatDate(f.startTime);
-                        if (!dateGroups[d]) dateGroups[d] = [];
-                        dateGroups[d].push(f);
-                      }
-                      return Object.entries(dateGroups).map(
-                        ([date, dayFixtures]) => (
-                          <div key={date} className="mb-4 last:mb-0">
-                            <div className="font-mono text-xs text-foreground/50 mb-2">
-                              {date}
-                            </div>
-                            <div className="divide-y divide-border border border-border">
-                              {dayFixtures.map((f) => (
-                                <FixtureRow
-                                  key={f._id}
-                                  fixture={f}
-                                  updateScore={updateScore}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        ),
-                      );
-                    })()
-                  )}
-                </section>
-              );
-            })}
-
-            {byCompetition["__unassigned__"] && (
-              <section className="py-4 last:pb-0">
-                <div className="flex items-center gap-3 mb-3 font-mono text-sm">
-                  <span className="font-bold text-foreground/50">
-                    Unassigned
-                  </span>
-                </div>
-
-                {(() => {
-                  const unassigned = byCompetition["__unassigned__"];
-                  const dateGroups: Record<string, Fixture[]> = {};
-                  for (const f of unassigned) {
-                    const d = formatDate(f.startTime);
-                    if (!dateGroups[d]) dateGroups[d] = [];
-                    dateGroups[d].push(f);
-                  }
-                  return Object.entries(dateGroups).map(
-                    ([date, dayFixtures]) => (
-                      <div key={date} className="mb-4 last:mb-0">
-                        <div className="font-mono text-xs text-foreground/50 mb-2">
-                          {date}
-                        </div>
-                        <div className="divide-y divide-border border border-border">
-                          {dayFixtures.map((f) => (
-                            <FixtureRow
-                              key={f._id}
-                              fixture={f}
-                              updateScore={updateScore}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ),
-                  );
-                })()}
-              </section>
-            )}
-          </div>
-        )}
+        <div className="divide-y divide-border">
+          {competitions.map((c) => (
+            <CompetitionMatchesSection
+              key={c._id}
+              competitionId={c._id}
+              name={c.name}
+              gameName={gamesById[c.gameId] ?? "—"}
+              status={c.status}
+              createdAt={c._creationTime}
+            />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
