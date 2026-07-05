@@ -5,6 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { GameTabs } from "~/components/game-tabs";
+import { CompetitionsSection } from "~/components/competitions-section";
 import { PlayerActivityPanel } from "~/components/player-activity-panel";
 import { PointsLog } from "~/components/points-log";
 import { ScheduleSection } from "~/components/schedule-section";
@@ -102,6 +103,8 @@ export default function Home() {
               <SkillsCard />
             </div>
           </div>
+
+          <CompetitionsSection />
 
           <ScheduleSection />
         </div>
