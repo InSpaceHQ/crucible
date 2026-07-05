@@ -21,7 +21,7 @@ const ROUND_LABELS: Record<number, string> = {
 
 function roundLabel(m: Match): string {
   if (m.phase === "knockout") return ROUND_LABELS[m.round] ?? `R${m.round}`;
-  return `Group ${m.group ?? "?"} R${m.round}`;
+  return `R${m.round}`;
 }
 
 function formatTime(ts: number) {
@@ -49,9 +49,11 @@ function toLagosTimestamp(dateStr: string, timeStr: string): number {
   const [y, m, d] = dateStr.split("-").map(Number);
   const [h, min] = timeStr.split(":").map(Number);
   const local = new Date(y, m - 1, d, h, min);
-  const lagosOffset = 60 * 60 * 1000; // WAT is UTC+1
+  const lagosOffset = 60 * 60 * 1000;
   return local.getTime() - local.getTimezoneOffset() * 60 * 1000 + lagosOffset;
 }
+
+const GRID = "grid-cols-[4ch_3ch_5ch_1fr_8ch]";
 
 function MatchManager() {
   const competitions = useQuery(api.competition.list);
@@ -73,11 +75,14 @@ function MatchManager() {
   const loadingComps = competitions === undefined;
   const loadingMatches = matches === undefined;
   const compsLoaded = competitions && competitions.length > 0;
-  const comp = competitions?.find((c) => c._id === selectedCompId);
+
+  const visibleMatches = (matches ?? []).filter(
+    (m) =>
+      m.homeTeamId !== m.awayTeamId && (!m.startTime || m.startTime >= now),
+  );
 
   function toggleAll(selectAll: boolean) {
-    if (!matches) return;
-    setChecked(new Set(selectAll ? matches.map((m) => m._id) : []));
+    setChecked(new Set(selectAll ? visibleMatches.map((m) => m._id) : []));
   }
 
   function toggleOne(id: string) {
@@ -143,7 +148,9 @@ function MatchManager() {
   }
 
   return (
-    <Card>
+    <Card
+      style={{ "--match-grid": "4ch 3ch 5ch 1fr 8ch" } as React.CSSProperties}
+    >
       <CardHeader>
         <CardTitle>Match Manager</CardTitle>
       </CardHeader>
@@ -171,11 +178,12 @@ function MatchManager() {
         ) : loadingMatches ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 py-2">
-                <div className="size-4 bg-muted skeleton-blink" />
-                <div className="h-3 w-16 bg-muted skeleton-blink" />
+              <div key={i} className={GRID + " items-center gap-3 py-2"}>
+                <div className="size-3.5 bg-muted skeleton-blink" />
+                <div className="h-3 w-6 bg-muted skeleton-blink" />
+                <div className="h-3 w-8 bg-muted skeleton-blink" />
                 <div className="h-3 w-32 bg-muted skeleton-blink" />
-                <div className="h-3 w-8 bg-muted skeleton-blink ml-auto" />
+                <div className="h-3 w-10 bg-muted skeleton-blink" />
               </div>
             ))}
           </div>
@@ -186,46 +194,65 @@ function MatchManager() {
         ) : (
           <>
             <div className="divide-y divide-border border border-border font-mono text-sm">
-              <div className="flex items-center gap-3 px-3 py-2 text-[11px] text-foreground/50 uppercase tracking-wider">
+              <div
+                className={
+                  GRID +
+                  " items-center gap-3 px-3 py-2 text-[11px] text-foreground/50 uppercase tracking-wider"
+                }
+              >
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     className="size-3.5 accent-foreground"
                     checked={
-                      checked.size === matches.length && matches.length > 0
+                      checked.size === visibleMatches.length &&
+                      visibleMatches.length > 0
                     }
                     onChange={(e) => toggleAll(e.target.checked)}
                   />
-                  All
+                  <span className="sr-only">All</span>
                 </label>
-                <span className="w-16">Round</span>
-                <span className="flex-1">Match</span>
-                <span className="w-10 text-right">Start</span>
+                <span>Group</span>
+                <span>Round</span>
+                <span>Match</span>
+                <span className="text-right">Start</span>
               </div>
-              {matches.map((m) => (
-                <label
-                  key={m._id}
-                  className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    className="size-3.5 accent-foreground shrink-0"
-                    checked={checked.has(m._id)}
-                    onChange={() => toggleOne(m._id)}
-                  />
-                  <span className="w-16 text-xs text-foreground/50 shrink-0">
-                    {roundLabel(m)}
-                  </span>
-                  <span className="flex-1 truncate">
-                    {m.homeTeam?.name ?? "TBD"}
-                    <span className="text-foreground/30 mx-1">vs</span>
-                    {m.awayTeam?.name ?? "TBD"}
-                  </span>
-                  <span className="w-10 text-right text-xs text-foreground/40 shrink-0">
-                    {m.startTime ? formatTime(m.startTime) : "—"}
-                  </span>
-                </label>
-              ))}
+              {visibleMatches.length === 0 ? (
+                <div className="px-3 py-4 text-center text-xs text-foreground/40">
+                  No upcoming matches.
+                </div>
+              ) : (
+                visibleMatches.map((m) => (
+                  <label
+                    key={m._id}
+                    className={
+                      GRID +
+                      " items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
+                    }
+                  >
+                    <input
+                      type="checkbox"
+                      className="size-3.5 accent-foreground shrink-0"
+                      checked={checked.has(m._id)}
+                      onChange={() => toggleOne(m._id)}
+                    />
+                    <span className="text-xs text-foreground/50">
+                      {m.phase === "knockout" ? "—" : (m.group ?? "?")}
+                    </span>
+                    <span className="text-xs text-foreground/50">
+                      {roundLabel(m)}
+                    </span>
+                    <span className="truncate">
+                      {m.homeTeam?.name ?? "TBD"}
+                      <span className="text-foreground/30 mx-1">vs</span>
+                      {m.awayTeam?.name ?? "TBD"}
+                    </span>
+                    <span className="text-right text-xs text-foreground/40">
+                      {m.startTime ? formatTime(m.startTime) : "—"}
+                    </span>
+                  </label>
+                ))
+              )}
             </div>
 
             <div className="flex items-center gap-3 pt-2 font-mono text-sm">
