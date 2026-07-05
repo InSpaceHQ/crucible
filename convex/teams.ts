@@ -6,6 +6,14 @@ export const list = query({
     const games = await ctx.db.query("games").collect();
     const gamesById = Object.fromEntries(games.map((g) => [g._id, g]));
 
+    const teamGames = await ctx.db.query("teamGames").collect();
+    const teamGamesByTeam: Record<string, typeof games> = {};
+    for (const tg of teamGames) {
+      if (!teamGamesByTeam[tg.teamId]) teamGamesByTeam[tg.teamId] = [];
+      const game = gamesById[tg.gameId];
+      if (game) teamGamesByTeam[tg.teamId].push(game);
+    }
+
     const teams = await ctx.db
       .query("teams")
       .withIndex("by_order")
@@ -21,7 +29,7 @@ export const list = query({
 
         return {
           ...team,
-          game: gamesById[team.gameId] ?? null,
+          games: teamGamesByTeam[team._id] ?? [],
           players: players.map((p) => ({
             ...p,
             game: gamesById[p.gameId] ?? null,

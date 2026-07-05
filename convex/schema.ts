@@ -11,10 +11,16 @@ export default defineSchema({
 
   teams: defineTable({
     name: v.string(),
-    gameId: v.id("games"),
     logo: v.string(),
     order: v.number(),
   }).index("by_order", ["order"]),
+
+  teamGames: defineTable({
+    teamId: v.id("teams"),
+    gameId: v.id("games"),
+  })
+    .index("by_team", ["teamId"])
+    .index("by_game", ["gameId"]),
 
   players: defineTable({
     name: v.string(),
@@ -57,7 +63,9 @@ export default defineSchema({
     kills: v.number(),
     wins: v.number(),
     matches: v.number(),
-  }).index("by_kills", ["kills"]),
+  })
+    .index("by_kills", ["kills"])
+    .index("by_player", ["playerId"]),
 
   pointsLog: defineTable({
     playerId: v.id("players"),
@@ -67,4 +75,66 @@ export default defineSchema({
   })
     .index("by_timestamp", ["timestamp"])
     .index("by_player_timestamp", ["playerId", "timestamp"]),
+
+  competitions: defineTable({
+    name: v.string(),
+    gameId: v.id("games"),
+    status: v.union(
+      v.literal("upcoming"),
+      v.literal("active"),
+      v.literal("completed"),
+    ),
+    season: v.string(),
+    phase: v.optional(
+      v.union(
+        v.literal("round_1"),
+        v.literal("round_2"),
+        v.literal("round_3"),
+        v.literal("round_4"),
+        v.literal("round_5"),
+        v.literal("knockout_qf"),
+        v.literal("knockout_sf"),
+        v.literal("knockout_final"),
+        v.literal("completed"),
+        v.literal("error"),
+      ),
+    ),
+  }).index("by_game", ["gameId"]),
+
+  competitionMatches: defineTable({
+    competitionId: v.id("competitions"),
+    phase: v.union(v.literal("group"), v.literal("knockout")),
+    group: v.optional(v.string()),
+    round: v.number(),
+    matchIndex: v.number(),
+    homeTeamId: v.id("teams"),
+    awayTeamId: v.id("teams"),
+    homeScore: v.optional(v.number()),
+    awayScore: v.optional(v.number()),
+    status: v.union(
+      v.literal("scheduled"),
+      v.literal("live"),
+      v.literal("completed"),
+    ),
+    startTime: v.optional(v.number()),
+  })
+    .index("by_competition", ["competitionId"])
+    .index("by_competition_phase", ["competitionId", "phase", "round"]),
+
+  competitionStandings: defineTable({
+    competitionId: v.id("competitions"),
+    group: v.string(),
+    teamId: v.id("teams"),
+    position: v.number(),
+    played: v.number(),
+    won: v.number(),
+    drawn: v.number(),
+    lost: v.number(),
+    goalsFor: v.number(),
+    goalsAgainst: v.number(),
+    goalDifference: v.number(),
+    points: v.number(),
+  })
+    .index("by_competition", ["competitionId"])
+    .index("by_competition_group", ["competitionId", "group"]),
 });

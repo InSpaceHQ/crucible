@@ -81,6 +81,40 @@ function ProfileHeader({
   );
 }
 
+function ProfileIdentity({
+  info,
+}: {
+  info: { name: string; teamName: string; teamLogo: string; gameName: string };
+}) {
+  return (
+    <div className="mb-6 pb-4 border-b border-border">
+      <div className="flex items-center gap-3">
+        <PlayerAvatar name={info.name} size="lg" />
+        <div>
+          <div className="font-mono text-sm font-medium">{info.name}</div>
+          <div className="flex items-center gap-1.5 text-xs text-foreground/60 mt-0.5">
+            {info.teamLogo && (
+              <Image
+                src={info.teamLogo}
+                alt=""
+                width={14}
+                height={14}
+                className="object-cover"
+              />
+            )}
+            {info.teamName}
+            <span className="text-foreground/30">·</span>
+            {info.gameName}
+          </div>
+        </div>
+      </div>
+      <p className="font-mono text-xs text-foreground/50 mt-3">
+        Couldn&apos;t completely load profile.
+      </p>
+    </div>
+  );
+}
+
 function PanelContent({
   playerId,
   info,
@@ -119,7 +153,11 @@ function PanelContent({
             <DrawerTitle>{title}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6">
-            {profile && <ProfileHeader profile={profile} />}
+            {profile
+              ? <ProfileHeader profile={profile} />
+              : stats === null
+                ? <ProfileIdentity info={info} />
+                : null}
             <ActivityLog userId={playerId} />
           </div>
         </DrawerContent>
@@ -133,7 +171,11 @@ function PanelContent({
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        {profile && <ProfileHeader profile={profile} />}
+        {profile
+          ? <ProfileHeader profile={profile} />
+          : stats === null
+            ? <ProfileIdentity info={info} />
+            : null}
         <ActivityLog userId={playerId} />
       </SheetContent>
     </Sheet>

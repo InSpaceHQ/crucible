@@ -16,9 +16,15 @@ description: string   — optional overview
 
 ```
 name: string
-gameId: Id<"games">   — team's primary game
 logo: string           — DiceBear/asset URL
 order: number          — display ordering (0-based)
+```
+
+### `teamGames`
+
+```
+teamId: Id<"teams">
+gameId: Id<"games">
 ```
 
 ### `players`
@@ -37,8 +43,7 @@ teamId: Id<"teams">    — parent team
 _id: Id<"teams">
 _creationTime: number
 name: string
-gameId: Id<"games">
-game: Option<{ name, displayName, description }>   — resolved game
+games: Array<{ name, displayName, description }>   — resolved games via teamGames
 logo: string
 order: number
 players: PlayerWithGame[]
@@ -171,7 +176,7 @@ Index: `by_timestamp` (desc)
 ### `seed.seed`
 
 Games: FC26 (`FC26`), MK1 (`Mortal Kombat 1`)
-Teams: 20 teams (Nova, Vertex, Pulse, Apex, Blaze, Shadow, Eclipse, Reaper, Frost, Phantom, Storm, Vanguard, Comet, Warden, Fury, Raven, Thunder, Hydra, Vapor, Phoenix)
+Teams: 20 teams (Nova, Vertex, Pulse, Apex, Blaze, Shadow, Eclipse, Reaper, Frost, Phantom, Storm, Vanguard, Comet, Warden, Fury, Raven, Thunder, Hydra, Vapor, Phoenix) — each team competes in all games
 Players: 48 players (2 per team, 1 FC26 + 1 MK1)
 
 ### `seedFixtures.seed`
@@ -228,7 +233,7 @@ name: string
 gameId: Id<"games">
 game: Option<{ name, displayName, description }>   — resolved game
 teamId: Id<"teams">
-team: Option<{ _id, name, gameId, logo, order }>    — resolved team with logo
+team: Option<{ _id, name, logo, order }>    — resolved team with logo
 ```
 
 ## Seed Data

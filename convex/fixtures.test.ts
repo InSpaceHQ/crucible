@@ -17,7 +17,6 @@ async function seedFixture(t: ReturnType<typeof convexTest>) {
     });
     const teamId = await ctx.db.insert("teams", {
       name: "Nova",
-      gameId,
       logo: "/logos/nova.png",
       order: 0,
     });

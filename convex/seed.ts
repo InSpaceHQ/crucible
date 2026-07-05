@@ -9,121 +9,121 @@ const SEED_GAMES = [
 const SEED_TEAMS = [
   {
     name: "Nova",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Nova&backgroundColor=ff6b6b",
     order: 0,
   },
   {
     name: "Vertex",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Vertex&backgroundColor=4ecdc4",
     order: 1,
   },
   {
     name: "Pulse",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Pulse&backgroundColor=ffa502",
     order: 2,
   },
   {
     name: "Apex",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Apex&backgroundColor=7c5cfc",
     order: 3,
   },
   {
     name: "Blaze",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Blaze&backgroundColor=ff3333",
     order: 4,
   },
   {
     name: "Shadow",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Shadow&backgroundColor=1a1a2e",
     order: 5,
   },
   {
     name: "Eclipse",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Eclipse&backgroundColor=333333",
     order: 6,
   },
   {
     name: "Reaper",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Reaper&backgroundColor=8b0000",
     order: 7,
   },
   {
     name: "Frost",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Frost&backgroundColor=66d9ff",
     order: 8,
   },
   {
     name: "Phantom",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Phantom&backgroundColor=696969",
     order: 9,
   },
   {
     name: "Storm",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Storm&backgroundColor=4a90d9",
     order: 10,
   },
   {
     name: "Vanguard",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Vanguard&backgroundColor=006400",
     order: 11,
   },
   {
     name: "Comet",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Comet&backgroundColor=ff66ff",
     order: 12,
   },
   {
     name: "Warden",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Warden&backgroundColor=00008b",
     order: 13,
   },
   {
     name: "Fury",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Fury&backgroundColor=ff6600",
     order: 14,
   },
   {
     name: "Raven",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Raven&backgroundColor=2f2f3f",
     order: 15,
   },
   {
     name: "Thunder",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Thunder&backgroundColor=ffd700",
     order: 16,
   },
   {
     name: "Hydra",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Hydra&backgroundColor=006666",
     order: 17,
   },
   {
     name: "Vapor",
-    game: "FC26",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Vapor&backgroundColor=66ff99",
     order: 18,
   },
   {
     name: "Phoenix",
-    game: "MK1",
+    gameIds: ["FC26", "MK1"],
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Phoenix&backgroundColor=ff4500",
     order: 19,
   },
@@ -221,13 +221,22 @@ const SEED_SKILLS = [
 export const seed = mutation({
   args: {},
   handler: async (ctx) => {
-    const existing = await ctx.db.query("games").take(1);
-    if (existing.length > 0) return { seeded: false };
+    const existingGames = await ctx.db.query("games").collect();
 
-    const gameIds: Record<string, Id<"games">> = {};
-    for (const game of SEED_GAMES) {
-      gameIds[game.name] = await ctx.db.insert("games", game);
+    let gameIds: Record<string, Id<"games">>;
+    if (existingGames.length < 2) {
+      gameIds = {};
+      for (const game of SEED_GAMES) {
+        gameIds[game.name] = await ctx.db.insert("games", game);
+      }
+    } else {
+      gameIds = Object.fromEntries(
+        existingGames.map((g) => [g.name, g._id]),
+      );
     }
+
+    const existingTeams = await ctx.db.query("teams").take(1);
+    if (existingTeams.length > 0) return { seeded: false };
 
     const teamNames = SEED_TEAMS.map((t) => t.name);
     const uniqueTeamNames = new Set(teamNames);
@@ -239,12 +248,18 @@ export const seed = mutation({
 
     const teamIds: Record<string, Id<"teams">> = {};
     for (const team of SEED_TEAMS) {
-      teamIds[team.name] = await ctx.db.insert("teams", {
+      const teamId = await ctx.db.insert("teams", {
         name: team.name,
-        gameId: gameIds[team.game] as Id<"games">,
         logo: team.logo,
         order: team.order,
       });
+      teamIds[team.name] = teamId;
+      for (const gameId of team.gameIds) {
+        await ctx.db.insert("teamGames", {
+          teamId,
+          gameId: gameIds[gameId] as Id<"games">,
+        });
+      }
     }
 
     const playerNames = SEED_PLAYERS.map((p) => p.name);

@@ -1,6 +1,7 @@
-import { mutation, query } from "./_generated/server";
+import { action, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
+import { api } from "./_generated/api";
 
 const GROUP_NAMES = ["A", "B", "C", "D"];
 
@@ -73,97 +74,107 @@ function generateGroupFixtures(
   return fixtures;
 }
 
+async function seedCompetitionInternal(
+  ctx: any,
+  gameId: Id<"games">,
+): Promise<{
+  competitionId: Id<"competitions">;
+  teamOrders: Record<string, number>;
+}> {
+  const allTeams = await ctx.db
+    .query("teams")
+    .withIndex("by_order")
+    .order("asc")
+    .collect();
+
+  if (allTeams.length < 20) {
+    throw new Error(`Need at least 20 teams, got ${allTeams.length}.`);
+  }
+
+  const teamsForComp = allTeams.slice(0, 20);
+  const teamIds = teamsForComp.map((t: any) => t._id);
+  const teamOrders = Object.fromEntries(
+    teamsForComp.map((t: any) => [t._id, t.order]),
+  );
+
+  const competitionId = await ctx.db.insert("competitions", {
+    name: "Crucible Season 1",
+    gameId,
+    status: "active",
+    season: "2026",
+  });
+
+  const groups = snakeDraft(teamIds.map((id: string) => id), 4);
+
+  for (let gi = 0; gi < groups.length; gi++) {
+    const groupFixtures = generateGroupFixtures(
+      groups[gi],
+      GROUP_NAMES[gi],
+      competitionId,
+      1,
+    );
+    for (const f of groupFixtures) {
+      await ctx.db.insert("competitionMatches", f);
+    }
+  }
+
+  for (let gi = 0; gi < groups.length; gi++) {
+    for (const rawId of groups[gi]) {
+      const teamId = rawId as Id<"teams">;
+      await ctx.db.insert("competitionStandings", {
+        competitionId,
+        group: GROUP_NAMES[gi],
+        teamId,
+        position: 0,
+        played: 0,
+        won: 0,
+        drawn: 0,
+        lost: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0,
+        points: 0,
+      });
+    }
+  }
+
+  const existingTbd = allTeams.find((t: any) => t.name === "TBD");
+  const tbdTeamId =
+    existingTbd?._id ??
+    (await ctx.db.insert("teams", {
+      name: "TBD",
+      logo: "/logos/tbd.png",
+      order: 999,
+    }));
+
+  const bracketRounds = [
+    { round: 6, matches: 4 },
+    { round: 7, matches: 2 },
+    { round: 8, matches: 1 },
+  ];
+
+  for (const { round, matches } of bracketRounds) {
+    for (let mi = 0; mi < matches; mi++) {
+      await ctx.db.insert("competitionMatches", {
+        competitionId,
+        phase: "knockout",
+        round,
+        matchIndex: mi,
+        homeTeamId: tbdTeamId,
+        awayTeamId: tbdTeamId,
+        status: "scheduled",
+      });
+    }
+  }
+
+  return { competitionId, teamOrders };
+}
+
 export const seedCompetition = mutation({
   args: { gameId: v.id("games") },
   handler: async (ctx, args) => {
-    const allTeams = await ctx.db
-      .query("teams")
-      .withIndex("by_order")
-      .order("asc")
-      .collect();
-
-    if (allTeams.length < 20) {
-      throw new Error(
-        `Need at least 20 teams, got ${allTeams.length}. Run the competition seed first.`,
-      );
-    }
-
-    const teamsForComp = allTeams.slice(0, 20);
-    const teamIds = teamsForComp.map((t) => t._id);
-
-    const competitionId = await ctx.db.insert("competitions", {
-      name: "Crucible Season 1",
-      gameId: args.gameId,
-      status: "active",
-      season: "2026",
-    });
-
-    const groups = snakeDraft(
-      teamIds.map((id) => id),
-      4,
-    );
-
-    let fixtureCount = 0;
-    for (let gi = 0; gi < groups.length; gi++) {
-      const groupFixtures = generateGroupFixtures(
-        groups[gi],
-        GROUP_NAMES[gi],
-        competitionId,
-        1,
-      );
-      for (const f of groupFixtures) {
-        await ctx.db.insert("competitionMatches", f);
-      }
-      fixtureCount += groupFixtures.length;
-    }
-
-    let standingsCount = 0;
-    for (let gi = 0; gi < groups.length; gi++) {
-      for (const rawId of groups[gi]) {
-        const teamId = rawId as Id<"teams">;
-        await ctx.db.insert("competitionStandings", {
-          competitionId,
-          group: GROUP_NAMES[gi],
-          teamId,
-          position: 0,
-          played: 0,
-          won: 0,
-          drawn: 0,
-          lost: 0,
-          goalsFor: 0,
-          goalsAgainst: 0,
-          goalDifference: 0,
-          points: 0,
-        });
-        standingsCount++;
-      }
-    }
-
-    const bracketRounds = [
-      { round: 6, matches: 4 },
-      { round: 7, matches: 2 },
-      { round: 8, matches: 1 },
-    ];
-
-    for (const { round, matches } of bracketRounds) {
-      for (let mi = 0; mi < matches; mi++) {
-        await ctx.db.insert("competitionMatches", {
-          competitionId,
-          phase: "knockout",
-          round,
-          matchIndex: mi,
-          homeTeamId: teamIds[0],
-          awayTeamId: teamIds[1],
-          status: "scheduled",
-        });
-      }
-    }
-
-    return {
-      competitionId,
-      fixtureCount,
-      standingsCount,
-    };
+    const { competitionId } = await seedCompetitionInternal(ctx, args.gameId);
+    return { competitionId, fixtureCount: 40, standingsCount: 20 };
   },
 });
 
@@ -171,6 +182,13 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("competitions").collect();
+  },
+});
+
+export const get = query({
+  args: { competitionId: v.id("competitions") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.competitionId);
   },
 });
 
@@ -382,6 +400,18 @@ function simulateMatch(homeOrder: number, awayOrder: number, seed: number) {
   return { homeScore, awayScore };
 }
 
+export const simulateMatchAction = action({
+  args: {
+    homeOrder: v.number(),
+    awayOrder: v.number(),
+    seed: v.number(),
+  },
+  handler: async (_, args) => {
+    await new Promise((resolve) => setTimeout(resolve, 10_000));
+    return simulateMatch(args.homeOrder, args.awayOrder, args.seed);
+  },
+});
+
 async function applyMatchResult(
   ctx: any,
   matchId: any,
@@ -404,116 +434,447 @@ function getWinner(match: any): Id<"teams"> | null {
   return null;
 }
 
+function getWinnerWithTiebreak(
+  match: any,
+  teamOrders: Record<string, number>,
+): Id<"teams"> | null {
+  const winner = getWinner(match);
+  if (winner) return winner;
+  if (!match.homeTeamId || !match.awayTeamId) return null;
+  const homeOrder = teamOrders[match.homeTeamId] ?? 999;
+  const awayOrder = teamOrders[match.awayTeamId] ?? 999;
+  return homeOrder <= awayOrder ? match.homeTeamId : match.awayTeamId;
+}
+
+async function advanceBracket(
+  ctx: any,
+  competitionId: Id<"competitions">,
+  winnerFn?: (match: any) => Id<"teams"> | null,
+) {
+  const standings = await ctx.db
+    .query("competitionStandings")
+    .withIndex("by_competition", (q: any) => q.eq("competitionId", competitionId))
+    .collect();
+
+  const groups = ["A", "B", "C", "D"] as const;
+  const qualifiers: Array<{ teamId: Id<"teams">; group: string; position: number }> = [];
+
+  for (const group of groups) {
+    const groupStandings = standings
+      .filter((s: any) => s.group === group)
+      .sort(
+        (a: any, b: any) =>
+          b.points - a.points ||
+          b.goalDifference - a.goalDifference ||
+          b.goalsFor - a.goalsFor,
+      );
+
+    if (groupStandings.length < 2) {
+      throw new Error(`Group ${group} does not have enough teams`);
+    }
+
+    const allPlayed = groupStandings.every((s: any) => s.played === 4);
+    if (!allPlayed) {
+      throw new Error(`Group ${group} stage not complete (all teams must play 4 matches)`);
+    }
+
+    qualifiers.push(
+      { teamId: groupStandings[0].teamId, group, position: 1 },
+      { teamId: groupStandings[1].teamId, group, position: 2 },
+    );
+  }
+
+  const bracketMatches = await ctx.db
+    .query("competitionMatches")
+    .withIndex("by_competition_phase", (q: any) =>
+      q.eq("competitionId", competitionId).eq("phase", "knockout"),
+    )
+    .collect();
+
+  if (bracketMatches.length < 7) {
+    throw new Error("Bracket matches not initialized. Run seedCompetition first.");
+  }
+
+  const sorted = [...bracketMatches].sort(
+    (a: any, b: any) => a.round - b.round || a.matchIndex - b.matchIndex,
+  );
+
+  const qf = sorted.filter((m: any) => m.round === 6);
+  const sf = sorted.filter((m: any) => m.round === 7);
+  const final = sorted.filter((m: any) => m.round === 8);
+
+  const groupWinners = qualifiers
+    .filter((q) => q.position === 1)
+    .sort((a, b) => a.group.localeCompare(b.group));
+  const groupRunnersUp = qualifiers
+    .filter((q) => q.position === 2)
+    .sort((a, b) => a.group.localeCompare(b.group));
+
+  const qfPairs: Array<[Id<"teams">, Id<"teams">]> = [
+    [groupWinners[0].teamId, groupRunnersUp[1].teamId],
+    [groupWinners[2].teamId, groupRunnersUp[3].teamId],
+    [groupWinners[1].teamId, groupRunnersUp[0].teamId],
+    [groupWinners[3].teamId, groupRunnersUp[2].teamId],
+  ];
+
+  for (let i = 0; i < qf.length; i++) {
+    await ctx.db.patch(qf[i]._id, {
+      homeTeamId: qfPairs[i][0],
+      awayTeamId: qfPairs[i][1],
+    });
+  }
+
+  const win = winnerFn ?? getWinner;
+  const qfAllComplete = qf.every((m: any) => m.status === "completed");
+  if (qfAllComplete) {
+    const sfWinners = [
+      win(qf[0])!,
+      win(qf[2])!,
+      win(qf[1])!,
+      win(qf[3])!,
+    ];
+
+    for (let i = 0; i < sf.length; i++) {
+      await ctx.db.patch(sf[i]._id, {
+        homeTeamId: sfWinners[i * 2],
+        awayTeamId: sfWinners[i * 2 + 1],
+      });
+    }
+
+    const sfAllComplete = sf.every((m: any) => m.status === "completed");
+    if (sfAllComplete) {
+      const finalWinners = [win(sf[0])!, win(sf[1])!];
+      await ctx.db.patch(final[0]._id, {
+        homeTeamId: finalWinners[0],
+        awayTeamId: finalWinners[1],
+      });
+    }
+  }
+}
+
 export const advanceKnockout = mutation({
   args: { competitionId: v.id("competitions") },
   handler: async (ctx, args) => {
-    const standings = await ctx.db
+    await advanceBracket(ctx, args.competitionId);
+  },
+});
+
+export const simulateCompetition = mutation({
+  args: { gameId: v.id("games") },
+  handler: async (ctx, args) => {
+    const { competitionId, teamOrders } = await seedCompetitionInternal(
+      ctx,
+      args.gameId,
+    );
+
+    const teams = await ctx.db.query("teams").collect();
+
+    const matches = await ctx.db
+      .query("competitionMatches")
+      .withIndex("by_competition", (q) => q.eq("competitionId", competitionId))
+      .collect();
+
+    const groupMatches = matches
+      .filter((m: any) => m.phase === "group")
+      .sort((a: any, b: any) => a.round - b.round || a.matchIndex - b.matchIndex);
+
+    const groupResults: Array<{
+      round: number;
+      matchIndex: number;
+      homeTeamId: Id<"teams">;
+      awayTeamId: Id<"teams">;
+      homeScore: number;
+      awayScore: number;
+    }> = [];
+
+    for (const match of groupMatches) {
+      const seed = match.round * 1000 + match.matchIndex;
+      const { homeScore, awayScore } = simulateMatch(
+        teamOrders[match.homeTeamId],
+        teamOrders[match.awayTeamId],
+        seed,
+      );
+      await applyMatchResult(ctx, match._id, homeScore, awayScore);
+      groupResults.push({
+        round: match.round,
+        matchIndex: match.matchIndex,
+        homeTeamId: match.homeTeamId,
+        awayTeamId: match.awayTeamId,
+        homeScore,
+        awayScore,
+      });
+    }
+
+    await advanceBracket(ctx, competitionId, (m: any) =>
+      getWinnerWithTiebreak(m, teamOrders),
+    );
+
+    const bracketMatches = matches
+      .filter((m: any) => m.phase === "knockout")
+      .sort((a: any, b: any) => a.round - b.round || a.matchIndex - b.matchIndex);
+
+    const qfMatches = bracketMatches.filter((m: any) => m.round === 6);
+    for (const m of qfMatches) {
+      const fresh = await ctx.db.get(m._id);
+      if (!fresh) continue;
+      const seed = fresh.round * 1000 + fresh.matchIndex;
+      const { homeScore, awayScore } = simulateMatch(
+        teamOrders[fresh.homeTeamId],
+        teamOrders[fresh.awayTeamId],
+        seed,
+      );
+      await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
+    }
+
+    const wfn = (m: any) => getWinnerWithTiebreak(m, teamOrders);
+    await advanceBracket(ctx, competitionId, wfn);
+
+    const afterQf = await ctx.db
+      .query("competitionMatches")
+      .withIndex("by_competition_phase", (q) =>
+        q.eq("competitionId", competitionId).eq("phase", "knockout"),
+      )
+      .collect();
+    const sf = afterQf.filter((m: any) => m.round === 7);
+
+    for (const m of sf) {
+      const seed = m.round * 1000 + m.matchIndex;
+      const { homeScore, awayScore } = simulateMatch(
+        teamOrders[m.homeTeamId],
+        teamOrders[m.awayTeamId],
+        seed,
+      );
+      await applyMatchResult(ctx, m._id, homeScore, awayScore);
+    }
+
+    await advanceBracket(ctx, competitionId, wfn);
+
+    const afterSf = await ctx.db
+      .query("competitionMatches")
+      .withIndex("by_competition_phase", (q) =>
+        q.eq("competitionId", competitionId).eq("phase", "knockout"),
+      )
+      .collect();
+    const finalMatch = afterSf.find((m: any) => m.round === 8);
+
+    if (finalMatch) {
+      const seed = finalMatch.round * 1000 + finalMatch.matchIndex;
+      const { homeScore, awayScore } = simulateMatch(
+        teamOrders[finalMatch.homeTeamId],
+        teamOrders[finalMatch.awayTeamId],
+        seed,
+      );
+      await applyMatchResult(ctx, finalMatch._id, homeScore, awayScore);
+    }
+
+    const finalStandings = await ctx.db
       .query("competitionStandings")
-      .withIndex("by_competition", (q) =>
+      .withIndex("by_competition", (q) => q.eq("competitionId", competitionId))
+      .collect();
+
+    const groupSummaries: Array<{
+      group: string;
+      winnerName: string;
+      runnerUpName: string;
+    }> = [];
+
+    const simGroups = ["A", "B", "C", "D"] as const;
+    for (const group of simGroups) {
+      const top2 = finalStandings
+        .filter((s: any) => s.group === group)
+        .sort(
+          (a: any, b: any) =>
+            b.points - a.points ||
+            b.goalDifference - a.goalDifference ||
+            b.goalsFor - a.goalsFor,
+        )
+        .slice(0, 2);
+      const winner = teams.find((t: any) => t._id === top2[0]?.teamId);
+      const runnerUp = teams.find((t: any) => t._id === top2[1]?.teamId);
+      groupSummaries.push({
+        group,
+        winnerName: winner?.name ?? "—",
+        runnerUpName: runnerUp?.name ?? "—",
+      });
+    }
+
+    const finalChampion = finalMatch
+      ? getWinnerWithTiebreak(finalMatch, teamOrders)
+      : null;
+    const championTeam = finalChampion
+      ? teams.find((t: any) => t._id === finalChampion)
+      : null;
+
+    return {
+      competitionId,
+      groupResults,
+      groupSummaries,
+      champion: championTeam?.name ?? null,
+      totalMatches: matches.length,
+    };
+  },
+});
+
+export const startSimulation = mutation({
+  args: { gameId: v.id("games") },
+  handler: async (ctx, args) => {
+    const { competitionId } = await seedCompetitionInternal(ctx, args.gameId);
+    await ctx.db.patch(competitionId, { phase: "round_1" });
+    await ctx.scheduler.runAfter(10_000, api.competition.advancePhase, {
+      competitionId,
+    });
+    return { competitionId };
+  },
+});
+
+export const advancePhase = mutation({
+  args: { competitionId: v.id("competitions") },
+  handler: async (ctx, args) => {
+    const competition = await ctx.db.get(args.competitionId);
+    if (!competition) return;
+    const phase = competition.phase ?? "round_1";
+
+    if (
+      phase === "completed" ||
+      phase === "error" ||
+      phase === undefined
+    ) {
+      return;
+    }
+
+    const teams = await ctx.db.query("teams").collect();
+    const teamOrders = Object.fromEntries(
+      teams.map((t: any) => [t._id, t.order]),
+    );
+    const matches = await ctx.db
+      .query("competitionMatches")
+      .withIndex("by_competition", (q: any) =>
         q.eq("competitionId", args.competitionId),
       )
       .collect();
 
-    const groups = ["A", "B", "C", "D"] as const;
-    const qualifiers: Array<{
-      teamId: Id<"teams">;
-      group: string;
-      position: number;
-    }> = [];
+    const getWinnerTb = (m: any) => getWinnerWithTiebreak(m, teamOrders);
 
-    for (const group of groups) {
-      const groupStandings = standings
-        .filter((s) => s.group === group)
-        .sort(
-          (a, b) =>
-            b.points - a.points ||
-            b.goalDifference - a.goalDifference ||
-            b.goalsFor - a.goalsFor,
-        );
-
-      if (groupStandings.length < 2) {
-        throw new Error(`Group ${group} does not have enough teams`);
-      }
-
-      const allPlayed = groupStandings.every((s) => s.played === 4);
-      if (!allPlayed) {
-        throw new Error(
-          `Group ${group} stage not complete (all teams must play 4 matches)`,
-        );
-      }
-
-      qualifiers.push(
-        { teamId: groupStandings[0].teamId, group, position: 1 },
-        { teamId: groupStandings[1].teamId, group, position: 2 },
+    if (phase.startsWith("round_")) {
+      const roundNum = Number(phase.split("_")[1]);
+      const roundMatches = matches.filter(
+        (m: any) => m.phase === "group" && m.round === roundNum,
       );
+      for (const m of roundMatches) {
+        const seed = m.round * 1000 + m.matchIndex;
+        const { homeScore, awayScore } = simulateMatch(
+          teamOrders[m.homeTeamId],
+          teamOrders[m.awayTeamId],
+          seed,
+        );
+        await applyMatchResult(ctx, m._id, homeScore, awayScore);
+      }
+      const nextPhase: "round_2" | "round_3" | "round_4" | "round_5" | "knockout_qf" =
+        roundNum < 5
+          ? (`round_${roundNum + 1}` as "round_2" | "round_3" | "round_4" | "round_5")
+          : "knockout_qf";
+      await ctx.db.patch(args.competitionId, { phase: nextPhase });
+      await ctx.scheduler.runAfter(10_000, api.competition.advancePhase, {
+        competitionId: args.competitionId,
+      });
+      return;
     }
 
-    const bracketMatches = await ctx.db
+    if (phase === "knockout_qf") {
+      await advanceBracket(ctx, args.competitionId, getWinnerTb);
+      const qfMatches = matches.filter(
+        (m: any) => m.phase === "knockout" && m.round === 6,
+      );
+      for (const m of qfMatches) {
+        const fresh = await ctx.db.get(m._id);
+        if (!fresh || fresh.status === "completed") continue;
+        const seed = fresh.round * 1000 + fresh.matchIndex;
+        const { homeScore, awayScore } = simulateMatch(
+          teamOrders[fresh.homeTeamId],
+          teamOrders[fresh.awayTeamId],
+          seed,
+        );
+        await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
+      }
+      await ctx.db.patch(args.competitionId, { phase: "knockout_sf" });
+      await ctx.scheduler.runAfter(10_000, api.competition.advancePhase, {
+        competitionId: args.competitionId,
+      });
+      return;
+    }
+
+    if (phase === "knockout_sf") {
+      await advanceBracket(ctx, args.competitionId, getWinnerTb);
+      const sfMatches = matches.filter(
+        (m: any) => m.phase === "knockout" && m.round === 7,
+      );
+      for (const m of sfMatches) {
+        const fresh = await ctx.db.get(m._id);
+        if (!fresh || fresh.status === "completed") continue;
+        const seed = fresh.round * 1000 + fresh.matchIndex;
+        const { homeScore, awayScore } = simulateMatch(
+          teamOrders[fresh.homeTeamId],
+          teamOrders[fresh.awayTeamId],
+          seed,
+        );
+        await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
+      }
+      await ctx.db.patch(args.competitionId, { phase: "knockout_final" });
+      await ctx.scheduler.runAfter(10_000, api.competition.advancePhase, {
+        competitionId: args.competitionId,
+      });
+      return;
+    }
+
+    if (phase === "knockout_final") {
+      await advanceBracket(ctx, args.competitionId, getWinnerTb);
+      const finalMatch = matches.find(
+        (m: any) => m.phase === "knockout" && m.round === 8,
+      );
+      if (finalMatch) {
+        const fresh = await ctx.db.get(finalMatch._id);
+        if (fresh && fresh.status !== "completed") {
+          const seed = fresh.round * 1000 + fresh.matchIndex;
+          const { homeScore, awayScore } = simulateMatch(
+            teamOrders[fresh.homeTeamId],
+            teamOrders[fresh.awayTeamId],
+            seed,
+          );
+          await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
+        }
+      }
+      await ctx.db.patch(args.competitionId, {
+        phase: "completed",
+        status: "completed",
+      });
+      return;
+    }
+  },
+});
+
+export const clearCompetition = mutation({
+  args: { competitionId: v.id("competitions") },
+  handler: async (ctx, args) => {
+    const matches = await ctx.db
       .query("competitionMatches")
-      .withIndex("by_competition_phase", (q) =>
-        q.eq("competitionId", args.competitionId).eq("phase", "knockout"),
+      .withIndex("by_competition", (q: any) =>
+        q.eq("competitionId", args.competitionId),
       )
       .collect();
-
-    if (bracketMatches.length < 7) {
-      throw new Error(
-        "Bracket matches not initialized. Run seedCompetition first.",
-      );
+    for (const m of matches) {
+      await ctx.db.delete(m._id);
     }
 
-    const sorted = [...bracketMatches].sort(
-      (a: any, b: any) => a.round - b.round || a.matchIndex - b.matchIndex,
-    );
-
-    const qf = sorted.filter((m: any) => m.round === 6);
-    const sf = sorted.filter((m: any) => m.round === 7);
-    const final = sorted.filter((m: any) => m.round === 8);
-
-    const groupWinners = qualifiers
-      .filter((q) => q.position === 1)
-      .sort((a, b) => a.group.localeCompare(b.group));
-    const groupRunnersUp = qualifiers
-      .filter((q) => q.position === 2)
-      .sort((a, b) => a.group.localeCompare(b.group));
-
-    const qfPairs: Array<[Id<"teams">, Id<"teams">]> = [
-      [groupWinners[0].teamId, groupRunnersUp[1].teamId],
-      [groupWinners[2].teamId, groupRunnersUp[3].teamId],
-      [groupWinners[1].teamId, groupRunnersUp[0].teamId],
-      [groupWinners[3].teamId, groupRunnersUp[2].teamId],
-    ];
-
-    for (let i = 0; i < qf.length; i++) {
-      await ctx.db.patch(qf[i]._id, {
-        homeTeamId: qfPairs[i][0],
-        awayTeamId: qfPairs[i][1],
-      });
+    const standings = await ctx.db
+      .query("competitionStandings")
+      .withIndex("by_competition", (q: any) =>
+        q.eq("competitionId", args.competitionId),
+      )
+      .collect();
+    for (const s of standings) {
+      await ctx.db.delete(s._id);
     }
 
-    const qfAllComplete = qf.every((m: any) => m.status === "completed");
-    if (qfAllComplete) {
-      const sfWinners = [
-        getWinner(qf[0])!,
-        getWinner(qf[2])!,
-        getWinner(qf[1])!,
-        getWinner(qf[3])!,
-      ];
-
-      for (let i = 0; i < sf.length; i++) {
-        await ctx.db.patch(sf[i]._id, {
-          homeTeamId: sfWinners[i * 2],
-          awayTeamId: sfWinners[i * 2 + 1],
-        });
-      }
-
-      const sfAllComplete = sf.every((m: any) => m.status === "completed");
-      if (sfAllComplete) {
-        const finalWinners = [getWinner(sf[0])!, getWinner(sf[1])!];
-        await ctx.db.patch(final[0]._id, {
-          homeTeamId: finalWinners[0],
-          awayTeamId: finalWinners[1],
-        });
-      }
-    }
+    await ctx.db.delete(args.competitionId);
   },
 });
