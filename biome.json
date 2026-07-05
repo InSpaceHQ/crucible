@@ -13,7 +13,7 @@
     }
   },
   "files": {
-    "includes": ["**", "!.next", "!**/convex/_generated"]
+    "includes": ["**", "!.next", "!**/convex/_generated", "!public"]
   },
   "linter": {
     "enabled": true,
