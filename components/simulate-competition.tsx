@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
 import { Button } from "~/components/ui/button";
-import { useSimStore } from "~/stores/use-sim-store";
 
 const PHASE_LABELS: Record<string, string> = {
   round_1: "Round 1/5",
@@ -30,7 +30,11 @@ function CircularProgress({ competitionId }: { competitionId: string }) {
   }, []);
 
   const progress =
-    startedAt && phase && phase !== "completed" && phase !== "error"
+    startedAt &&
+    phase &&
+    phase !== "completed" &&
+    phase !== "error" &&
+    phase !== "cancelled"
       ? Math.min((now - startedAt) / 10_000, 1)
       : 0;
 
@@ -74,48 +78,68 @@ function CircularProgress({ competitionId }: { competitionId: string }) {
   );
 }
 
-export function SimulateCompetition() {
-  const games = useQuery(api.games.list);
-  const lastCompetitionId = useSimStore((s) => s.lastCompetitionId);
-  const gameId = games?.[0]?._id;
-
+function ClearButton({ competitionId }: { competitionId: Id<"competitions"> }) {
   const clearCompetition = useMutation(api.competition.clearCompetition);
   const [clearing, setClearing] = useState(false);
 
   async function handleClear() {
     setClearing(true);
     try {
-      await clearCompetition({ competitionId: lastCompetitionId! });
+      await clearCompetition({ competitionId });
     } finally {
       setClearing(false);
     }
   }
 
+  return (
+    <Button
+      variant={"outline"}
+      onClick={handleClear}
+      disabled={clearing}
+      className="h-7 text-[11px] px-2"
+    >
+      {clearing ? "..." : "Clear"}
+    </Button>
+  );
+}
+
+function SimulateButton({ gameId }: { gameId: Id<"games"> }) {
+  const start = useMutation(api.competition.startSimulation);
+
+  async function handleStart() {
+    await start({ gameId });
+  }
+
+  return (
+    <Button
+      variant="default"
+      onClick={handleStart}
+      className="h-7 text-[11px] px-2"
+    >
+      + Simulate
+    </Button>
+  );
+}
+
+export function SimulateCompetition() {
+  const games = useQuery(api.games.list);
+  const competitions = useQuery(api.competition.list);
+  const gameId = games?.[0]?._id;
+
   if (!gameId) return null;
 
   return (
     <div className="bottom-2 fixed left-1/2 -translate-x-1/2 bg-foreground py-2 px-4 flex items-center gap-3">
-      {lastCompetitionId && (
-        <CircularProgress competitionId={lastCompetitionId} />
-      )}
-      <SimulateCompetitionBehaviour gameId={gameId} />
-      <Button variant={"outline"} onClick={handleClear} disabled={clearing}>
-        {clearing ? "Clearing..." : "Clear"}
-      </Button>
+      {competitions?.map((c) => (
+        <div key={c._id} className="flex items-center gap-2">
+          <span className="text-sm font-mono text-background/80 whitespace-nowrap">
+            {c.name}
+          </span>
+          <CircularProgress competitionId={c._id} />
+          <ClearButton competitionId={c._id} />
+        </div>
+      ))}
+      <SimulateButton gameId={gameId} />
     </div>
-  );
-}
-
-export function SimulateCompetitionBehaviour({ gameId }: { gameId: string }) {
-  const start = useMutation(api.competition.startSimulation);
-
-  async function handleStart() {
-    await start({ gameId: gameId as any });
-  }
-
-  return (
-    <Button variant="default" onClick={handleStart}>
-      Simulate Competition
-    </Button>
   );
 }

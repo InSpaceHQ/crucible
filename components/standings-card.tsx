@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import Image from "next/image";
 import { api } from "~/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -32,7 +33,7 @@ export function StandingsCard({ showHeader = true }: { showHeader?: boolean }) {
             <span className="col-span-1 text-right">GD</span>
             <span className="col-span-2 text-right font-bold">Pts</span>
           </div>
-          <div className="divide-y divide-border">
+          <motion.div layout className="divide-y divide-border">
             {standings === undefined ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div
@@ -71,8 +72,10 @@ export function StandingsCard({ showHeader = true }: { showHeader?: boolean }) {
               </div>
             ) : (
               standings.map((entry) => (
-                <div
+                <motion.div
                   key={entry.team._id}
+                  layout
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className={`grid ${gridCols} items-center gap-x-1 py-2`}
                 >
                   <span className="col-span-1 text-start text-foreground">
@@ -103,10 +106,10 @@ export function StandingsCard({ showHeader = true }: { showHeader?: boolean }) {
                   <span className="col-span-2 text-right font-medium">
                     {entry.points}
                   </span>
-                </div>
+                </motion.div>
               ))
             )}
-          </div>
+          </motion.div>
         </div>
       </CardContent>
     </Card>

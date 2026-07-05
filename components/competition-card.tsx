@@ -244,16 +244,7 @@ export function CompetitionCard({
     <Card>
       {showHeader && (
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <CardTitle>{competitions[0]?.name ?? "No Competition"}</CardTitle>
-              {phase && (
-                <span className="font-mono text-[10px] text-foreground/40 uppercase tracking-wider border border-border px-1.5 py-0.5">
-                  {phaseLabels[phase] ?? phase}
-                </span>
-              )}
-            </div>
-          </div>
+          <CardTitle>{competitions[0]?.name ?? "No Competition"}</CardTitle>
         </CardHeader>
       )}
 

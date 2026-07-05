@@ -804,7 +804,12 @@ export const advancePhase = mutation({
     const state = await kvGet(ctx, "sim_state:" + args.competitionId);
     const phase = state?.phase ?? "round_1";
 
-    if (phase === "completed" || phase === "error" || phase === undefined) {
+    if (
+      phase === "completed" ||
+      phase === "error" ||
+      phase === "cancelled" ||
+      phase === undefined
+    ) {
       return;
     }
 
@@ -970,7 +975,10 @@ export const clearCompetition = mutation({
       await ctx.db.delete(f._id);
     }
 
-    await kvRemove(ctx, "sim_state:" + args.competitionId);
+    await kvSet(ctx, "sim_state:" + args.competitionId, {
+      phase: "cancelled",
+      startedAt: Date.now(),
+    });
     await ctx.db.delete(args.competitionId);
   },
 });
