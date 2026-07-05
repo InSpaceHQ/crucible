@@ -25,21 +25,61 @@ export function ScheduleSection() {
   const entries = Object.entries(grouped);
 
   return (
+    <CreativeWrapper heading="Schedule" subHeading="8 Days of Mayhem">
+      <div className="block md:hidden">
+        {entries.map(([date, items], gi) => (
+          <ScheduleDateGroupMobile
+            key={date}
+            date={date}
+            items={items}
+            isLast={gi === entries.length - 1}
+          />
+        ))}
+      </div>
+
+      <div className="hidden md:block">
+        {entries.map(([date, items]) => (
+          <ScheduleDateGroupDesktop key={date} date={date} items={items} />
+        ))}
+      </div>
+    </CreativeWrapper>
+  );
+}
+
+export function CreativeWrapper({
+  heading,
+  subHeading,
+  children,
+}: {
+  heading: string;
+  subHeading: string;
+  children: React.ReactNode;
+}) {
+  return (
     <>
       <div className="block md:hidden">
-        <ScheduleSectionMobile entries={entries} />
+        <CreativeSection heading={heading} subHeading={subHeading}>
+          {children}
+        </CreativeSection>
       </div>
+
       <div className="hidden md:block">
-        <ScheduleSectionDesktop entries={entries} />
+        <CreativeSectionDesktop heading={heading} subHeading={subHeading}>
+          {children}
+        </CreativeSectionDesktop>
       </div>
     </>
   );
 }
 
-function ScheduleSectionMobile({
-  entries,
+function CreativeSectionDesktop({
+  children,
+  heading,
+  subHeading,
 }: {
-  entries: [string, ScheduleItem[]][];
+  children: React.ReactNode;
+  heading?: string;
+  subHeading?: string;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -54,43 +94,51 @@ function ScheduleSectionMobile({
   );
 
   return (
-    <section
-      ref={sectionRef}
-      className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-24 md:mt-64 relative"
-    >
-      <div className="md:col-span-3 md:sticky md:top-0 md:self-start hidden md:flex flex-col justify-center min-h-[50vh] overflow-hidden">
-        <Fit
-          options={{
-            maxSize: 200,
-            observeMutations: { subtree: true, childList: true },
-          }}
-        >
-          <motion.h2
-            style={{ translate: x }}
-            className="text-[color-mix(in_oklch,var(--background)_100%,rgba(255,255,255,0.9)_11%)] font-heading tracking-tighter font-bold text-[10vh] origin-top-left whitespace-nowrap rotate-90 leading-[1ex]"
+    <section ref={sectionRef} className="flex gap-4 items-start mt-64 relative">
+      <div className="top-0 basis-4/12 sticky self-start flex flex-col justify-center shrink-0 pointer-events-none">
+        <div className="w-screen h-screen fixed top-0 left-0">
+          <Fit
+            options={{
+              maxSize: 200,
+              observeMutations: { subtree: true, childList: true },
+            }}
           >
-            Schedule
-          </motion.h2>
-        </Fit>
+            <motion.h2
+              style={{ translate: x }}
+              className="absolute top-0 left-0 text-[color-mix(in_oklch,var(--background)_100%,rgba(255,255,255,0.9)_11%)] font-heading tracking-tighter font-bold text-[10vh] origin-top-left text-end whitespace-nowrap rotate-90 leading-[1ex]"
+            >
+              {heading}
+            </motion.h2>
+          </Fit>
+        </div>
       </div>
-      <div className="md:hidden mb-6">
+
+      <div className="flex-1 min-w-0 pl-16">{children}</div>
+    </section>
+  );
+}
+
+function CreativeSection({
+  heading,
+  subHeading,
+  children,
+}: {
+  children: React.ReactNode;
+  heading: string;
+  subHeading: string;
+}) {
+  return (
+    <section className="grid grid-cols-1 gap-4 mt-24 px-4 relative">
+      <div className="mb-6">
         <h2 className="font-heading tracking-tighter font-bold text-3xl">
-          Schedule
+          {heading}
         </h2>
         <p className="font-mono text-xs text-foreground/50 mt-1">
-          8 Days of Mayhem
+          {subHeading}
         </p>
       </div>
-      <div className="md:col-span-9">
-        {entries.map(([date, items], gi) => (
-          <ScheduleDateGroupMobile
-            key={date}
-            date={date}
-            items={items}
-            isLast={gi === entries.length - 1}
-          />
-        ))}
-      </div>
+
+      <div>{children}</div>
     </section>
   );
 }
@@ -131,52 +179,6 @@ function ScheduleDateGroupMobile({
         ))}
       </div>
     </div>
-  );
-}
-
-function ScheduleSectionDesktop({
-  entries,
-}: {
-  entries: [string, ScheduleItem[]][];
-}) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-
-  const x = useTransform(
-    scrollYProgress,
-    [0, 0.4, 0.85, 1],
-    ["-0.5ex", "1.1ex", "1.1ex", "-0.5ex"],
-  );
-
-  return (
-    <section ref={sectionRef} className="flex gap-4 items-start mt-64 relative">
-      <div className="top-0 basis-4/12 sticky self-start flex flex-col justify-center shrink-0 pointer-events-none">
-        <div className="w-screen h-screen fixed top-0 left-0">
-          <Fit
-            options={{
-              maxSize: 200,
-              observeMutations: { subtree: true, childList: true },
-            }}
-          >
-            <motion.h2
-              style={{ translate: x }}
-              className="absolute top-0 left-0 text-[color-mix(in_oklch,var(--background)_100%,rgba(255,255,255,0.9)_11%)] font-heading tracking-tighter font-bold text-[10vh] origin-top-left text-end whitespace-nowrap rotate-90 leading-[1ex]"
-            >
-              Schedule
-            </motion.h2>
-          </Fit>
-        </div>
-      </div>
-
-      <div className="flex-1 min-w-0 pl-16">
-        {entries.map(([date, items]) => (
-          <ScheduleDateGroupDesktop key={date} date={date} items={items} />
-        ))}
-      </div>
-    </section>
   );
 }
 

@@ -53,16 +53,16 @@ export function CompetitionDetails({
 
   if (empty) {
     return (
-      <CardContent>
+      <>
         <div className="py-4 text-center text-sm text-foreground">
           No competition data available.
         </div>
-      </CardContent>
+      </>
     );
   }
 
   return (
-    <CardContent>
+    <>
       {standings && standings.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {standings.map((group) => (
@@ -143,7 +143,7 @@ export function CompetitionDetails({
                             </span>
                           </div>
                         </div>
-                        <div className="text-right min-w-[32px]">
+                        <div className="text-right min-w-8">
                           {completed ? (
                             <span className="font-bold text-xs">
                               {m.homeScore}–{m.awayScore}
@@ -163,7 +163,7 @@ export function CompetitionDetails({
           </div>
         </div>
       )}
-    </CardContent>
+    </>
   );
 }
 
