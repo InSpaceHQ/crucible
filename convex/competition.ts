@@ -251,7 +251,14 @@ export const listMatches = query({
       )
       .collect();
 
-    return matches.map((m) => ({
+    const sorted = [...matches].sort((a, b) => {
+      if (!a.startTime && !b.startTime) return 0;
+      if (!a.startTime) return -1;
+      if (!b.startTime) return 1;
+      return a.startTime - b.startTime;
+    });
+
+    return sorted.map((m) => ({
       ...m,
       homeTeam: teamsById[m.homeTeamId] ?? null,
       awayTeam: teamsById[m.awayTeamId] ?? null,

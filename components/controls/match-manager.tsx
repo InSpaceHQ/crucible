@@ -59,6 +59,7 @@ function MatchManager() {
   const rescheduleMatches = useMutation(api.competition.rescheduleMatches);
 
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
 
   const now = Date.now();
   const [dateVal, setDateVal] = useState(() => formatDateForInput(now));
@@ -74,8 +75,16 @@ function MatchManager() {
       (!m.startTime || m.startTime >= now),
   );
 
+  const q = search.toLowerCase();
+  const filtered = visibleMatches.filter(
+    (m) =>
+      !search ||
+      m.homeTeam?.name?.toLowerCase().includes(q) ||
+      m.awayTeam?.name?.toLowerCase().includes(q),
+  );
+
   function toggleAll(selectAll: boolean) {
-    setChecked(new Set(selectAll ? visibleMatches.map((m) => m._id) : []));
+    setChecked(new Set(selectAll ? filtered.map((m) => m._id) : []));
   }
 
   function toggleOne(id: string) {
@@ -164,6 +173,17 @@ function MatchManager() {
           ))}
         </select>
 
+        <input
+          type="text"
+          placeholder="Search teams..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            resetSelection();
+          }}
+          className="w-full border border-border bg-background px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground"
+        />
+
         {!selectedCompId ? (
           <div className="py-4 text-center text-sm text-foreground/60">
             Select a competition above to manage its matches.
@@ -196,8 +216,7 @@ function MatchManager() {
                     type="checkbox"
                     className="size-3.5 accent-foreground"
                     checked={
-                      checked.size === visibleMatches.length &&
-                      visibleMatches.length > 0
+                      checked.size === filtered.length && filtered.length > 0
                     }
                     onChange={(e) => toggleAll(e.target.checked)}
                   />
@@ -208,12 +227,14 @@ function MatchManager() {
                 <span>Match</span>
                 <span className="text-right">Start</span>
               </div>
-              {visibleMatches.length === 0 ? (
+              {filtered.length === 0 ? (
                 <div className="px-3 py-4 text-center text-xs text-foreground/40">
-                  No upcoming matches.
+                  {search
+                    ? "No matches match your search."
+                    : "No upcoming matches."}
                 </div>
               ) : (
-                visibleMatches.map((m) => (
+                filtered.map((m) => (
                   <label
                     key={m._id}
                     className="grid grid-cols-[var(--match-grid)] items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
