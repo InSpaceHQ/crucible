@@ -12,9 +12,7 @@ function makeKey(query: FunctionReference<"query">, args?: unknown): string {
   return `${getFunctionName(query)}::${serialize(args ?? {})}`;
 }
 
-export function useCachedQuery<
-  Q extends FunctionReference<"query", "public">,
->(
+export function useCachedQuery<Q extends FunctionReference<"query", "public">>(
   query: Q,
   args?: Omit<Q["_args"], "paginationOpts">,
 ): Q["_returnType"] | undefined {
@@ -49,7 +47,7 @@ export function useCachedPaginatedQuery(
   query: FunctionReference<"query", "public">,
   args: Record<string, unknown>,
   opts: { initialNumItems: number },
-// biome-ignore lint/suspicious/noExplicitAny: paginated item type is inferred from the query function
+  // biome-ignore lint/suspicious/noExplicitAny: paginated item type is inferred from the query function
 ): PaginatedResult<any> {
   const key = makeKey(query, args);
   // biome-ignore lint/suspicious/noExplicitAny: args type is constrained by the paginated query signature
@@ -73,7 +71,11 @@ export function useCachedPaginatedQuery(
     };
   }
   // biome-ignore lint/suspicious/noExplicitAny: cached results array is compared structurally
-  if (result.results.length > 0 && cached && isEqual(result.results, cached as any)) {
+  if (
+    result.results.length > 0 &&
+    cached &&
+    isEqual(result.results, cached as any)
+  ) {
     return { ...result, results: cached };
   }
   return result;

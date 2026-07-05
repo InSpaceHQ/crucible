@@ -8,6 +8,7 @@ import { GameTabs } from "~/components/game-tabs";
 import { PlayerActivityPanel } from "~/components/player-activity-panel";
 import { PointsLog } from "~/components/points-log";
 import { ScheduleSection } from "~/components/schedule-section";
+import { SimulateCompetition } from "~/components/simulate-competition";
 import { SkillsCard } from "~/components/skills-card";
 import { Button } from "~/components/ui/button";
 
@@ -142,6 +143,8 @@ export default function Home() {
           </div>
         </footer>
       </div>
+
+      <SimulateCompetition />
     </>
   );
 }

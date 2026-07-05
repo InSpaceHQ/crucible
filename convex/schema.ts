@@ -76,6 +76,11 @@ export default defineSchema({
     .index("by_timestamp", ["timestamp"])
     .index("by_player_timestamp", ["playerId", "timestamp"]),
 
+  kv: defineTable({
+    key: v.string(),
+    value: v.any(),
+  }).index("by_key", ["key"]),
+
   competitions: defineTable({
     name: v.string(),
     gameId: v.id("games"),
@@ -85,20 +90,6 @@ export default defineSchema({
       v.literal("completed"),
     ),
     season: v.string(),
-    phase: v.optional(
-      v.union(
-        v.literal("round_1"),
-        v.literal("round_2"),
-        v.literal("round_3"),
-        v.literal("round_4"),
-        v.literal("round_5"),
-        v.literal("knockout_qf"),
-        v.literal("knockout_sf"),
-        v.literal("knockout_final"),
-        v.literal("completed"),
-        v.literal("error"),
-      ),
-    ),
   }).index("by_game", ["gameId"]),
 
   competitionMatches: defineTable({

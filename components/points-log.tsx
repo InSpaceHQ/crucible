@@ -17,7 +17,10 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { LogItem, LogItemSkeleton } from "~/components/log-item";
-import { useCachedQuery, useCachedPaginatedQuery } from "~/hooks/use-cached-query";
+import {
+  useCachedQuery,
+  useCachedPaginatedQuery,
+} from "~/hooks/use-cached-query";
 
 export function PointsLog() {
   const [open, setOpen] = useState(false);

@@ -17,7 +17,8 @@ export function emitViewProfile(detail: ViewProfileDetail) {
 }
 
 export function onViewProfile(handler: (detail: ViewProfileDetail) => void) {
-  const listener = (e: Event) => handler((e as CustomEvent<ViewProfileDetail>).detail);
+  const listener = (e: Event) =>
+    handler((e as CustomEvent<ViewProfileDetail>).detail);
   bus.addEventListener(VIEW_PROFILE, listener);
   return () => bus.removeEventListener(VIEW_PROFILE, listener);
 }

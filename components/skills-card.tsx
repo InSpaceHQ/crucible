@@ -114,8 +114,7 @@ export function SkillsCard() {
                             name: player.name,
                             teamName: player.team?.name ?? "",
                             teamLogo: player.team?.logo ?? "",
-                            gameName:
-                              player.game?.displayName ?? player.gameId,
+                            gameName: player.game?.displayName ?? player.gameId,
                           })
                         }
                       >

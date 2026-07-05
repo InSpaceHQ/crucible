@@ -230,9 +230,7 @@ export const seed = mutation({
         gameIds[game.name] = await ctx.db.insert("games", game);
       }
     } else {
-      gameIds = Object.fromEntries(
-        existingGames.map((g) => [g.name, g._id]),
-      );
+      gameIds = Object.fromEntries(existingGames.map((g) => [g.name, g._id]));
     }
 
     const existingTeams = await ctx.db.query("teams").take(1);

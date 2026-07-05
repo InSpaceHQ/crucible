@@ -496,15 +496,22 @@ test("startSimulation creates competition with round_1 phase", async () => {
     }
   });
 
-  const { competitionId } = await t.mutation(
-    api.competition.startSimulation,
-    { gameId },
-  );
+  const { competitionId } = await t.mutation(api.competition.startSimulation, {
+    gameId,
+  });
 
+  const kvEntry = await t.run(async (ctx) => {
+    return await ctx.db
+      .query("kv")
+      .withIndex("by_key", (q: any) =>
+        q.eq("key", "sim_state:" + competitionId),
+      )
+      .first();
+  });
+  expect(kvEntry!.value.phase).toBe("round_1");
   const competition = await t.run(async (ctx) => {
     return await ctx.db.get(competitionId);
   });
-  expect(competition!.phase).toBe("round_1");
   expect(competition!.status).toBe("active");
 });
 
@@ -527,10 +534,9 @@ test("advancePhase walks through all phases to completion", async () => {
     }
   });
 
-  const { competitionId } = await t.mutation(
-    api.competition.startSimulation,
-    { gameId },
-  );
+  const { competitionId } = await t.mutation(api.competition.startSimulation, {
+    gameId,
+  });
 
   const expectedPhases = [
     "round_1",
@@ -544,13 +550,28 @@ test("advancePhase walks through all phases to completion", async () => {
   ];
 
   for (const phase of expectedPhases) {
-    const comp = await t.run(async (ctx) => await ctx.db.get(competitionId));
-    expect(comp!.phase).toBe(phase);
+    const kvEntry = await t.run(async (ctx) => {
+      return await ctx.db
+        .query("kv")
+        .withIndex("by_key", (q: any) =>
+          q.eq("key", "sim_state:" + competitionId),
+        )
+        .first();
+    });
+    expect(kvEntry!.value.phase).toBe(phase);
     await t.mutation(api.competition.advancePhase, { competitionId });
   }
 
+  const finalKv = await t.run(async (ctx) => {
+    return await ctx.db
+      .query("kv")
+      .withIndex("by_key", (q: any) =>
+        q.eq("key", "sim_state:" + competitionId),
+      )
+      .first();
+  });
+  expect(finalKv!.value.phase).toBe("completed");
   const final = await t.run(async (ctx) => await ctx.db.get(competitionId));
-  expect(final!.phase).toBe("completed");
   expect(final!.status).toBe("completed");
 
   const allMatches = await t.run(async (ctx) => {

@@ -104,7 +104,10 @@ async function seedCompetitionInternal(
     season: "2026",
   });
 
-  const groups = snakeDraft(teamIds.map((id: string) => id), 4);
+  const groups = snakeDraft(
+    teamIds.map((id: string) => id),
+    4,
+  );
 
   for (let gi = 0; gi < groups.length; gi++) {
     const groupFixtures = generateGroupFixtures(
@@ -453,11 +456,17 @@ async function advanceBracket(
 ) {
   const standings = await ctx.db
     .query("competitionStandings")
-    .withIndex("by_competition", (q: any) => q.eq("competitionId", competitionId))
+    .withIndex("by_competition", (q: any) =>
+      q.eq("competitionId", competitionId),
+    )
     .collect();
 
   const groups = ["A", "B", "C", "D"] as const;
-  const qualifiers: Array<{ teamId: Id<"teams">; group: string; position: number }> = [];
+  const qualifiers: Array<{
+    teamId: Id<"teams">;
+    group: string;
+    position: number;
+  }> = [];
 
   for (const group of groups) {
     const groupStandings = standings
@@ -475,7 +484,9 @@ async function advanceBracket(
 
     const allPlayed = groupStandings.every((s: any) => s.played === 4);
     if (!allPlayed) {
-      throw new Error(`Group ${group} stage not complete (all teams must play 4 matches)`);
+      throw new Error(
+        `Group ${group} stage not complete (all teams must play 4 matches)`,
+      );
     }
 
     qualifiers.push(
@@ -492,7 +503,9 @@ async function advanceBracket(
     .collect();
 
   if (bracketMatches.length < 7) {
-    throw new Error("Bracket matches not initialized. Run seedCompetition first.");
+    throw new Error(
+      "Bracket matches not initialized. Run seedCompetition first.",
+    );
   }
 
   const sorted = [...bracketMatches].sort(
@@ -527,12 +540,7 @@ async function advanceBracket(
   const win = winnerFn ?? getWinner;
   const qfAllComplete = qf.every((m: any) => m.status === "completed");
   if (qfAllComplete) {
-    const sfWinners = [
-      win(qf[0])!,
-      win(qf[2])!,
-      win(qf[1])!,
-      win(qf[3])!,
-    ];
+    const sfWinners = [win(qf[0])!, win(qf[2])!, win(qf[1])!, win(qf[3])!];
 
     for (let i = 0; i < sf.length; i++) {
       await ctx.db.patch(sf[i]._id, {
@@ -576,7 +584,9 @@ export const simulateCompetition = mutation({
 
     const groupMatches = matches
       .filter((m: any) => m.phase === "group")
-      .sort((a: any, b: any) => a.round - b.round || a.matchIndex - b.matchIndex);
+      .sort(
+        (a: any, b: any) => a.round - b.round || a.matchIndex - b.matchIndex,
+      );
 
     const groupResults: Array<{
       round: number;
@@ -611,7 +621,9 @@ export const simulateCompetition = mutation({
 
     const bracketMatches = matches
       .filter((m: any) => m.phase === "knockout")
-      .sort((a: any, b: any) => a.round - b.round || a.matchIndex - b.matchIndex);
+      .sort(
+        (a: any, b: any) => a.round - b.round || a.matchIndex - b.matchIndex,
+      );
 
     const qfMatches = bracketMatches.filter((m: any) => m.round === 6);
     for (const m of qfMatches) {
@@ -715,11 +727,44 @@ export const simulateCompetition = mutation({
   },
 });
 
+async function kvSet(ctx: any, key: string, value: any) {
+  const existing = await ctx.db
+    .query("kv")
+    .withIndex("by_key", (q: any) => q.eq("key", key))
+    .first();
+  if (existing) {
+    await ctx.db.patch(existing._id, { value });
+  } else {
+    await ctx.db.insert("kv", { key, value });
+  }
+}
+
+async function kvGet(ctx: any, key: string) {
+  const doc = await ctx.db
+    .query("kv")
+    .withIndex("by_key", (q: any) => q.eq("key", key))
+    .first();
+  return doc?.value ?? null;
+}
+
+async function kvRemove(ctx: any, key: string) {
+  const existing = await ctx.db
+    .query("kv")
+    .withIndex("by_key", (q: any) => q.eq("key", key))
+    .first();
+  if (existing) {
+    await ctx.db.delete(existing._id);
+  }
+}
+
 export const startSimulation = mutation({
   args: { gameId: v.id("games") },
   handler: async (ctx, args) => {
     const { competitionId } = await seedCompetitionInternal(ctx, args.gameId);
-    await ctx.db.patch(competitionId, { phase: "round_1" });
+    await kvSet(ctx, "sim_state:" + competitionId, {
+      phase: "round_1",
+      startedAt: Date.now(),
+    });
     await ctx.scheduler.runAfter(10_000, api.competition.advancePhase, {
       competitionId,
     });
@@ -730,15 +775,10 @@ export const startSimulation = mutation({
 export const advancePhase = mutation({
   args: { competitionId: v.id("competitions") },
   handler: async (ctx, args) => {
-    const competition = await ctx.db.get(args.competitionId);
-    if (!competition) return;
-    const phase = competition.phase ?? "round_1";
+    const state = await kvGet(ctx, "sim_state:" + args.competitionId);
+    const phase = state?.phase ?? "round_1";
 
-    if (
-      phase === "completed" ||
-      phase === "error" ||
-      phase === undefined
-    ) {
+    if (phase === "completed" || phase === "error" || phase === undefined) {
       return;
     }
 
@@ -769,11 +809,23 @@ export const advancePhase = mutation({
         );
         await applyMatchResult(ctx, m._id, homeScore, awayScore);
       }
-      const nextPhase: "round_2" | "round_3" | "round_4" | "round_5" | "knockout_qf" =
+      const nextPhase:
+        | "round_2"
+        | "round_3"
+        | "round_4"
+        | "round_5"
+        | "knockout_qf" =
         roundNum < 5
-          ? (`round_${roundNum + 1}` as "round_2" | "round_3" | "round_4" | "round_5")
+          ? (`round_${roundNum + 1}` as
+              | "round_2"
+              | "round_3"
+              | "round_4"
+              | "round_5")
           : "knockout_qf";
-      await ctx.db.patch(args.competitionId, { phase: nextPhase });
+      await kvSet(ctx, "sim_state:" + args.competitionId, {
+        phase: nextPhase,
+        startedAt: Date.now(),
+      });
       await ctx.scheduler.runAfter(10_000, api.competition.advancePhase, {
         competitionId: args.competitionId,
       });
@@ -796,7 +848,10 @@ export const advancePhase = mutation({
         );
         await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
       }
-      await ctx.db.patch(args.competitionId, { phase: "knockout_sf" });
+      await kvSet(ctx, "sim_state:" + args.competitionId, {
+        phase: "knockout_sf",
+        startedAt: Date.now(),
+      });
       await ctx.scheduler.runAfter(10_000, api.competition.advancePhase, {
         competitionId: args.competitionId,
       });
@@ -819,7 +874,10 @@ export const advancePhase = mutation({
         );
         await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
       }
-      await ctx.db.patch(args.competitionId, { phase: "knockout_final" });
+      await kvSet(ctx, "sim_state:" + args.competitionId, {
+        phase: "knockout_final",
+        startedAt: Date.now(),
+      });
       await ctx.scheduler.runAfter(10_000, api.competition.advancePhase, {
         competitionId: args.competitionId,
       });
@@ -843,10 +901,11 @@ export const advancePhase = mutation({
           await applyMatchResult(ctx, fresh._id, homeScore, awayScore);
         }
       }
-      await ctx.db.patch(args.competitionId, {
+      await kvSet(ctx, "sim_state:" + args.competitionId, {
         phase: "completed",
-        status: "completed",
+        startedAt: Date.now(),
       });
+      await ctx.db.patch(args.competitionId, { status: "completed" });
       return;
     }
   },
@@ -875,6 +934,7 @@ export const clearCompetition = mutation({
       await ctx.db.delete(s._id);
     }
 
+    await kvRemove(ctx, "sim_state:" + args.competitionId);
     await ctx.db.delete(args.competitionId);
   },
 });

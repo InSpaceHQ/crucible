@@ -1,25 +1,29 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import Image from "next/image";
-import type { Id } from "~/convex/_generated/dataModel";
-import { api } from "~/convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { useCachedQuery } from "~/hooks/use-cached-query";
-import { useState } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { Button } from "~/components/ui/button";
-import { SimulateCompetition } from "~/components/simulate-competition";
+import { useEffect } from "react";
 import { GroupStandings } from "~/components/group-standings";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
+import { useCachedQuery } from "~/hooks/use-cached-query";
+import { useSimStore } from "~/stores/use-sim-store";
 
-function CompetitionDetails({ competitionId }: { competitionId: Id<"competitions"> }) {
-  const standings = useCachedQuery(api.competition.listStandings, { competitionId });
-  const bracket = useCachedQuery(api.competition.listBracket, { competitionId });
+function CompetitionDetails({
+  competitionId,
+}: {
+  competitionId: Id<"competitions">;
+}) {
+  const standings = useCachedQuery(api.competition.listStandings, {
+    competitionId,
+  });
+  const bracket = useCachedQuery(api.competition.listBracket, {
+    competitionId,
+  });
 
   const loading = standings === undefined || bracket === undefined;
-  const empty =
-    !loading &&
-    standings?.length === 0 &&
-    !bracket?.length;
+  const empty = !loading && standings?.length === 0 && !bracket?.length;
 
   if (loading) {
     return (
@@ -110,7 +114,11 @@ function CompetitionDetails({ competitionId }: { competitionId: Id<"competitions
                                 />
                               )}
                             </div>
-                            <span className={homeWin ? "font-bold" : "text-foreground/60"}>
+                            <span
+                              className={
+                                homeWin ? "font-bold" : "text-foreground/60"
+                              }
+                            >
                               {m.homeTeam?.name ?? "TBD"}
                             </span>
                           </div>
@@ -126,7 +134,11 @@ function CompetitionDetails({ competitionId }: { competitionId: Id<"competitions
                                 />
                               )}
                             </div>
-                            <span className={awayWin ? "font-bold" : "text-foreground/60"}>
+                            <span
+                              className={
+                                awayWin ? "font-bold" : "text-foreground/60"
+                              }
+                            >
                               {m.awayTeam?.name ?? "TBD"}
                             </span>
                           </div>
@@ -137,7 +149,9 @@ function CompetitionDetails({ competitionId }: { competitionId: Id<"competitions
                               {m.homeScore}–{m.awayScore}
                             </span>
                           ) : (
-                            <span className="text-[10px] text-foreground/30">vs</span>
+                            <span className="text-[10px] text-foreground/30">
+                              vs
+                            </span>
                           )}
                         </div>
                       </div>
@@ -153,20 +167,52 @@ function CompetitionDetails({ competitionId }: { competitionId: Id<"competitions
   );
 }
 
-export function CompetitionCard({ showHeader = true }: { showHeader?: boolean }) {
+export function CompetitionCard({
+  showHeader = true,
+}: {
+  showHeader?: boolean;
+}) {
   const competitions = useCachedQuery(api.competition.list);
   const games = useQuery(api.games.list);
-  const gameId = games?.[0]?._id;
-  const clearCompetition = useMutation(api.competition.clearCompetition);
-  const [clearing, setClearing] = useState(false);
+  const lastCompetitionId = useSimStore((s) => s.lastCompetitionId);
+  const setLastCompetitionId = useSimStore((s) => s.setLastCompetitionId);
+  const liveCompetitionId = competitions?.[0]?._id ?? null;
+  const competitionId = liveCompetitionId ?? lastCompetitionId;
 
+  useEffect(() => {
+    if (liveCompetitionId) {
+      setLastCompetitionId(liveCompetitionId);
+    }
+  }, [liveCompetitionId, setLastCompetitionId]);
+
+  const simState = useQuery(
+    api.kv.get,
+    competitionId ? { key: "sim_state:" + competitionId } : "skip",
+  );
+  const phase = simState?.phase;
+
+  const phaseLabels: Record<string, string> = {
+    round_1: "Round 1/5",
+    round_2: "Round 2/5",
+    round_3: "Round 3/5",
+    round_4: "Round 4/5",
+    round_5: "Round 5/5",
+    knockout_qf: "Quarter-Finals",
+    knockout_sf: "Semi-Finals",
+    knockout_final: "Final",
+    completed: "Completed",
+  };
 
   const loading = competitions === undefined || games === undefined;
 
   if (loading) {
     return (
       <Card>
-        {showHeader && <CardHeader><CardTitle>Competition</CardTitle></CardHeader>}
+        {showHeader && (
+          <CardHeader>
+            <CardTitle>Competition</CardTitle>
+          </CardHeader>
+        )}
         <CardContent className={`space-y-6 ${!showHeader ? "py-4" : ""}`}>
           {Array.from({ length: 4 }).map((_, gi) => (
             <div key={gi}>
@@ -192,48 +238,7 @@ export function CompetitionCard({ showHeader = true }: { showHeader?: boolean })
     );
   }
 
-  if (competitions.length === 0) {
-    return (
-      <Card>
-        {showHeader && (
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Competition</CardTitle>
-              {gameId && <SimulateCompetition gameId={gameId} />}
-            </div>
-          </CardHeader>
-        )}
-        <CardContent className={!showHeader ? "py-4" : ""}>
-          <div className="py-4 text-center text-sm text-foreground">
-            No competition running.
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const phaseLabels: Record<string, string> = {
-    round_1: "Round 1/5",
-    round_2: "Round 2/5",
-    round_3: "Round 3/5",
-    round_4: "Round 4/5",
-    round_5: "Round 5/5",
-    knockout_qf: "Quarter-Finals",
-    knockout_sf: "Semi-Finals",
-    knockout_final: "Final",
-    completed: "Completed",
-  };
-
-
-  async function handleClear() {
-    if (!competitions?.[0]) return;
-    setClearing(true);
-    try {
-      await clearCompetition({ competitionId: competitions[0]._id as unknown as Id<"competitions"> });
-    } finally {
-      setClearing(false);
-    }
-  }
+  const isEmpty = competitions.length === 0;
 
   return (
     <Card>
@@ -241,23 +246,26 @@ export function CompetitionCard({ showHeader = true }: { showHeader?: boolean })
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <CardTitle>{competitions[0].name}</CardTitle>
-              {competitions[0].phase && (
+              <CardTitle>{competitions[0]?.name ?? "No Competition"}</CardTitle>
+              {phase && (
                 <span className="font-mono text-[10px] text-foreground/40 uppercase tracking-wider border border-border px-1.5 py-0.5">
-                  {phaseLabels[competitions[0].phase] ?? competitions[0].phase}
+                  {phaseLabels[phase] ?? phase}
                 </span>
               )}
-            </div>
-            <div className="flex items-center gap-2">
-              {gameId && <SimulateCompetition gameId={gameId} />}
-              <Button variant="ghost" size="sm" onClick={handleClear} disabled={clearing}>
-                {clearing ? "Clearing..." : "Clear"}
-              </Button>
             </div>
           </div>
         </CardHeader>
       )}
-      <CompetitionDetails competitionId={competitions[0]._id} />
+
+      {isEmpty ? (
+        <CardContent className={!showHeader ? "py-4" : ""}>
+          <div className="py-4 text-center text-sm text-foreground">
+            No competition running.
+          </div>
+        </CardContent>
+      ) : (
+        <CompetitionDetails competitionId={competitions[0]._id} />
+      )}
     </Card>
   );
 }

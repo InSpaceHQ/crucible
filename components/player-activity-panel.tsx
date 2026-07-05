@@ -153,11 +153,11 @@ function PanelContent({
             <DrawerTitle>{title}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6">
-            {profile
-              ? <ProfileHeader profile={profile} />
-              : stats === null
-                ? <ProfileIdentity info={info} />
-                : null}
+            {profile ? (
+              <ProfileHeader profile={profile} />
+            ) : stats === null ? (
+              <ProfileIdentity info={info} />
+            ) : null}
             <ActivityLog userId={playerId} />
           </div>
         </DrawerContent>
@@ -171,11 +171,11 @@ function PanelContent({
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        {profile
-          ? <ProfileHeader profile={profile} />
-          : stats === null
-            ? <ProfileIdentity info={info} />
-            : null}
+        {profile ? (
+          <ProfileHeader profile={profile} />
+        ) : stats === null ? (
+          <ProfileIdentity info={info} />
+        ) : null}
         <ActivityLog userId={playerId} />
       </SheetContent>
     </Sheet>
@@ -185,7 +185,12 @@ function PanelContent({
 export function PlayerActivityPanel() {
   const [state, setState] = useState<{
     open: boolean;
-    info: { name: string; teamName: string; teamLogo: string; gameName: string };
+    info: {
+      name: string;
+      teamName: string;
+      teamLogo: string;
+      gameName: string;
+    };
     playerId: Id<"players">;
   } | null>(null);
 

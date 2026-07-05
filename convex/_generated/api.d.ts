@@ -12,6 +12,7 @@ import type * as _clearAll from "../_clearAll.js";
 import type * as competition from "../competition.js";
 import type * as fixtures from "../fixtures.js";
 import type * as games from "../games.js";
+import type * as kv from "../kv.js";
 import type * as playerStats from "../playerStats.js";
 import type * as pointsLog from "../pointsLog.js";
 import type * as schedule from "../schedule.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   competition: typeof competition;
   fixtures: typeof fixtures;
   games: typeof games;
+  kv: typeof kv;
   playerStats: typeof playerStats;
   pointsLog: typeof pointsLog;
   schedule: typeof schedule;

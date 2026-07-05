@@ -4,11 +4,7 @@ import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { Button } from "~/components/ui/button";
-
-type Status =
-  | { state: "idle" }
-  | { state: "running"; competitionId?: string }
-  | { state: "error"; message: string };
+import { useSimStore } from "~/stores/use-sim-store";
 
 const PHASE_LABELS: Record<string, string> = {
   round_1: "Round 1/5",
@@ -22,136 +18,103 @@ const PHASE_LABELS: Record<string, string> = {
   completed: "Completed",
 };
 
-function CircularProgress({ phase }: { phase: string | undefined }) {
-  const [progress, setProgress] = useState(0);
+function CircularProgress({ competitionId }: { competitionId: string }) {
+  const state = useQuery(api.kv.get, { key: "sim_state:" + competitionId });
+  const phase = state?.phase;
+  const startedAt = state?.startedAt as number | undefined;
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    setProgress(0);
-    const start = Date.now();
-    const id = setInterval(() => {
-      const elapsed = Date.now() - start;
-      const p = Math.min(elapsed / 10_000, 1);
-      setProgress(p);
-      if (p >= 1) clearInterval(id);
-    }, 50);
+    const id = setInterval(() => setNow(Date.now()), 50);
     return () => clearInterval(id);
-  }, [phase]);
+  }, []);
+
+  const progress =
+    startedAt && phase && phase !== "completed" && phase !== "error"
+      ? Math.min((now - startedAt) / 10_000, 1)
+      : 0;
 
   const r = 7;
   const c = 2 * Math.PI * r;
   const offset = c * (1 - progress);
 
+  const label = phase ? (PHASE_LABELS[phase] ?? phase) : null;
+
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      className="-rotate-90 shrink-0"
-    >
-      <circle
-        cx="9"
-        cy="9"
-        r={r}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        opacity="0.15"
-      />
-      <circle
-        cx="9"
-        cy="9"
-        r={r}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeDasharray={c}
-        strokeDashoffset={offset}
-      />
-    </svg>
+    <span className="flex items-center gap-2 text-sm text-background">
+      {label && label !== "Completed" && <span>{label}</span>}
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 18 18"
+        className="-rotate-90 shrink-0"
+      >
+        <circle
+          cx="9"
+          cy="9"
+          r={r}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          opacity="0.15"
+        />
+        <circle
+          cx="9"
+          cy="9"
+          r={r}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={offset}
+        />
+      </svg>
+    </span>
   );
 }
 
-export function SimulateCompetition({
-  gameId,
-}: {
-  gameId: string;
-}) {
-  return <div className="bottom-2 fixed left-1/2 -translate-x-1/2 bg-foreground py-2 px-4">
-    <SimulateCompetitionBehaviour gameId={gameId} />
-  </div>
+export function SimulateCompetition() {
+  const games = useQuery(api.games.list);
+  const lastCompetitionId = useSimStore((s) => s.lastCompetitionId);
+  const gameId = games?.[0]?._id;
+
+  const clearCompetition = useMutation(api.competition.clearCompetition);
+  const [clearing, setClearing] = useState(false);
+
+  async function handleClear() {
+    setClearing(true);
+    try {
+      await clearCompetition({ competitionId: lastCompetitionId! });
+    } finally {
+      setClearing(false);
+    }
+  }
+
+  if (!gameId) return null;
+
+  return (
+    <div className="bottom-2 fixed left-1/2 -translate-x-1/2 bg-foreground py-2 px-4 flex items-center gap-3">
+      {lastCompetitionId && (
+        <CircularProgress competitionId={lastCompetitionId} />
+      )}
+      <SimulateCompetitionBehaviour gameId={gameId} />
+      <Button variant={"outline"} onClick={handleClear} disabled={clearing}>
+        {clearing ? "Clearing..." : "Clear"}
+      </Button>
+    </div>
+  );
 }
 
-export function SimulateCompetitionBehaviour({
-  gameId,
-}: {
-  gameId: string;
-}) {
-  const [status, setStatus] = useState<Status>({ state: "idle" });
-
+export function SimulateCompetitionBehaviour({ gameId }: { gameId: string }) {
   const start = useMutation(api.competition.startSimulation);
 
-  const competitionId =
-    status.state === "running" ? status.competitionId : undefined;
-  const competition = useQuery(
-    api.competition.get,
-    competitionId ? { competitionId: competitionId as any } : "skip",
-  );
-  const latestPhase = competition?.phase;
-
-  const showPhase =
-    status.state === "running" && latestPhase && latestPhase !== "completed";
-
   async function handleStart() {
-    setStatus({ state: "running" });
-    try {
-      const { competitionId: id } = await start({ gameId: gameId as any });
-      setStatus({ state: "running", competitionId: id });
-    } catch (e: unknown) {
-      setStatus({
-        state: "error",
-        message: e instanceof Error ? e.message : "Failed to start simulation",
-      });
-    }
-  }
-
-  if (status.state === "running") {
-    if (latestPhase === "completed") {
-      return (
-        <Button variant="outline" size="sm" disabled>
-          <span className="inline-block size-2 rounded-full bg-green-500 shrink-0" />
-          Simulation complete
-        </Button>
-      );
-    }
-
-    return (
-      <Button variant="outline" size="sm" disabled>
-        <CircularProgress key={latestPhase ?? "starting"} phase={latestPhase} />
-        <span>
-          {showPhase
-            ? PHASE_LABELS[latestPhase] ?? latestPhase
-            : "Starting..."}
-        </span>
-      </Button>
-    );
-  }
-
-  if (status.state === "error") {
-    return (
-      <div className="flex items-center gap-2">
-        <span className="font-mono text-xs text-foreground/60">
-          {status.message}
-        </span>
-        <Button variant="ghost" size="sm" onClick={() => setStatus({ state: "idle" })}>
-          Dismiss
-        </Button>
-      </div>
-    );
+    await start({ gameId: gameId as any });
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleStart}>
+    <Button variant="default" onClick={handleStart}>
       Simulate Competition
     </Button>
   );

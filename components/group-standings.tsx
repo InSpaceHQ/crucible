@@ -51,9 +51,7 @@ export function GroupStandings({
                 />
               )}
             </div>
-            <span className="flex-1 truncate">
-              {entry.team?.name ?? "—"}
-            </span>
+            <span className="flex-1 truncate">{entry.team?.name ?? "—"}</span>
             <span className="text-foreground/50 w-4 text-center">
               {entry.played}
             </span>
@@ -71,9 +69,7 @@ export function GroupStandings({
                 ? `+${entry.goalDifference}`
                 : entry.goalDifference}
             </span>
-            <span className="w-6 text-right font-bold">
-              {entry.points}
-            </span>
+            <span className="w-6 text-right font-bold">{entry.points}</span>
           </motion.div>
         ))}
       </motion.div>

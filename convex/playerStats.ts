@@ -61,9 +61,7 @@ export const getByPlayerId = query({
       matches: entry.matches ?? 0,
       player: {
         name: player.name,
-        game: game
-          ? { name: game.name, displayName: game.displayName }
-          : null,
+        game: game ? { name: game.name, displayName: game.displayName } : null,
         team: team ? { name: team.name, logo: team.logo } : null,
       },
     };
