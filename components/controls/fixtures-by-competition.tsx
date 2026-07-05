@@ -9,6 +9,7 @@ import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { GameMatch } from "~/lib/game-match";
 
 type Match = NonNullable<
   ReturnType<typeof useQuery<typeof api.competition.listMatches>>
@@ -201,7 +202,9 @@ function CompetitionMatchesSection({
         </div>
       ) : (
         (() => {
-          const actual = matches.filter((m) => m.homeTeam && m.awayTeam);
+          const actual = matches.filter(
+            (m) => !GameMatch.isTBD(m.homeTeam, m.awayTeam),
+          );
           const groupMatches = actual.filter((m) => m.phase === "group");
           const knockoutMatches = actual.filter((m) => m.phase === "knockout");
 

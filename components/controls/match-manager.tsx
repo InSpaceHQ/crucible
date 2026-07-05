@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
+import { GameMatch } from "~/lib/game-match";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
@@ -78,7 +79,8 @@ function MatchManager() {
 
   const visibleMatches = (matches ?? []).filter(
     (m) =>
-      m.homeTeamId !== m.awayTeamId && (!m.startTime || m.startTime >= now),
+      !GameMatch.isTBD(m.homeTeam, m.awayTeam) &&
+      (!m.startTime || m.startTime >= now),
   );
 
   function toggleAll(selectAll: boolean) {
