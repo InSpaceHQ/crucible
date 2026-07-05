@@ -9,6 +9,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { CompetitionList } from "~/components/controls/competition-list";
 import { CreateCompetitionIntegrated } from "~/components/controls/create-competition-integrated";
+import { FixturesByCompetition } from "~/components/controls/fixtures-by-competition";
 
 function formatTime(ts: number) {
   return new Date(ts).toLocaleTimeString("en-US", {
@@ -67,6 +68,8 @@ export default function ControlsPage() {
       </Card>
 
       <CompetitionList />
+
+      <FixturesByCompetition />
 
       <section>
         <h2 className="font-mono text-sm text-foreground/60 font-bold uppercase tracking-wider mb-4">
