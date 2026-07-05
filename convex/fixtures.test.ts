@@ -5,13 +5,12 @@ import { convexTest } from "convex-test";
 import { expect, test } from "vitest";
 import { api } from "./_generated/api";
 import schema from "./schema";
+import type { Id } from "./_generated/dataModel";
 
 const modules = import.meta.glob("./**/*.ts");
 
-test("updateScore increments and decrements an entry's score", async () => {
-  const t = convexTest(schema, modules);
-
-  const { fixtureId } = await t.run(async (ctx) => {
+async function seedFixture(t: ReturnType<typeof convexTest>) {
+  return t.run(async (ctx) => {
     const gameId = await ctx.db.insert("games", {
       name: "FC26",
       displayName: "FC26",
@@ -41,78 +40,78 @@ test("updateScore increments and decrements an entry's score", async () => {
         { playerId: player2Id, score: 0 },
       ],
     });
-    return { fixtureId };
+    return { fixtureId } as { fixtureId: Id<"fixtures"> };
   });
+}
 
-  // increment p1
+test("increments entry score by delta", async () => {
+  const t = convexTest(schema, modules);
+  const { fixtureId } = await seedFixture(t);
+
   await t.mutation(api.fixtures.updateScore, {
     fixtureId,
     entryIndex: 0,
     delta: 1,
   });
-  let f = await t.query(api.fixtures.list);
-  expect(f[0].entries[0].score).toBe(1);
-  expect(f[0].entries[1].score).toBe(0);
 
-  // decrement p1
+  const [f] = await t.query(api.fixtures.list);
+  expect(f.entries[0].score).toBe(1);
+});
+
+test("decrements entry score by delta", async () => {
+  const t = convexTest(schema, modules);
+  const { fixtureId } = await seedFixture(t);
+
+  await t.mutation(api.fixtures.updateScore, {
+    fixtureId,
+    entryIndex: 0,
+    delta: 3,
+  });
   await t.mutation(api.fixtures.updateScore, {
     fixtureId,
     entryIndex: 0,
     delta: -1,
   });
-  f = await t.query(api.fixtures.list);
-  expect(f[0].entries[0].score).toBe(0);
 
-  // cannot go below 0
+  const [f] = await t.query(api.fixtures.list);
+  expect(f.entries[0].score).toBe(2);
+});
+
+test("does not decrease score below zero", async () => {
+  const t = convexTest(schema, modules);
+  const { fixtureId } = await seedFixture(t);
+
   await t.mutation(api.fixtures.updateScore, {
     fixtureId,
     entryIndex: 0,
-    delta: -5,
+    delta: -1,
   });
-  f = await t.query(api.fixtures.list);
-  expect(f[0].entries[0].score).toBe(0);
 
-  // only the specified entry changes
+  const [f] = await t.query(api.fixtures.list);
+  expect(f.entries[0].score).toBe(0);
+});
+
+test("only updates the targeted entry", async () => {
+  const t = convexTest(schema, modules);
+  const { fixtureId } = await seedFixture(t);
+
   await t.mutation(api.fixtures.updateScore, {
     fixtureId,
     entryIndex: 1,
     delta: 3,
   });
-  f = await t.query(api.fixtures.list);
-  expect(f[0].entries[0].score).toBe(0);
-  expect(f[0].entries[1].score).toBe(3);
+
+  const [f] = await t.query(api.fixtures.list);
+  expect(f.entries[0].score).toBe(0);
+  expect(f.entries[1].score).toBe(3);
 });
 
-test("updateScore throws on nonexistent fixture", async () => {
+test("throws when fixture does not exist", async () => {
   const t = convexTest(schema, modules);
+  const { fixtureId } = await seedFixture(t);
 
-  const { fixtureId } = await t.run(async (ctx) => {
-    const gameId = await ctx.db.insert("games", {
-      name: "FC26",
-      displayName: "FC26",
-    });
-    const teamId = await ctx.db.insert("teams", {
-      name: "Nova",
-      gameId,
-      logo: "/logos/nova.png",
-      order: 0,
-    });
-    const playerId = await ctx.db.insert("players", {
-      name: "Aisha Khan",
-      gameId,
-      teamId,
-    });
-    const fixtureId = await ctx.db.insert("fixtures", {
-      gameId,
-      startTime: 0,
-      endTime: 60000,
-      entries: [
-        { playerId, score: 0 },
-        { playerId, score: 0 },
-      ],
-    });
+  await t.run(async (ctx) => {
     await ctx.db.delete("fixtures", fixtureId);
-    return { fixtureId };
   });
 
   await expect(
