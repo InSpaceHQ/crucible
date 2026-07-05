@@ -77,6 +77,7 @@ function generateGroupFixtures(
 async function seedCompetitionInternal(
   ctx: any,
   gameId: Id<"games">,
+  name: string,
 ): Promise<{
   competitionId: Id<"competitions">;
   teamOrders: Record<string, number>;
@@ -98,7 +99,7 @@ async function seedCompetitionInternal(
   );
 
   const competitionId = await ctx.db.insert("competitions", {
-    name: "Crucible Season 1",
+    name,
     gameId,
     status: "active",
     season: "2026",
@@ -174,9 +175,13 @@ async function seedCompetitionInternal(
 }
 
 export const seedCompetition = mutation({
-  args: { gameId: v.id("games") },
+  args: { gameId: v.id("games"), name: v.string() },
   handler: async (ctx, args) => {
-    const { competitionId } = await seedCompetitionInternal(ctx, args.gameId);
+    const { competitionId } = await seedCompetitionInternal(
+      ctx,
+      args.gameId,
+      args.name,
+    );
     return { competitionId, fixtureCount: 40, standingsCount: 20 };
   },
 });
@@ -594,11 +599,12 @@ export const advanceKnockout = mutation({
 });
 
 export const simulateCompetition = mutation({
-  args: { gameId: v.id("games") },
+  args: { gameId: v.id("games"), name: v.string() },
   handler: async (ctx, args) => {
     const { competitionId, teamOrders } = await seedCompetitionInternal(
       ctx,
       args.gameId,
+      args.name,
     );
 
     const teams = await ctx.db.query("teams").collect();
@@ -784,9 +790,13 @@ async function kvRemove(ctx: any, key: string) {
 }
 
 export const startSimulation = mutation({
-  args: { gameId: v.id("games") },
+  args: { gameId: v.id("games"), name: v.string() },
   handler: async (ctx, args) => {
-    const { competitionId } = await seedCompetitionInternal(ctx, args.gameId);
+    const { competitionId } = await seedCompetitionInternal(
+      ctx,
+      args.gameId,
+      args.name,
+    );
     await kvSet(ctx, "sim_state:" + competitionId, {
       phase: "round_1",
       startedAt: Date.now(),

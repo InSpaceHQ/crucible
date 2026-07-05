@@ -33,6 +33,7 @@ test("seedCompetition creates a competition document", async () => {
 
   const result = await t.mutation(api.competition.seedCompetition, {
     gameId,
+    name: "Test Competition",
   });
 
   expect(result).toHaveProperty("competitionId");
@@ -67,7 +68,10 @@ test("seedCompetition creates 4 groups of 5 teams with round-robin fixtures", as
     }
   });
 
-  await t.mutation(api.competition.seedCompetition, { gameId });
+  await t.mutation(api.competition.seedCompetition, {
+    gameId,
+    name: "Test Competition",
+  });
 
   const standings = await t.run(async (ctx) => {
     return await ctx.db.query("competitionStandings").collect();
@@ -121,6 +125,7 @@ test("updateMatchResult recalculates group standings", async () => {
 
   const { competitionId } = await t.mutation(api.competition.seedCompetition, {
     gameId,
+    name: "Test Competition",
   });
 
   const matches = await t.run(async (ctx) => {
@@ -197,6 +202,7 @@ test("advanceKnockout fills bracket after all group matches complete", async () 
 
   const { competitionId } = await t.mutation(api.competition.seedCompetition, {
     gameId,
+    name: "Test Competition",
   });
 
   const allMatches = await t.run(async (ctx) => {
@@ -260,6 +266,7 @@ test("advanceKnockout assigns QF pairings that match advancing teams", async () 
 
   const { competitionId } = await t.mutation(api.competition.seedCompetition, {
     gameId,
+    name: "Test Competition",
   });
 
   const matches = await t.run(async (ctx) => {
@@ -323,6 +330,7 @@ test("advanceKnockout fills entire bracket through to Final", async () => {
 
   const { competitionId } = await t.mutation(api.competition.seedCompetition, {
     gameId,
+    name: "Test Competition",
   });
 
   const allMatches = await t.run(async (ctx) => {
@@ -411,6 +419,7 @@ test("simulateCompetition produces deterministic results with a champion", async
 
   const result = await t.mutation(api.competition.simulateCompetition, {
     gameId,
+    name: "Test Competition",
   });
 
   expect(result.totalMatches).toBe(47);
@@ -464,6 +473,7 @@ test("simulateCompetition produces deterministic results with a champion", async
   });
   const result2 = await t2.mutation(api.competition.simulateCompetition, {
     gameId: gameId2,
+    name: "Test Competition",
   });
 
   expect(result2.champion).toBe(result.champion);
@@ -498,6 +508,7 @@ test("startSimulation creates competition with round_1 phase", async () => {
 
   const { competitionId } = await t.mutation(api.competition.startSimulation, {
     gameId,
+    name: "Test Competition",
   });
 
   const kvEntry = await t.run(async (ctx) => {
@@ -536,6 +547,7 @@ test("advancePhase walks through all phases to completion", async () => {
 
   const { competitionId } = await t.mutation(api.competition.startSimulation, {
     gameId,
+    name: "Test Competition",
   });
 
   const expectedPhases = [

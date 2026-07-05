@@ -107,7 +107,8 @@ function SimulateButton({ gameId }: { gameId: Id<"games"> }) {
   const start = useMutation(api.competition.startSimulation);
 
   async function handleStart() {
-    await start({ gameId });
+    const name = `Sim ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+    await start({ gameId, name });
   }
 
   return (
