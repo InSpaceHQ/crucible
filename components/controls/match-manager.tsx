@@ -54,8 +54,6 @@ function toLagosTimestamp(dateStr: string, timeStr: string): number {
   return local.getTime() - local.getTimezoneOffset() * 60 * 1000 + lagosOffset;
 }
 
-const GRID = "grid-cols-[4ch_3ch_5ch_1fr_8ch]";
-
 function MatchManager() {
   const competitions = useQuery(api.competition.list);
   const [selectedCompId, setSelectedCompId] = useState<string | null>(null);
@@ -180,7 +178,10 @@ function MatchManager() {
         ) : loadingMatches ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className={GRID + " items-center gap-3 py-2"}>
+              <div
+                key={i}
+                className="grid grid-cols-[var(--match-grid)] items-center gap-3 py-2"
+              >
                 <div className="size-3.5 bg-muted skeleton-blink" />
                 <div className="h-3 w-6 bg-muted skeleton-blink" />
                 <div className="h-3 w-8 bg-muted skeleton-blink" />
@@ -196,12 +197,7 @@ function MatchManager() {
         ) : (
           <>
             <div className="divide-y divide-border border border-border font-mono text-sm">
-              <div
-                className={
-                  GRID +
-                  " items-center gap-3 px-3 py-2 text-[11px] text-foreground/50 uppercase tracking-wider"
-                }
-              >
+              <div className="grid grid-cols-[var(--match-grid)] items-center gap-3 px-3 py-2 text-[11px] text-foreground/50 uppercase tracking-wider">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -227,10 +223,7 @@ function MatchManager() {
                 visibleMatches.map((m) => (
                   <label
                     key={m._id}
-                    className={
-                      GRID +
-                      " items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
-                    }
+                    className="grid grid-cols-[var(--match-grid)] items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
                   >
                     <input
                       type="checkbox"
