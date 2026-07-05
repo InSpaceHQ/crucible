@@ -229,6 +229,14 @@ export const seed = mutation({
       gameIds[game.name] = await ctx.db.insert("games", game);
     }
 
+    const teamNames = SEED_TEAMS.map((t) => t.name);
+    const uniqueTeamNames = new Set(teamNames);
+    if (teamNames.length !== uniqueTeamNames.size) {
+      throw new Error(
+        `Duplicate team names in SEED_TEAMS: ${teamNames.filter((n, i) => teamNames.indexOf(n) !== i).join(", ")}`,
+      );
+    }
+
     const teamIds: Record<string, Id<"teams">> = {};
     for (const team of SEED_TEAMS) {
       teamIds[team.name] = await ctx.db.insert("teams", {
@@ -237,6 +245,14 @@ export const seed = mutation({
         logo: team.logo,
         order: team.order,
       });
+    }
+
+    const playerNames = SEED_PLAYERS.map((p) => p.name);
+    const uniquePlayerNames = new Set(playerNames);
+    if (playerNames.length !== uniquePlayerNames.size) {
+      throw new Error(
+        `Duplicate player names in SEED_PLAYERS: ${playerNames.filter((n, i) => playerNames.indexOf(n) !== i).join(", ")}`,
+      );
     }
 
     const playerIds: Record<string, Id<"players">> = {};
