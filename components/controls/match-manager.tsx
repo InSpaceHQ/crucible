@@ -157,11 +157,12 @@ function MatchManager() {
 
   return (
     <Card
-      style={{ "--match-grid": "8ch 8ch 8ch 1fr 16ch" } as React.CSSProperties}
+      style={{ "--match-grid": "4ch 5ch 5ch 1fr 16ch" } as React.CSSProperties}
     >
       <CardHeader>
         <CardTitle>Match Manager</CardTitle>
       </CardHeader>
+
       <CardContent className="space-y-4">
         <select
           className="w-full border border-border bg-background px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground"
@@ -190,32 +191,32 @@ function MatchManager() {
           className="w-full border border-border bg-background px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground"
         />
 
-        {!selectedCompId ? (
-          <div className="py-4 text-center text-sm text-foreground/60">
-            Select a competition above to manage its matches.
-          </div>
-        ) : loadingMatches ? (
-          <div className="space-y-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-(--match-grid) items-center gap-3 py-2"
-              >
-                <div className="size-3.5 bg-muted skeleton-blink" />
-                <div className="h-3 w-6 bg-muted skeleton-blink" />
-                <div className="h-3 w-8 bg-muted skeleton-blink" />
-                <div className="h-3 w-32 bg-muted skeleton-blink" />
-                <div className="h-3 w-10 bg-muted skeleton-blink" />
-              </div>
-            ))}
-          </div>
-        ) : matches.length === 0 ? (
-          <div className="py-4 text-center text-sm text-foreground/60">
-            No matches for this competition.
-          </div>
-        ) : (
-          <>
-            <div className="divide-y divide-border border border-border font-mono text-sm">
+        <div className="text-xs">
+          {!selectedCompId ? (
+            <div className="py-4 text-center text-sm text-foreground/60">
+              Select a competition above to manage its matches.
+            </div>
+          ) : loadingMatches ? (
+            <div className="space-y-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-(--match-grid) items-center gap-3 py-2"
+                >
+                  <div className="size-3.5 bg-muted skeleton-blink" />
+                  <div className="h-3 w-6 bg-muted skeleton-blink" />
+                  <div className="h-3 w-8 bg-muted skeleton-blink" />
+                  <div className="h-3 w-32 bg-muted skeleton-blink" />
+                  <div className="h-3 w-10 bg-muted skeleton-blink" />
+                </div>
+              ))}
+            </div>
+          ) : matches.length === 0 ? (
+            <div className="py-4 text-center text-sm text-foreground/60">
+              No matches for this competition.
+            </div>
+          ) : (
+            <div className="divide-y divide-border border border-border font-mono">
               <div className="grid grid-cols-(--match-grid) items-center gap-3 px-3 py-2 text-foreground/50 uppercase tracking-wider">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -278,33 +279,37 @@ function MatchManager() {
                 ))
               )}
             </div>
-          </>
-        )}
+          )}
+        </div>
       </CardContent>
+
       {selectedCompId && !loadingMatches && matches.length > 0 && (
-        <CardFooter className="font-mono text-sm">
-          <span className="text-xs text-foreground/50 shrink-0">
+        <CardFooter className="font-mono text-sm gap-4">
+          <span className="text-xs text-foreground shrink-0">
             {checked.size} selected
           </span>
-          <input
-            type="date"
-            className="flex-1 border border-border bg-background px-2 py-1.5 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground min-w-0"
-            value={dateVal}
-            onChange={(e) => setDateVal(e.target.value)}
-          />
-          <input
-            type="time"
-            className="w-28 border border-border bg-background px-2 py-1.5 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground shrink-0"
-            value={timeVal}
-            onChange={(e) => setTimeVal(e.target.value)}
-          />
+
+          <div className="flex flex-1 justify-end *:last:border-l-0">
+            <input
+              type="date"
+              className="border border-border bg-background px-2 py-1.5 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground min-w-0"
+              value={dateVal}
+              onChange={(e) => setDateVal(e.target.value)}
+            />
+            <input
+              type="time"
+              className="w-28 border border-border bg-background px-2 py-1.5 font-mono text-sm outline-none focus:ring-1 focus:ring-foreground shrink-0"
+              value={timeVal}
+              onChange={(e) => setTimeVal(e.target.value)}
+            />
+          </div>
+
           <Button
-            variant="default"
-            size="sm"
+            variant="fill"
             disabled={checked.size === 0}
             onClick={handleApply}
           >
-            Apply
+            Apply changes
           </Button>
         </CardFooter>
       )}

@@ -189,6 +189,7 @@ export function CompetitionCard({
     api.kv.get,
     competitionId ? { key: "sim_state:" + competitionId } : "skip",
   );
+
   const phase = simState?.phase;
 
   const phaseLabels: Record<string, string> = {
