@@ -193,6 +193,14 @@
   }
 }
 
+:root {
+  --header-height: 3rem;
+}
+
 .skeleton-blink {
   animation: skeleton-blink 1.4s ease-in-out infinite;
+}
+
+.page-content {
+  margin-top: var(--header-height);
 }

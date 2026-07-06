@@ -143,7 +143,6 @@ export function useLocalStorage<T>(
     window.dispatchEvent(new StorageEvent("local-storage", { key }));
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setStoredValue(readValue(key));

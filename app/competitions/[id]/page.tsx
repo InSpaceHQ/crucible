@@ -29,7 +29,7 @@ export default function CompetitionDetailPage({
   }
 
   return (
-    <div className="scanline-root">
+    <div className="scanline-root page-content">
       <div className="scanline-container fixed z-1 pointer-events-none inset-0" />
 
       <div className="z-10 relative">

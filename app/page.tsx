@@ -6,6 +6,7 @@ import { GameTabs } from "~/components/game-tabs";
 import { PlayerActivityPanel } from "~/components/player-activity-panel";
 import { PointsLog } from "~/components/points-log";
 import { ScheduleSection } from "~/components/schedule-section";
+import { SponsorsSection } from "~/components/sponsors-section";
 import { SimulateCompetition } from "~/components/simulate-competition";
 import { SkillsCard } from "~/components/skills-card";
 
@@ -14,7 +15,7 @@ export default function Home() {
     <>
       <PlayerActivityPanel />
 
-      <div className="py-8 md:py-12 text-foreground scanline-root relative w-[calc(100svw-30px)] mx-auto min-h-svh">
+      <div className="py-8 page-content text-foreground scanline-root relative w-[calc(100svw-30px)] mx-auto min-h-svh">
         <div className="mx-auto px-4 w-full mt-32">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 scanline-container z-10">
             <div className="md:col-span-8">
@@ -32,6 +33,8 @@ export default function Home() {
         </div>
 
         <ScheduleSection />
+
+        <SponsorsSection />
 
         <footer className="flex flex-col items-center gap-2 py-12 md:py-16 border-t border-border mt-16">
           <span className="font-mono text-xs text-foreground">
