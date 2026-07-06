@@ -80,7 +80,7 @@ export function Header() {
             className="hidden md:inline-block"
           >
             <Button variant={"ghost"} size={"lg"}>
-              Join the competition <ArrowUpRight />
+              Join the Crucible <ArrowUpRight />
             </Button>
           </Link>
         </div>

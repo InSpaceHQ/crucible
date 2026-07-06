@@ -86,35 +86,66 @@ export default function Home() {
 
 function CompetitorsSection() {
   return (
-    <div className="flex items-start gap-8 min-h-screen py-12">
-      <div className="basis-5/12 sticky top-(--header-height) justify-between h-[calc(90svh-var(--header-height))] flex flex-col gap-4">
-        <h1 className="tracking-[-0.6ch] font-bold">
-          <Fit options={{ multiLine: false, maxSize: 120 }}>
-            <span className="leading-[1.4ex]">Made For</span>
-          </Fit>
-        </h1>
+    <>
+      <div className="lg:hidden flex flex-col items-start gap-8 py-12">
+        <div className="gap-4 flex flex-col w-full">
+          <h1 className="text-xl font-bold">
+            <Fit options={{ multiLine: false, maxSize: 78 }}>
+              <span className="leading-[1.4ex] tracking-[-0.06ch]">
+                Made For The{" "}
+                <span className="text-accent-foreground"> Bold</span>
+              </span>
+            </Fit>
+          </h1>
 
-        <div className="flex justify-end">
-          <p className="w-[20ch] leading-[2.2ex] text-start text-pretty">
-            The ones who enter the Crucible. Let’s see who survives and comes
-            out victorious. Only two will remembered.
-          </p>
+          <div className="flex w-full max-w-full">
+            <p className="text-sm leading-[2.2ex] text-start text-pretty">
+              These are champions who enter the Crucible.
+              <br />
+              In the end, only two will emerge as the victors.
+            </p>
+          </div>
+        </div>
+
+        <div className="w-full">
+          <CompetitorsList />
         </div>
       </div>
 
-      <div className="flex-1 basis-4/12 shrink-0">
-        <CompetitorsList />
-      </div>
+      <div className="hidden lg:flex items-start gap-8 min-h-screen py-12 [--bleed:var(--header-height)]">
+        <div className="basis-5/12 sticky top-(--bleed) pb-(--bleed) justify-between h-[calc(90svh-var(--bleed))] flex flex-col gap-4">
+          <h1 className="font-bold">
+            <Fit options={{ multiLine: false, maxSize: 120 }}>
+              <span className="tracking-[-0.06ch] leading-[1.4ex] transition-all duration-200">
+                Made For
+              </span>
+            </Fit>
+          </h1>
 
-      <div className="basis-5/12 top-(--header-height) flex self-stretch flex-col justify-end">
-        <h1 className="tracking-[-0.6ch] font-bold sticky bottom-0">
-          <Fit options={{ multiLine: false, maxSize: 120 }}>
-            <span className="leading-[1.4ex]">
-              The <span className="text-accent-foreground"> Bold</span>
-            </span>
-          </Fit>
-        </h1>
+          <div className="flex justify-end">
+            <p className="w-[20ch] leading-[2.2ex] text-start text-pretty">
+              These are champions who enter the Crucible.
+              <br />
+              <br />
+              In the end, only two will emerge as the victors.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex-1 basis-4/12 shrink-0">
+          <CompetitorsList />
+        </div>
+
+        <div className="basis-5/12 top-(--bleed) flex self-stretch flex-col justify-end">
+          <h1 className=" font-bold sticky bottom-(--bleed)">
+            <Fit options={{ multiLine: false, maxSize: 120 }}>
+              <span className="tracking-[-0.06ch] leading-[1.4ex] transition-all duration-200">
+                The <span className="text-accent-foreground"> Bold</span>
+              </span>
+            </Fit>
+          </h1>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

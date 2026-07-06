@@ -12,6 +12,7 @@ import { useCachedQuery } from "~/hooks/use-cached-query";
 
 export function CompetitorsList() {
   const players = useCachedQuery(api.players.list);
+
   if (players === undefined) return null;
 
   const isEmpty = players.length === 0;
@@ -36,7 +37,7 @@ export function CompetitorsList() {
               key={p._id}
               className="grid grid-cols-(--competitor-grid) items-center py-2 px-1 font-mono text-sm gap-1"
             >
-              <span className="text-foreground text-right">
+              <span className="text-muted-foreground">
                 {String(idx + 1).padStart(2, "0")}.
               </span>
               <span>{p.name}</span>
