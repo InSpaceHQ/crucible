@@ -21,6 +21,7 @@
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
         "fitty": "^2.4.2",
+        "flagsmith": "^10.0.0",
         "lodash-es": "^4.18.1",
         "lucide-react": "^1.23.0",
         "motion": "^12.42.2",
@@ -1150,6 +1151,8 @@
     "find-up": ["find-up@5.0.0", "", { "dependencies": { "locate-path": "6.0.0", "path-exists": "4.0.0" } }, "sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng=="],
 
     "fitty": ["fitty@2.4.2", "", {}, "sha512-GNhWgImK4+wEkgEZjBkQMyu5NLSmmryg/CaRP7zYby+TWzCrUou6BHL+iqbjKzJRXMyzuJkH+LBB1+lh4oO77g=="],
+
+    "flagsmith": ["flagsmith@10.0.0", "", {}, "sha512-JEO4V6nO6ic4ahi5uZRVBYKFil9IuRkLWemKZuFv3QVUCxluQfgymwiuPSs4/LqwFqQ+89SuubaawHxUxUPTzg=="],
 
     "flat-cache": ["flat-cache@4.0.1", "", { "dependencies": { "flatted": "3.3.3", "keyv": "4.5.4" } }, "sha512-f7ccFPK3SXFHpx15UIGyRJ/FJQctuKZ0zVuN3frBo4HnK3cay9VEW0R6yPYFHC0AgqhukPzKjq22t5DmAyqGyw=="],
 

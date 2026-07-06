@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { CompetitionsSection } from "~/components/competitions-section";
+import { CompetitorsList } from "~/components/competitors-list";
+import { FlagCond } from "~/components/flag-cond";
 import { GameTabs } from "~/components/game-tabs";
 import { PlayerActivityPanel } from "~/components/player-activity-panel";
 import { PointsLog } from "~/components/points-log";
@@ -9,27 +11,36 @@ import { ScheduleSection } from "~/components/schedule-section";
 import { SponsorsSection } from "~/components/sponsors-section";
 import { SimulateCompetition } from "~/components/simulate-competition";
 import { SkillsCard } from "~/components/skills-card";
+import { Fit } from "~/components/ui/fit";
 
 export default function Home() {
   return (
     <>
       <PlayerActivityPanel />
+      <div className="fixed inset-0 scanline-root z-1">
+        <div className="scanline-container inset-0" />
+      </div>
 
-      <div className="py-8 page-content text-foreground scanline-root relative w-[calc(100svw-30px)] mx-auto min-h-svh">
-        <div className="mx-auto px-4 w-full mt-32">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 scanline-container z-10">
-            <div className="md:col-span-8">
-              <div className="border border-border">
-                <GameTabs />
+      <div className="py-8 page-content z-20 text-foreground relative w-[calc(100svw-30px)] mx-auto min-h-svh">
+        <div className="mx-auto px-4 w-full mt-(--header-height)">
+          <FlagCond
+            flags={["start_competition"]}
+            fallback={<CompetitorsSection />}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 z-10">
+              <div className="md:col-span-8">
+                <div className="border border-border">
+                  <GameTabs />
+                </div>
+              </div>
+
+              <div className="md:col-span-4 flex flex-col gap-4">
+                <PointsLog />
+                <SkillsCard />
               </div>
             </div>
-            <div className="md:col-span-4 flex flex-col gap-4">
-              <PointsLog />
-              <SkillsCard />
-            </div>
-          </div>
-
-          <CompetitionsSection />
+            <CompetitionsSection />
+          </FlagCond>
         </div>
 
         <ScheduleSection />
@@ -70,5 +81,40 @@ export default function Home() {
 
       <SimulateCompetition />
     </>
+  );
+}
+
+function CompetitorsSection() {
+  return (
+    <div className="flex items-start gap-8 min-h-screen py-12">
+      <div className="basis-5/12 sticky top-(--header-height) justify-between h-[calc(90svh-var(--header-height))] flex flex-col gap-4">
+        <h1 className="tracking-[-0.6ch] font-bold">
+          <Fit options={{ multiLine: false, maxSize: 120 }}>
+            <span className="leading-[1.4ex]">Made For</span>
+          </Fit>
+        </h1>
+
+        <div className="flex justify-end">
+          <p className="w-[20ch] leading-[2.2ex] text-start text-pretty">
+            The ones who enter the Crucible. Let’s see who survives and comes
+            out victorious. Only two will remembered.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex-1 basis-4/12 shrink-0">
+        <CompetitorsList />
+      </div>
+
+      <div className="basis-5/12 top-(--header-height) flex self-stretch flex-col justify-end">
+        <h1 className="tracking-[-0.6ch] font-bold sticky bottom-0">
+          <Fit options={{ multiLine: false, maxSize: 120 }}>
+            <span className="leading-[1.4ex]">
+              The <span className="text-accent-foreground"> Bold</span>
+            </span>
+          </Fit>
+        </h1>
+      </div>
+    </div>
   );
 }
