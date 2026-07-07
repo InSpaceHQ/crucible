@@ -5,6 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function isSSR(): boolean {
+  return typeof window === "undefined";
+}
+
 export const getCssVarInPx = (document: Document, varName: string): number => {
   const rootStyle = getComputedStyle(document.documentElement);
   const rawValue = rootStyle.getPropertyValue(varName)?.trim() || "";
