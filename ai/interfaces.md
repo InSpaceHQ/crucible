@@ -35,6 +35,35 @@ gameId: Id<"games">    — player's game
 teamId: Id<"teams">    — parent team
 ```
 
+### `rulesets`
+
+```
+gameId: Id<"games">      — FK to games
+sections: array of {
+  title: string
+  content: string
+}
+```
+
+Index: `by_game` (one ruleset per game)
+
+### `rulesets.getByGame` → `Option<Ruleset>`
+
+Returns a single ruleset document for the given game.
+Args: `gameId: Id<"games">`
+
+### `rulesets.upsert`
+
+Creates or replaces the ruleset for a given game.
+Args: `gameId: Id<"games">`, `sections: array of { title: string, content: string }`
+
+## Seed Data
+
+### `seed.seed`
+
+FC26 rules: Match Format (5v5, 6-min halves, Golden Goal), Scoring (Win 3, Draw 1, Loss 0), Team Selection (any club, no custom tactics)
+MK1 rules: Match Format (Best of 3, 90s rounds), Character Selection (any character, kameo allowed, random stage), Rules (no stalling)
+
 ## Query Return Types
 
 ### `teams.list` → `TeamWithPlayers[]`

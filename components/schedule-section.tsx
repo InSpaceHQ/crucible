@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
+import { Button } from "~/components/ui/button";
 import { Fit } from "~/components/ui/fit";
 import { api } from "~/convex/_generated/api";
 import type { Doc } from "~/convex/_generated/dataModel";
@@ -174,6 +175,13 @@ function ScheduleDateGroupMobile({
             <p className="font-mono text-xs md:text-sm text-foreground/80 max-w-[60ch] text-pretty">
               {item.description}
             </p>
+            {item.link && (
+              <Button asChild variant="ghost" size="xs" className="mt-1">
+                <a href={item.link} target="_blank" rel="noopener noreferrer">
+                  {item.linkLabel ?? "Learn more"}
+                </a>
+              </Button>
+            )}
           </div>
         ))}
       </div>
@@ -217,6 +225,16 @@ function ScheduleDateGroupDesktop({
                 <p className="font-mono text-sm text-foreground/80 max-w-[60ch] text-pretty">
                   {item.description}
                 </p>
+                {item.link && (
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-flex items-center gap-1 font-mono text-xs text-accent-foreground"
+                  >
+                    {item.linkLabel ?? "Learn more"} ↗
+                  </a>
+                )}
               </div>
             </div>
           </div>

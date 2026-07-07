@@ -7,6 +7,7 @@ import Link from "next/link";
 import { CompetitionList } from "~/components/controls/competition-list";
 import { CreateCompetitionIntegrated } from "~/components/controls/create-competition-integrated";
 import { FixturesByCompetition } from "~/components/controls/fixtures-by-competition";
+import { GameRulesetIntegrated } from "~/components/controls/game-ruleset-integrated";
 import { MatchManager } from "~/components/controls/match-manager";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -73,6 +74,15 @@ export default function ControlsPage() {
       <MatchManager />
 
       <FixturesByCompetition />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Game Rules</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <GameRulesetIntegrated />
+        </CardContent>
+      </Card>
 
       <section>
         <h2 className="font-mono text-sm text-foreground/60 font-bold uppercase tracking-wider mb-4">

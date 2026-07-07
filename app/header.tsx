@@ -74,6 +74,12 @@ export function Header() {
         <div className="flex items-center gap-3 md:gap-6">
           <Countdown targetDate={new Date("2026-08-01T00:00:00")} />
 
+          <Link href="/game-rules" className="hidden md:inline-block">
+            <Button variant="ghost" size="lg">
+              Rules
+            </Button>
+          </Link>
+
           <Link
             href="https://bit.ly/crucible-inspace"
             target="_blank"
