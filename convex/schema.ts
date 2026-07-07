@@ -32,6 +32,8 @@ export default defineSchema({
     timestamp: v.number(),
     activity: v.string(),
     description: v.string(),
+    link: v.optional(v.string()),
+    linkLabel: v.optional(v.string()),
   }).index("by_timestamp", ["timestamp"]),
 
   skills: defineTable({
@@ -131,4 +133,14 @@ export default defineSchema({
   })
     .index("by_competition", ["competitionId"])
     .index("by_competition_group", ["competitionId", "group"]),
+
+  rulesets: defineTable({
+    gameId: v.id("games"),
+    sections: v.array(
+      v.object({
+        title: v.string(),
+        content: v.string(),
+      }),
+    ),
+  }).index("by_game", ["gameId"]),
 });

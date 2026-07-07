@@ -225,6 +225,45 @@ const SEED_SKILLS = [
   },
 ];
 
+const SEED_RULESETS = [
+  {
+    gameName: "FC26",
+    sections: [
+      {
+        title: "Match Format",
+        content:
+          "5v5, 6-minute halves. Golden Goal extra time in knockout stages.",
+      },
+      {
+        title: "Scoring",
+        content: "Win = 3 pts, Draw = 1 pt, Loss = 0 pts.",
+      },
+      {
+        title: "Team Selection",
+        content: "Any club. No custom tactics restrictions. Default kits only.",
+      },
+    ],
+  },
+  {
+    gameName: "MK1",
+    sections: [
+      {
+        title: "Match Format",
+        content:
+          "Best of 3. 90-second rounds, 2/3 round wins to take the match.",
+      },
+      {
+        title: "Character Selection",
+        content: "Any character. Kameo allowed. Random stage select only.",
+      },
+      {
+        title: "Rules",
+        content: "No stalling. Timer must always be running. No stage select.",
+      },
+    ],
+  },
+];
+
 export const seed = mutation({
   args: {},
   handler: async (ctx) => {
@@ -300,6 +339,16 @@ export const seed = mutation({
             playerId: playerId as Id<"players">,
           });
         }
+      }
+    }
+
+    for (const rs of SEED_RULESETS) {
+      const gameId = gameIds[rs.gameName];
+      if (gameId) {
+        await ctx.db.insert("rulesets", {
+          gameId: gameId as Id<"games">,
+          sections: rs.sections,
+        });
       }
     }
 
