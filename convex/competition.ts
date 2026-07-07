@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, mutation, query } from "./_generated/server";
+import { fetchActiveTeams } from "./teams";
 
 const GROUP_NAMES = ["A", "B", "C", "D"];
 
@@ -82,11 +83,7 @@ async function seedCompetitionInternal(
   competitionId: Id<"competitions">;
   teamOrders: Record<string, number>;
 }> {
-  const allTeams = await ctx.db
-    .query("teams")
-    .withIndex("by_order")
-    .order("asc")
-    .collect();
+  const allTeams = await fetchActiveTeams(ctx.db);
 
   if (allTeams.length < 20) {
     throw new Error(`Need at least 20 teams, got ${allTeams.length}.`);

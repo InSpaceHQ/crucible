@@ -1,13 +1,14 @@
 import { query } from "./_generated/server";
+import { fetchActiveTeams } from "./teams";
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const teams = await ctx.db.query("teams").collect();
+    const teams = await fetchActiveTeams(ctx.db);
     const players = await ctx.db.query("players").collect();
     const playerTeam: Record<string, string> = {};
     for (const p of players) {
-      playerTeam[p._id] = p.teamId;
+      if (p.teamId) playerTeam[p._id] = p.teamId;
     }
 
     const fixtures = await ctx.db

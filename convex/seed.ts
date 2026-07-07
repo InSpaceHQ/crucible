@@ -1,5 +1,6 @@
 import type { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
+import { fetchActiveTeams } from "./teams";
 
 const SEED_GAMES = [
   { name: "FC26", displayName: "FC26", description: "EA Sports FC 26" },
@@ -127,6 +128,12 @@ const SEED_TEAMS = [
     logo: "https://api.dicebear.com/9.x/shapes/png?seed=Phoenix&backgroundColor=ff4500",
     order: 19,
   },
+  {
+    name: "Unassigned",
+    gameIds: [],
+    logo: "",
+    order: -1,
+  },
 ];
 
 const SEED_PLAYERS = [
@@ -233,7 +240,7 @@ export const seed = mutation({
       gameIds = Object.fromEntries(existingGames.map((g) => [g.name, g._id]));
     }
 
-    const existingTeams = await ctx.db.query("teams").take(1);
+    const existingTeams = await fetchActiveTeams(ctx.db);
     if (existingTeams.length > 0) return { seeded: false };
 
     const teamNames = SEED_TEAMS.map((t) => t.name);

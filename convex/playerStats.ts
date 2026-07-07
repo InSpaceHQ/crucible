@@ -21,7 +21,7 @@ export const list = query({
 
     return stats.map((entry) => {
       const player = playersById[entry.playerId] ?? null;
-      const team = player ? (teamsById[player.teamId] ?? null) : null;
+      const team = player?.teamId ? (teamsById[player.teamId] ?? null) : null;
       const game = player ? (gamesById[player.gameId] ?? null) : null;
       return {
         ...entry,

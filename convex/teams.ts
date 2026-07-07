@@ -1,4 +1,14 @@
+import type { DatabaseReader } from "./_generated/server";
 import { query } from "./_generated/server";
+
+export async function fetchActiveTeams(db: DatabaseReader) {
+  const teams = await db
+    .query("teams")
+    .withIndex("by_order")
+    .order("asc")
+    .collect();
+  return teams.filter((t) => t.order >= 0);
+}
 
 export const list = query({
   args: {},
@@ -14,11 +24,7 @@ export const list = query({
       if (game) teamGamesByTeam[tg.teamId].push(game);
     }
 
-    const teams = await ctx.db
-      .query("teams")
-      .withIndex("by_order")
-      .order("asc")
-      .collect();
+    const teams = await fetchActiveTeams(ctx.db);
 
     const teamsWithPlayers = await Promise.all(
       teams.map(async (team) => {

@@ -1,8 +1,8 @@
 "use client";
 
+import { useFlags } from "flagsmith/react";
 import type { IFlagsmithFeature } from "flagsmith/types";
 import type { ReactNode } from "react";
-import { useFlags } from "flagsmith/react";
 
 interface FlagCondProps {
   flags: string[];

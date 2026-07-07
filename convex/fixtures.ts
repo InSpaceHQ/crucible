@@ -24,7 +24,7 @@ export const list = query({
       game: gamesById[fixture.gameId] ?? null,
       entries: fixture.entries.map((entry) => {
         const player = playersById[entry.playerId] ?? null;
-        const team = player ? (teamsById[player.teamId] ?? null) : null;
+        const team = player?.teamId ? (teamsById[player.teamId] ?? null) : null;
         return {
           ...entry,
           player: player

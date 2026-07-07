@@ -34,7 +34,7 @@ export const list = query({
 
     return logs.map((entry) => {
       const player = playersById[entry.playerId] ?? null;
-      const team = player ? (teamsById[player.teamId] ?? null) : null;
+      const team = player?.teamId ? (teamsById[player.teamId] ?? null) : null;
       return {
         ...entry,
         player: player
@@ -65,7 +65,7 @@ export const listPaginated = query({
 
     const page = result.page.map((entry) => {
       const player = playersById[entry.playerId] ?? null;
-      const team = player ? (teamsById[player.teamId] ?? null) : null;
+      const team = player?.teamId ? (teamsById[player.teamId] ?? null) : null;
       return {
         ...entry,
         player: player

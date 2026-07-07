@@ -16,7 +16,7 @@ export const list = query({
         {
           ...p,
           game: gamesById[p.gameId] ?? null,
-          team: teamsById[p.teamId] ?? null,
+          team: p.teamId ? (teamsById[p.teamId] ?? null) : null,
         },
       ]),
     );

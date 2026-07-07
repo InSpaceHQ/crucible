@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { ConvexClientProvider } from "~/components/providers/convex-client-provider";
 import { FlagsmithProvider } from "~/components/providers/flagsmith-provider";
+import { QueryProvider } from "~/components/providers/query-provider";
 import { Header } from "./header";
 
 const geistSans = Geist({
@@ -32,23 +33,25 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
         <FlagsmithProvider>
-          <ConvexClientProvider>
-            <Header />
-            {children}
-            <Toaster
-              theme="light"
-              style={{ "--toast-radius": "0" } as React.CSSProperties}
-              toastOptions={{
-                className: "border font-mono text-sm",
-                style: {
-                  background: "var(--background)",
-                  color: "var(--foreground)",
-                  borderColor: "var(--border)",
-                  borderRadius: 0,
-                },
-              }}
-            />
-          </ConvexClientProvider>
+          <QueryProvider>
+            <ConvexClientProvider>
+              <Header />
+              {children}
+              <Toaster
+                theme="light"
+                style={{ "--toast-radius": "0" } as React.CSSProperties}
+                toastOptions={{
+                  className: "border font-mono text-sm",
+                  style: {
+                    background: "var(--background)",
+                    color: "var(--foreground)",
+                    borderColor: "var(--border)",
+                    borderRadius: 0,
+                  },
+                }}
+              />
+            </ConvexClientProvider>
+          </QueryProvider>
         </FlagsmithProvider>
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID ?? ""} />
       </body>
