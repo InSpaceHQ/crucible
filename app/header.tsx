@@ -38,7 +38,7 @@ function Countdown({ targetDate }: { targetDate: Date }) {
 export function Header() {
   return (
     <>
-      <div className="marquee bg-foreground text-background font-mono absolute top-0 z-20 text-xs md:text-sm py-2 w-full">
+      <div className="marquee bg-foreground text-background font-mono absolute top-0 z-60 text-xs md:text-sm py-2 w-full">
         <div className="marquee-inner gap-12 px-6 font-bold">
           <span>
             Welcome to the most interactive gaming event in Port-Harcourt.
@@ -63,7 +63,7 @@ export function Header() {
         </div>
       </div>
 
-      <header className="flex absolute w-full top-8 pt-2 bg-background border-t-2 px-4 z-20 flex-row justify-between gap-4">
+      <header className="flex absolute w-full top-8 pt-2 bg-background border-t-2 px-4 z-50 flex-row justify-between gap-4">
         <h1 className="text-3xl md:text-5xl select-none font-[neue_machina] relative font-bold inline-block self-start">
           <span className="font-mono bg-foreground text-background text-[8px] md:text-xxs absolute left-[18%] px-1 ">
             InSpace
