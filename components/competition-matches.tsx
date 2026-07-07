@@ -4,6 +4,7 @@ import type { useQuery } from "convex/react";
 import { format } from "date-fns";
 import { range } from "effect/Array";
 import Image from "next/image";
+import { CompetitionCalendarGrid } from "~/components/competition-calendar-grid";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { useCachedQuery } from "~/hooks/use-cached-query";
@@ -121,6 +122,9 @@ export function CompetitionMatches({
         Fixtures
       </span>
 
+      <div className="hidden lg:block">
+        <CompetitionCalendarGrid matches={matches} />
+      </div>
       <CreativeWrapper heading="Matchdays" subHeading="">
         {unscheduled.length > 0 && (
           <div className="mb-6">
