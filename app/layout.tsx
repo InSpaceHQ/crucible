@@ -18,8 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "InSpace Crucible",
-  description: "Port-Harcourt most interactive gaming competition",
+  title: "InSpace Crucible Port-Harcourt",
+  description:
+    "Port-Harcourt's most interactive gaming competition. Compete as a team of 4 for the price money of NGN 600,000. Compete with 2 players each for Mortal Kombat and Football Club 2026.",
 };
 
 export default function RootLayout({
