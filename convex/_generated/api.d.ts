@@ -9,6 +9,9 @@
  */
 
 import type * as _clearAll from "../_clearAll.js";
+import type * as admin from "../admin.js";
+import type * as auth from "../auth.js";
+import type * as clerk from "../clerk.js";
 import type * as competition from "../competition.js";
 import type * as fixtures from "../fixtures.js";
 import type * as games from "../games.js";
@@ -27,6 +30,7 @@ import type * as seedSchedule from "../seedSchedule.js";
 import type * as skills from "../skills.js";
 import type * as standings from "../standings.js";
 import type * as teams from "../teams.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -36,6 +40,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   _clearAll: typeof _clearAll;
+  admin: typeof admin;
+  auth: typeof auth;
+  clerk: typeof clerk;
   competition: typeof competition;
   fixtures: typeof fixtures;
   games: typeof games;
@@ -54,6 +61,7 @@ declare const fullApi: ApiFromModules<{
   skills: typeof skills;
   standings: typeof standings;
   teams: typeof teams;
+  users: typeof users;
 }>;
 
 /**

@@ -1,4 +1,5 @@
 "use client";
+import { useUser } from "@clerk/nextjs";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -36,6 +37,8 @@ function Countdown({ targetDate }: { targetDate: Date }) {
 }
 
 export function Header() {
+  const { isSignedIn } = useUser();
+
   return (
     <>
       <div className="marquee bg-foreground text-background font-mono absolute top-0 z-60 text-xs md:text-sm py-2 w-full">
@@ -89,6 +92,14 @@ export function Header() {
               Join the Crucible <ArrowUpRight />
             </Button>
           </Link>
+
+          {isSignedIn && (
+            <Link href="/controls">
+              <Button variant="ghost" size="lg">
+                Controls
+              </Button>
+            </Link>
+          )}
         </div>
       </header>
     </>

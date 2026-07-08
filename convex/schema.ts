@@ -1,7 +1,29 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  users: authTables.users,
+
+  profile: defineTable({
+    id: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
+    phoneNumber: v.optional(v.string()),
+    email: v.optional(v.string()),
+    occupation: v.union(v.id("occupations"), v.literal("None")),
+    role: v.optional(v.string()),
+  })
+    .index("occupation", ["occupation"])
+    .index("by_user_id", ["id"])
+    .index("by_email", ["email"]),
+
+  occupations: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
   games: defineTable({
     name: v.string(),
     displayName: v.string(),

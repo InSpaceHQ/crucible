@@ -1,12 +1,19 @@
+import { currentUser } from "@clerk/nextjs/server";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { ControlsNavbar } from "~/components/controls/controls-navbar";
 
-export default function ControlsLayout({
+export default async function ControlsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await currentUser();
+  if (!user) redirect("/auth");
+
+  const isAdmin = user?.privateMetadata?.role === "admin";
+  if (!isAdmin) notFound();
   return (
     <div className="max-w-5xl mx-auto py-12 px-4">
       <div className="flex items-center justify-between mb-8">

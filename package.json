@@ -20,6 +20,8 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.5.13",
+    "@convex-dev/auth": "^0.0.94",
     "@hookform/resolvers": "^5.0.1",
     "@next/third-parties": "^16.2.10",
     "@tailwindcss/postcss": "^4.1.18",
@@ -42,6 +44,7 @@
     "lucide-react": "^1.23.0",
     "motion": "^12.42.2",
     "next": "16.2.9",
+    "ofetch": "^1.5.1",
     "ohash": "^2.0.11",
     "radix-ui": "^1.6.1",
     "ramda": "^0.27.2",
