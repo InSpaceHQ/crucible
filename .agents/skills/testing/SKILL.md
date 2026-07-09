@@ -4,7 +4,6 @@ description: TDD rules
 ---
 
 ## Development workflow — STRICT TDD (always follow this order)
-
 1. **RED**: Write a failing test first. Run test script — confirm it FAILS.
    Do NOT write implementation before this step.
 
@@ -15,7 +14,6 @@ description: TDD rules
    Run tests after every change.
 
 **Rules:**
-
 - Never write implementation without a failing test first.
 - Never write more implementation than the current test requires.
 - One cycle at a time: RED → GREEN → REFACTOR before the next feature.
