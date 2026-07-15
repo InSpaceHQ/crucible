@@ -38,3 +38,5 @@ tsconfig.tsbuildinfo
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+/.agents

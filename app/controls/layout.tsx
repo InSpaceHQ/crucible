@@ -1,8 +1,13 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import type React from "react";
 import { Button } from "~/components/ui/button";
 import { ControlsNavbar } from "~/components/controls/controls-navbar";
+
+export const metadata = {
+  title: "Controls",
+};
 
 export default async function ControlsLayout({
   children,

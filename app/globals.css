@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@plugin "@tailwindcss/typography";
+
 /*@custom-variant dark (&:is(.dark *));*/
 
 @theme inline {
@@ -203,4 +205,18 @@
 
 .page-content {
   margin-top: var(--header-height);
+}
+
+.prose {
+  --tw-prose-quotes: var(--accent-foreground);
+  --tw-prose-bold: var(--color-foreground);
+  --tw-prose-headings: var(--color-foreground);
+  --tw-prose-body: hsl(from var(--color-foreground) h s l / 0.8);
+  --tw-prose-counters: hsl(from var(--color-foreground) h s l / 0.8);
+  --tw-prose-links: var(--color-primary);
+}
+
+.prose p,
+li {
+  line-height: 2.6ex;
 }
