@@ -8,10 +8,11 @@ import { GameTabs } from "~/components/game-tabs";
 import { PlayerActivityPanel } from "~/components/player-activity-panel";
 import { PointsLog } from "~/components/points-log";
 import { ScheduleSection } from "~/components/schedule-section";
-import { SponsorsSection } from "~/components/sponsors-section";
 import { SimulateCompetition } from "~/components/simulate-competition";
 import { SkillsCard } from "~/components/skills-card";
+import { SponsorsSection } from "~/components/sponsors-section";
 import { Fit } from "~/components/ui/fit";
+import { FAQs } from "./faqs";
 
 export default function Home() {
   return (
@@ -43,7 +44,10 @@ export default function Home() {
           </FlagCond>
         </div>
 
+
         <ScheduleSection />
+
+        <FAQs />
 
         <SponsorsSection />
 

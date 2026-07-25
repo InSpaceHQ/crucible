@@ -6,7 +6,7 @@ import type {
   PersistedClient,
   Persister,
 } from "@tanstack/react-query-persist-client";
-import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { persistQueryClient, } from "@tanstack/react-query-persist-client";
 import type { ReactNode } from "react";
 
 export const queryClient = new QueryClient({
@@ -18,7 +18,7 @@ export const queryClient = new QueryClient({
   },
 });
 
-const LS_KEY = "tanstack-query";
+const LS_KEY = "crucible:queries";
 
 const localStoragePersister: Persister = {
   persistClient: async (client: PersistedClient) => {

@@ -26,24 +26,26 @@ export function ScheduleSection() {
   const entries = Object.entries(grouped);
 
   return (
-    <CreativeWrapper heading="Schedule" subHeading="8 Days of Mayhem">
-      <div className="block md:hidden">
-        {entries.map(([date, items], gi) => (
-          <ScheduleDateGroupMobile
-            key={date}
-            date={date}
-            items={items}
-            isLast={gi === entries.length - 1}
-          />
-        ))}
-      </div>
+    <div className="mb-32">
+      <CreativeWrapper heading="Schedule" subHeading="8 Days of Mayhem">
+        <div className="block md:hidden">
+          {entries.map(([date, items], gi) => (
+            <ScheduleDateGroupMobile
+              key={date}
+              date={date}
+              items={items}
+              isLast={gi === entries.length - 1}
+            />
+          ))}
+        </div>
 
-      <div className="hidden md:block">
-        {entries.map(([date, items]) => (
-          <ScheduleDateGroupDesktop key={date} date={date} items={items} />
-        ))}
-      </div>
-    </CreativeWrapper>
+        <div className="hidden md:block">
+          {entries.map(([date, items]) => (
+            <ScheduleDateGroupDesktop key={date} date={date} items={items} />
+          ))}
+        </div>
+      </CreativeWrapper>
+    </div>
   );
 }
 
