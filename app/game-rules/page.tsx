@@ -2,6 +2,7 @@
 import { pipe } from "effect/Function";
 import React from "react";
 import GameRules from "./game-rules.mdx";
+import { FAQs } from "../faqs";
 
 const getHeadings = (items: HTMLElement[]) =>
   pipe(Array.from(items), (elements) =>
@@ -69,6 +70,8 @@ export default function GameRulesPage() {
           <GameRules />
         </div>
       </div>
+
+      <FAQs />
     </div>
   );
 }
