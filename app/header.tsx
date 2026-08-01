@@ -67,12 +67,14 @@ export function Header() {
       </div>
 
       <header className="flex absolute w-full top-8 pt-2 bg-background border-t-2 px-4 z-50 flex-row justify-between gap-4">
-        <h1 className="text-3xl md:text-5xl select-none font-[neue_machina] relative font-bold inline-block self-start">
-          <span className="font-mono bg-foreground text-background text-[8px] md:text-xxs absolute left-[18%] px-1 ">
-            InSpace
-          </span>
-          Crucible
-        </h1>
+        <Link href="/">
+          <h1 className="text-3xl md:text-5xl select-none font-[neue_machina] relative font-bold inline-block self-start">
+            <span className="font-mono bg-foreground text-background text-[8px] md:text-xxs absolute left-[18%] px-1 ">
+              InSpace
+            </span>
+            Crucible
+          </h1>
+        </Link>
 
         <div className="flex items-center gap-3 md:gap-6">
           <Countdown targetDate={new Date("2026-08-01T00:00:00")} />

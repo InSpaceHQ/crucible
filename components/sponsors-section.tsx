@@ -1,9 +1,9 @@
-import Image from "next/image";
-import { CreativeWrapper } from "./schedule-section";
-import { cn } from "~/lib/utils";
-import { Button } from "./ui/button";
 import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { cn } from "~/lib/utils";
+import { CreativeWrapper } from "./schedule-section";
+import { Button } from "./ui/button";
 
 const tiers = [
   {
@@ -19,14 +19,7 @@ const tiers = [
   },
   {
     name: "Platinum",
-    sponsors: [
-      { name: "Jet", src: "/images/sponsors-jet-logo.png" },
-      {
-        name: "Godfather Games",
-        src: "/images/sponsors-godfather-games-logo.png",
-      },
-      { name: "Daimyo", src: "/images/sponsors-daimyo-logo.png" },
-    ],
+    sponsors: [{ name: "Daimyo", src: "/images/sponsors-daimyo-logo.png" }],
   },
 ];
 
