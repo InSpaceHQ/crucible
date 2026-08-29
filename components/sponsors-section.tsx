@@ -19,7 +19,10 @@ const tiers = [
   },
   {
     name: "Platinum",
-    sponsors: [{ name: "Daimyo", src: "/images/sponsors-daimyo-logo.png" }],
+    sponsors: [
+      { name: "Daimyo", src: "/images/sponsors-daimyo-logo.png" },
+      { name: "Red Bull", src: "/images/sponsors-red-bull.png" },
+    ],
   },
 ];
 

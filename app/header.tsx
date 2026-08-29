@@ -1,5 +1,6 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
+import { isPast } from "date-fns";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -28,6 +29,8 @@ function Countdown({ targetDate }: { targetDate: Date }) {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [targetDate]);
+
+  if (isPast(targetDate)) return null;
 
   return (
     <span className="font-mono text-xs md:text-sm tabular-nums text-accent-foreground">
