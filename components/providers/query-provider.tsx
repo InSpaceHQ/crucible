@@ -6,7 +6,8 @@ import type {
   PersistedClient,
   Persister,
 } from "@tanstack/react-query-persist-client";
-import { persistQueryClient, } from "@tanstack/react-query-persist-client";
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { Either } from "effect";
 import type { ReactNode } from "react";
 
 export const queryClient = new QueryClient({
@@ -24,10 +25,19 @@ const localStoragePersister: Persister = {
   persistClient: async (client: PersistedClient) => {
     localStorage.setItem(LS_KEY, JSON.stringify(client));
   },
+
   restoreClient: async () => {
     const raw = localStorage.getItem(LS_KEY);
-    return raw ? (JSON.parse(raw) as PersistedClient) : undefined;
+    const output = Either.try(
+      () => JSON.parse(raw as string) as PersistedClient,
+    );
+
+    return Either.match(output, {
+      onRight: (parsed) => parsed,
+      onLeft: () => undefined,
+    });
   },
+
   removeClient: async () => {
     localStorage.removeItem(LS_KEY);
   },
