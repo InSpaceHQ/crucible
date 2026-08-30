@@ -1,7 +1,9 @@
 "use client";
 
 import { Volume2, VolumeX } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { isDevelopment } from "~/config/constants";
+import { STORAGE_KEY } from "./loading-screen";
 
 const MUSIC_SRC = "/sound/music.mp3";
 const DEFAULT_TEMPO = 0.8;
@@ -48,7 +50,8 @@ export function MusicPlayer({
 }) {
   const [status, setStatus, statusRef] = useRefState<Status>("loading");
   const [tempo, setTempo, tempoRef] = useRefState(DEFAULT_TEMPO);
-  const [entered, setEntered] = useState(false);
+
+  const canShowControl = false;
 
   const n = (() => {
     const f = Math.floor(bars);
@@ -145,7 +148,42 @@ export function MusicPlayer({
     rafRef.current = requestAnimationFrame(visualize);
   }
 
-  useEffect(() => {
+  function play() {
+    const ctx = audio.current.ctx;
+    if (!ctx) return;
+    if (fadeTimer.current) window.clearTimeout(fadeTimer.current);
+    ctx.resume().then(() => {
+      setStatus("on");
+      fadeTo(GAIN);
+      if (!audio.current.source) start();
+    });
+  }
+
+  function toggle() {
+    if (status === "off") {
+      play();
+      return;
+    }
+    // status === "on"
+    if (audio.current.source) {
+      setStatus("off");
+      fadeTo(0);
+      if (fadeTimer.current) window.clearTimeout(fadeTimer.current);
+      fadeTimer.current = window.setTimeout(() => {
+        if (statusRef.current !== "on") stopSource();
+      }, FADE * 1000);
+      return;
+    }
+    // intent-on but never actually started (pre-gesture) -> start now
+    play();
+  }
+
+  function onTempo(v: number) {
+    setTempo(v);
+    if (audio.current.source) audio.current.source.playbackRate.value = v;
+  }
+
+  React.useEffect(function loadMedia() {
     const audioRef = audio.current;
 
     const ac = new AbortController();
@@ -202,84 +240,46 @@ export function MusicPlayer({
     };
   }, []);
 
-  function play() {
-    const ctx = audio.current.ctx;
-    if (!ctx) return;
-    if (fadeTimer.current) window.clearTimeout(fadeTimer.current);
-    ctx.resume().then(() => {
-      setStatus("on");
-      fadeTo(GAIN);
-      if (!audio.current.source) start();
-    });
-  }
+  React.useEffect(
+    function listenForLoadingScreen() {
+      const ac = new AbortController();
 
-  function toggle() {
-    if (status === "off") {
-      play();
-      return;
-    }
-    // status === "on"
-    if (audio.current.source) {
-      setStatus("off");
-      fadeTo(0);
-      if (fadeTimer.current) window.clearTimeout(fadeTimer.current);
-      fadeTimer.current = window.setTimeout(() => {
-        if (statusRef.current !== "on") stopSource();
-      }, FADE * 1000);
-      return;
-    }
-    // intent-on but never actually started (pre-gesture) -> start now
-    play();
-  }
+      window.addEventListener(
+        STORAGE_KEY,
+        () => play(),
+        { signal: ac.signal },
+      );
 
-  function enterSite() {
-    setEntered(true);
-    play();
-  }
-
-  function onTempo(v: number) {
-    setTempo(v);
-    if (audio.current.source) audio.current.source.playbackRate.value = v;
-  }
+      return () => ac.abort()
+    },
+    [play],
+  );
 
   return (
-    <>
-      {!entered && (
-        <div className="fixed inset-0 z-100 flex flex-col items-center justify-center gap-6 bg-background">
-          <h2 className="font-[neue_machina] text-4xl font-bold uppercase">
-            InSpace Crucible
-          </h2>
-          <button
-            type="button"
-            onClick={enterSite}
-            className="border-2 border-foreground px-10 py-4 font-mono text-lg uppercase hover:bg-foreground hover:text-background"
-          >
-            Enter
-          </button>
-        </div>
-      )}
-
-      <div data-music-player>
-        <button
-          type="button"
-          className="flex fixed cursor-pointer bottom-48 end-4 z-60 bg-foreground aspect-square w-12 items-center justify-center gap-1 py-3"
-          onClick={toggle}
-          aria-pressed={status === "on"}
-          disabled={status === "loading"}
-        >
-          {Array.from({ length: n }, (_, i) => (
+    <div data-music-player>
+      <button
+        type="button"
+        className="flex fixed cursor-pointer bottom-3 end-2 z-60 aspect-5/1 w-24 items-center justify-center gap-1"
+        onClick={toggle}
+        aria-pressed={status === "on"}
+        disabled={status === "loading"}
+      >
+        {Array.from({ length: n }, (_, i) => {
+          return (
             <div
               key={i}
               ref={(el) => {
                 barRefs.current[i] = el;
               }}
-              className="w-0.5 shrink-0 bg-background"
+              className="w-0.5 shrink-0 bg-foreground"
               style={{ minHeight: "4px" }}
             />
-          ))}
-        </button>
+          );
+        })}
+      </button>
 
-        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 border-2 border-foreground bg-background p-3 font-mono text-xs text-foreground">
+      {canShowControl && isDevelopment ? (
+        <div className="fixed bottom-12 end-0 z-50 flex flex-col gap-2 border-2 border-foreground bg-background p-3 font-mono text-xs text-foreground">
           <button
             type="button"
             onClick={toggle}
@@ -309,7 +309,7 @@ export function MusicPlayer({
             />
           </label>
         </div>
-      </div>
-    </>
+      ) : null}
+    </div>
   );
 }

@@ -44,7 +44,6 @@ export default function Home() {
           </FlagCond>
         </div>
 
-
         <ScheduleSection />
 
         <FAQs />

@@ -220,3 +220,11 @@
 li {
   line-height: 2.6ex;
 }
+
+.transition-default {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.ease-eager {
+  transition-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+}

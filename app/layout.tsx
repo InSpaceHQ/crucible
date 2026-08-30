@@ -7,6 +7,7 @@ import { ConvexClientProvider } from "~/components/providers/convex-client-provi
 import { FlagsmithProvider } from "~/components/providers/flagsmith-provider";
 import { QueryProvider } from "~/components/providers/query-provider";
 import { Header } from "./header";
+import { LoadingScreen } from "./loading-screen";
 import { MusicPlayer } from "./music-player";
 
 const geistSans = Geist({
@@ -42,8 +43,9 @@ export default function RootLayout({
           <FlagsmithProvider>
             <QueryProvider>
               <ConvexClientProvider>
+                <LoadingScreen />
                 <Header />
-                <MusicPlayer src="/sound/music.mp3" bars={3} />
+                <MusicPlayer src="/sound/music.mp3" bars={8} />
                 {children}
                 <Toaster
                   theme="light"

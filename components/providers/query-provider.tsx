@@ -19,7 +19,7 @@ export const queryClient = new QueryClient({
   },
 });
 
-const LS_KEY = "tanstack-query";
+const LS_KEY = "crucible:queries";
 
 const localStoragePersister: Persister = {
   persistClient: async (client: PersistedClient) => {

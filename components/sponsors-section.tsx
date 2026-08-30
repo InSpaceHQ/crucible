@@ -1,9 +1,8 @@
-import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "~/lib/utils";
+import { CTAButton } from "./cta-button";
 import { CreativeWrapper } from "./schedule-section";
-import { Button } from "./ui/button";
 
 const tiers = [
   {
@@ -66,21 +65,9 @@ export function SponsorsSection() {
         ))}
 
         <div className="mt-32">
-          <Button
-            variant="fill"
-            size="lg"
-            className="w-full gap-4 font-bold relative h-auto md:w-auto text-lg md:text-xl px-4 py-2 pe-2"
-            asChild
-          >
-            <Link href="https://forms.gle/irLMRRzVMycyZ4T48" target="_blank">
-              <span className="inline-block text-start flex-1">
-                Be a Sponsor
-              </span>
-              <span className="aspect-square p-[0.8em] inline-block text-foreground end-0 bg-background">
-                <ArrowUpRight className="size-[0.75em]" />
-              </span>
-            </Link>
-          </Button>
+          <Link href="https://forms.gle/irLMRRzVMycyZ4T48" target="_blank">
+            <CTAButton>Be a Sponsor</CTAButton>
+          </Link>
         </div>
       </div>
     </CreativeWrapper>
