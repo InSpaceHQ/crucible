@@ -1,97 +1,83 @@
-import { motion } from "framer-motion";
+"use client";
+
+import { gsap } from "gsap";
+import { SplitText } from "gsap/SplitText";
+import { useInView } from "motion/react";
 import React from "react";
 
-export function RandomText({ text: children }: { text: string }) {
-  const ref = React.useRef<HTMLDivElement>(null);
+gsap.registerPlugin(SplitText);
+
+const RANDOM_CHARS = "!<>-_\\/[]{}—=+*^?#ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+function getRandomChar() {
+  return RANDOM_CHARS[Math.floor(Math.random() * RANDOM_CHARS.length)];
+}
+
+export function RandomText({
+  text,
+  animate = "in-view",
+  viewport,
+}: { text: string; animate?: "in-view"; viewport?: { once: boolean } }) {
+  const ref = React.useRef<HTMLParagraphElement>(null);
+  const isInView = useInView(ref);
+  const animateCount = React.useRef(0);
+
+  const startAnimation = (el: HTMLElement) => {
+    if (viewport?.once === true && animateCount.current > 0) {
+      return () => { }
+    }
+
+    animateCount.current += 1
+
+    const split = SplitText.create(el, { type: "chars" });
+    const chars = split.chars.filter((c) => c.textContent?.trim());
+
+    const jitterFrames = 32;
+    const stepDelay = 0.03; // seconds between each char starting
+
+    const ctx = gsap.context(() => {
+      chars.forEach((char, i) => {
+        const target = char.textContent ?? "";
+        const tl = gsap.timeline({ delay: i * stepDelay });
+
+        for (let f = 0; f < jitterFrames; f++) {
+          tl.call(() => {
+            char.textContent = getRandomChar();
+          });
+          tl.to({}, { duration: 1 / 60 });
+        }
+
+        tl.call(() => {
+          char.textContent = target === " " ? " " : target;
+        });
+      });
+    }, el);
+
+    return () => {
+      ctx.revert();
+      split.revert();
+    };
+  };
 
   React.useEffect(() => {
-    const chars = "!<>-_\\/[]{}—=+*^?#________";
+    if (animate === "in-view" && !isInView) return;
+
     const el = ref.current;
-
     if (!el) return;
-    const validEl = el;
 
-    let frame = 0;
-    let queue = [];
+    const cleanup = startAnimation(el);
 
-    function setText(newText: string) {
-      const oldText = validEl.innerText;
-      const length = Math.max(oldText.length, newText.length);
-      queue = [];
+    return () => cleanup();
+  }, [text, isInView, animate]);
 
-      for (let i = 0; i < length; i++) {
-        const from = oldText[i] || "";
-        const to = newText[i] || "";
-        const start = Math.floor(Math.random() * 20);
-        const end = start + Math.floor(Math.random() * 20);
-
-        queue.push({
-          from,
-          to,
-          start,
-          end,
-          char: "",
-        });
-      }
-
-      frame = 0;
-      requestAnimationFrame(update);
-    }
-
-    function randomChar() {
-      return chars[Math.floor(Math.random() * chars.length)];
-    }
-
-    let last = Date.now();
-
-    function update() {
-      let output = "";
-      let complete = 0;
-      const now = Date.now();
-
-      const isAfter200 = now - last > 200;
-      console.log({ frame, now });
-
-      if (!isAfter200) {
-        return requestAnimationFrame(update);
-      }
-
-      last = now;
-
-      for (let i = 0; i < queue.length; i++) {
-        let { from, to, start, end, char } = queue[i];
-
-        if (frame >= end) {
-          complete++;
-          output += to;
-        } else if (frame >= start) {
-          if (!char || Math.random() < 0.28) {
-            char = randomChar();
-            queue[i].char = char;
-          }
-          output += char;
-        } else {
-          output += from;
-        }
-      }
-
-      el.innerText = output;
-
-      if (complete < queue.length) {
-        frame++;
-        requestAnimationFrame(update);
-      }
-    }
-
-    // On load: hide, then reveal with scramble
-    el.innerText = "";
-    setTimeout(() => setText(children), 500);
-  }, [children]);
 
   return (
-    <motion.div className="w-full border flex relative">
-      <div className="opacity-25 w-full">{children}</div>
-      <span ref={ref} className="absolute inset-0" />
-    </motion.div>
+    <p
+      ref={ref}
+      className="w-full"
+    // style={{ fontFamily: "Monaspace Krypton" }}
+    >
+      {text}
+    </p>
   );
 }

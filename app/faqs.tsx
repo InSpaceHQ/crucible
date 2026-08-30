@@ -1,3 +1,5 @@
+import { RandomText } from "~/components/random-text";
+
 const faqs = [
   {
     question: "How many players per team?",
@@ -47,27 +49,35 @@ const faqs = [
       "You're welcome to arrange your own stay if the event runs long or spans multiple days.",
     ],
   },
-]
+];
 
 export function FAQs() {
-  return <div className="flex md:min-h-screen items-start bg-background py-6 md:py-24 gap-4">
-    <h1 className="hidden md:block text-5xl sticky top-(--header-height) font-semibold font-heading text-pretty basis-4/12">
-      Frequently Asked Questions
-    </h1>
+  return (
+    <div className="flex md:min-h-screen items-start bg-background py-6 md:py-24 gap-4">
+      <h1 className="hidden md:block text-5xl sticky top-(--header-height) font-semibold font-heading text-pretty basis-4/12">
+        <RandomText animate="in-view" text="Frequently Asked Questions" viewport={{ once: true }} />
+      </h1>
 
-    <div className="w-full md:basis-8/12 px-4 md:pl-16">
-      <h2 className="md:hidden font-heading tracking-tighter font-bold text-3xl mb-4">
-        Frequently Asked Questions
-      </h2>
+      <div className="w-full md:basis-8/12 px-4 md:pl-16">
+        <h2 className="md:hidden font-heading tracking-tighter font-bold text-3xl mb-4">
+          <RandomText animate="in-view" text="Frequently Asked Questions" viewport={{ once: true }} />
+        </h2>
 
-      <div className="divide-y *:pb-4 divide-white/16">
-        {faqs.map((faq, i) => (
-          <details className="group" key={i} name="faqs">
-            <summary className="group-open:text-accent-foreground text-lg marker:opacity-0 cursor-pointer py-2">{faq.question}</summary>
-            <div className="pl-4 max-w-[60ch] space-y-4">{faq.answer.map((line, j) => <p key={j}>{line}</p>)}</div>
-          </details>
-        ))}
+        <div className="divide-y *:pb-4 divide-white/16">
+          {faqs.map((faq, i) => (
+            <details className="group" key={i} name="faqs">
+              <summary className="group-open:text-accent-foreground text-lg marker:opacity-0 cursor-pointer py-2">
+                {faq.question}
+              </summary>
+              <div className="pl-4 max-w-[60ch] space-y-4">
+                {faq.answer.map((line, j) => (
+                  <p key={j}>{line}</p>
+                ))}
+              </div>
+            </details>
+          ))}
+        </div>
       </div>
     </div>
-  </div>
+  );
 }

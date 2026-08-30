@@ -6,6 +6,7 @@ import { PixelBackground } from "~/components/creative/pixel-background";
 import { CTAButton } from "~/components/cta-button";
 import { RandomText } from "~/components/random-text";
 import { isDevelopment } from "~/config/constants";
+import { isSSR } from "~/lib/utils";
 
 export const STORAGE_KEY = "crucible::loadingScreen::hide";
 const FIRST_VISIT_KEY = "crucible:firstvisit";
@@ -14,7 +15,7 @@ export function LoadingScreen() {
   const [isFirstLoad] = React.useState(
     () => {
       if (isDevelopment) return "true";
-
+      if (isSSR()) return "true"
       return localStorage.getItem(FIRST_VISIT_KEY) ?? "true";
     },
   );
