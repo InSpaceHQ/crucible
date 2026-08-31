@@ -30,8 +30,8 @@ export function PixelBackground({
   const sat = React.useMemo(
     () =>
       (saturations ?? (variant === "threeWay" ? [-10, -15, 0] : [-10, -15])) as
-      | [number, number]
-      | [number, number, number],
+        | [number, number]
+        | [number, number, number],
     [saturations, variant],
   );
 
@@ -118,13 +118,13 @@ export function PixelBackground({
 
   React.useLayoutEffect(() => {
     if (isVisible) {
-      document.body.style.overflow = 'hidden'
-      document.body.style.height = '100vh'
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100vh";
     } else {
-      document.body.style.overflow = 'unset'
-      document.body.style.height = 'auto'
+      document.body.style.overflow = "unset";
+      document.body.style.height = "auto";
     }
-  }, [isVisible])
+  }, [isVisible]);
 
   if (!mounted) return null;
 

@@ -54,13 +54,17 @@ const faqs = [
 export function FAQs() {
   return (
     <div className="flex md:min-h-screen items-start bg-background py-6 md:py-24 gap-4">
-      <h1 className="hidden md:block text-5xl sticky top-(--header-height) font-semibold font-heading text-pretty basis-4/12">
-        <RandomText animate="in-view" text="Frequently Asked Questions" viewport={{ once: true }} />
+      <h1 className="px-8 hidden md:block text-5xl sticky top-(--header-height) font-semibold font-heading text-pretty basis-4/12">
+        <RandomText animate="in-view" viewport={{ once: true }}>
+          Frequently Asked <br /> Questions
+        </RandomText>
       </h1>
 
       <div className="w-full md:basis-8/12 px-4 md:pl-16">
         <h2 className="md:hidden font-heading tracking-tighter font-bold text-3xl mb-4">
-          <RandomText animate="in-view" text="Frequently Asked Questions" viewport={{ once: true }} />
+          <RandomText animate="in-view" viewport={{ once: true }}>
+            Frequently Asked <br /> Questions
+          </RandomText>
         </h2>
 
         <div className="divide-y *:pb-4 divide-white/16">

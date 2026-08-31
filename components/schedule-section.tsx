@@ -8,6 +8,7 @@ import { Fit } from "~/components/ui/fit";
 import { api } from "~/convex/_generated/api";
 import type { Doc } from "~/convex/_generated/dataModel";
 import { useCachedQuery } from "~/hooks/use-cached-query";
+import { cn } from "~/lib/utils";
 
 type ScheduleItem = Doc<"schedule">;
 
@@ -53,10 +54,12 @@ export function CreativeWrapper({
   heading,
   subHeading,
   children,
+  position = "left",
 }: {
   heading: string;
   subHeading: string;
   children: React.ReactNode;
+  position?: "left" | "right";
 }) {
   return (
     <>
@@ -67,7 +70,11 @@ export function CreativeWrapper({
       </div>
 
       <div className="hidden md:block">
-        <CreativeSectionDesktop heading={heading} subHeading={subHeading}>
+        <CreativeSectionDesktop
+          heading={heading}
+          subHeading={subHeading}
+          position={position}
+        >
           {children}
         </CreativeSectionDesktop>
       </div>
@@ -78,10 +85,12 @@ export function CreativeWrapper({
 function CreativeSectionDesktop({
   children,
   heading,
+  position = "left",
 }: {
   children: React.ReactNode;
   heading: string;
   subHeading?: string;
+  position?: "left" | "right";
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -91,13 +100,15 @@ function CreativeSectionDesktop({
 
   const x = useTransform(
     scrollYProgress,
-    [0, 0.4, 0.85, 1],
-    ["-0.5ex", "1.1ex", "1.1ex", "-0.5ex"],
+    position === "left" ? [0, 0.4, 0.85, 1] : [0, 0.2, 0.4, 0.85, 1],
+    position === "left"
+      ? ["-0.5ex", "1.1ex", "1.1ex", "-0.5ex"]
+      : ["-100%", "-100%", "0%", "0%", "-100%"],
   );
 
   return (
     <section ref={sectionRef} className="flex gap-4 items-start mt-64 relative">
-      <div className="top-0 basis-4/12 sticky self-start flex flex-col justify-center shrink-0 pointer-events-none">
+      <div className="top-0 bg-yellow-300 basis-4/12 sticky self-start flex flex-col justify-center shrink-0 pointer-events-none">
         <div className="w-screen h-screen fixed top-0 left-0">
           <Fit
             options={{
@@ -107,7 +118,13 @@ function CreativeSectionDesktop({
           >
             <motion.h2
               style={{ translate: x }}
-              className="absolute top-0 left-0 text-[color-mix(in_oklch,var(--background)_100%,rgba(255,255,255,0.9)_11%)] font-heading tracking-tighter font-bold text-[10vh] origin-top-left text-end whitespace-nowrap rotate-90 leading-[1ex]"
+              className={cn(
+                "absolute top-0 text-[color-mix(in_oklch,var(--background)_100%,rgba(255,255,255,0.9)_11%)] font-heading tracking-tighter font-bold text-[10vh] text-end whitespace-nowrap leading-[1ex]",
+                {
+                  "left-0 rotate-90 origin-top-left ": position === "left",
+                  "left-0": position === "right",
+                },
+              )}
             >
               {heading}
             </motion.h2>

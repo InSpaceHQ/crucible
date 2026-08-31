@@ -69,8 +69,7 @@ export class MusicControl {
 
   setBars(n: number) {
     this.barsCount = n;
-    if (this.bandHeights.length !== n)
-      this.bandHeights = Array(n).fill(0);
+    if (this.bandHeights.length !== n) this.bandHeights = Array(n).fill(0);
   }
 
   async load(src: string) {
@@ -180,7 +179,9 @@ export class MusicControl {
   private stopSource() {
     if (!this.source) return;
     this.source.onended = null;
-    try { this.source.stop(); } catch { }
+    try {
+      this.source.stop();
+    } catch {}
     this.source.disconnect();
     this.source = null;
   }
@@ -189,8 +190,7 @@ export class MusicControl {
     if (!this.ctx || !this.gain || !this.forward || !this.reversed) return;
     this.stopSource();
 
-    const buffer =
-      this.direction === "forward" ? this.forward : this.reversed;
+    const buffer = this.direction === "forward" ? this.forward : this.reversed;
     const source = this.ctx.createBufferSource();
     source.buffer = buffer;
     source.playbackRate.value = this.tempo;
@@ -198,8 +198,7 @@ export class MusicControl {
     this.gain.gain.setValueAtTime(GAIN, this.ctx.currentTime);
     source.onended = () => {
       if (this.status !== "on") return;
-      this.direction =
-        this.direction === "forward" ? "reverse" : "forward";
+      this.direction = this.direction === "forward" ? "reverse" : "forward";
       this.start();
     };
     source.start();

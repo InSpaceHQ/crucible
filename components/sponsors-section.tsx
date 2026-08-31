@@ -27,7 +27,11 @@ const tiers = [
 
 export function SponsorsSection() {
   return (
-    <CreativeWrapper heading="Sponsors" subHeading="Our Partners">
+    <CreativeWrapper
+      heading="Sponsors"
+      subHeading="Our Partners"
+      position="right"
+    >
       <div className="space-y-12 pe-4">
         {tiers.map((tier, index) => (
           <div key={tier.name}>

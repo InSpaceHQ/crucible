@@ -2,6 +2,7 @@
 import { useUser } from "@clerk/nextjs";
 import { isPast } from "date-fns";
 import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -70,31 +71,35 @@ export function Header() {
       </div>
 
       <header className="flex absolute w-full top-8 pt-2 bg-background border-t-2 px-4 z-50 flex-row justify-between gap-4">
-        <Link href="/">
-          <h1 className="text-3xl md:text-5xl select-none font-[neue_machina] relative font-bold inline-block self-start">
-            <span className="font-mono bg-foreground text-background text-[8px] md:text-xxs absolute left-[18%] px-1 ">
-              InSpace
-            </span>
-            Crucible
-          </h1>
-        </Link>
+        <div className="basis-1/3 hidden md:block"></div>
 
-        <div className="flex items-center gap-3 md:gap-6">
-          <Countdown targetDate={new Date("2026-08-01T00:00:00")} />
-
+        <div className="flex grow basis-1/3 justify-center items-center gap-3 md:gap-6">
           <Link href="/game-rules" className="hidden md:inline-block">
-            <Button variant="ghost" size="lg">
+            <Button variant="ghost" size="lg" className="min-w-[12ch]">
               Rules
             </Button>
           </Link>
 
+          <div className="my-2">
+            <Link href="/" className="transform -translate-y-10">
+              <Image
+                id="brand-image"
+                src="/images/crucible-logo.png"
+                alt="Crucible Logo"
+                width={100}
+                height={37}
+                className="max-48"
+              />
+            </Link>
+          </div>
+
           <Link
             href="https://bit.ly/crucible-inspace"
             target="_blank"
-            className="hidden md:inline-block"
+            className="hidden md:inline-block "
           >
-            <Button variant={"ghost"} size={"lg"}>
-              Join the Crucible <ArrowUpRight />
+            <Button variant={"ghost"} size={"lg"} className="min-w-[12ch]">
+              Register <ArrowUpRight />
             </Button>
           </Link>
 
@@ -105,6 +110,10 @@ export function Header() {
               </Button>
             </Link>
           )}
+        </div>
+
+        <div className="grow hidden basis-1/3 md:flex justify-end items-center">
+          <Countdown targetDate={new Date("2026-08-01T00:00:00")} />
         </div>
       </header>
     </>

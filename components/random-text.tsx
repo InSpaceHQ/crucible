@@ -14,20 +14,24 @@ function getRandomChar() {
 }
 
 export function RandomText({
-  text,
+  children: text,
   animate = "in-view",
   viewport,
-}: { text: string; animate?: "in-view"; viewport?: { once: boolean } }) {
+}: {
+  children: React.ReactNode;
+  animate?: "in-view";
+  viewport?: { once: boolean };
+}) {
   const ref = React.useRef<HTMLParagraphElement>(null);
   const isInView = useInView(ref);
   const animateCount = React.useRef(0);
 
   const startAnimation = (el: HTMLElement) => {
     if (viewport?.once === true && animateCount.current > 0) {
-      return () => { }
+      return () => { };
     }
 
-    animateCount.current += 1
+    animateCount.current += 1;
 
     const split = SplitText.create(el, { type: "chars" });
     const chars = split.chars.filter((c) => c.textContent?.trim());
@@ -69,7 +73,6 @@ export function RandomText({
 
     return () => cleanup();
   }, [text, isInView, animate]);
-
 
   return (
     <p

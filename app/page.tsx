@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { CompetitionsSection } from "~/components/competitions-section";
 import { CompetitorsList } from "~/components/competitors-list";
+import { CTAButton } from "~/components/cta-button";
 import { FlagCond } from "~/components/flag-cond";
 import { GameTabs } from "~/components/game-tabs";
 import { PlayerActivityPanel } from "~/components/player-activity-panel";
@@ -112,6 +113,12 @@ function CompetitorsSection() {
 
         <div className="w-full">
           <CompetitorsList />
+          <Link
+            href="https://bit.ly/crucible-inspace">
+            <CTAButton className="w-full mt-4">
+              Join competition
+            </CTAButton>
+          </Link>
         </div>
       </div>
 

@@ -13,6 +13,7 @@ import {
 } from "./music-control";
 
 const MUSIC_SRC = "/sound/music.mp3";
+const MUSIC_PREF_KEY = "crucible:music:pref";
 
 function clampBars(bars: number) {
   const f = Math.floor(bars);
@@ -51,26 +52,32 @@ export function MusicPlayer({
     [],
   );
 
-  useEffect(
-    function listenForLoadingScreen() {
-      const ac = new AbortController();
-      window.addEventListener(STORAGE_KEY, () => ctrl.current?.play(), {
-        signal: ac.signal,
-      });
-      return () => ac.abort();
-    },
-    [],
-  );
+  useEffect(function listenForLoadingScreen() {
+    const ac = new AbortController();
+    window.addEventListener(STORAGE_KEY, () => {
+      if (localStorage.getItem(MUSIC_PREF_KEY) === "off") return;
+      ctrl.current?.play();
+    }, { signal: ac.signal });
+    return () => ac.abort();
+  }, []);
 
   const canShowControl = false;
-  const barsArray = React.useMemo(() => Array.from({ length: n }).map((_, i) => i), [n]);
+  const barsArray = React.useMemo(
+    () => Array.from({ length: n }).map((_, i) => i),
+    [n],
+  );
+
+  const handleToggle = React.useCallback(() => {
+    ctrl.current?.toggle();
+    localStorage.setItem(MUSIC_PREF_KEY, status === "on" ? "off" : "on");
+  }, [status]);
 
   return (
     <div data-music-player>
       <button
         type="button"
         className="flex fixed cursor-pointer bottom-3 end-2 z-60 aspect-5/1 w-24 items-center justify-center gap-1"
-        onClick={() => ctrl.current?.toggle()}
+        onClick={handleToggle}
         aria-pressed={status === "on"}
         disabled={status === "loading"}
       >
@@ -80,7 +87,8 @@ export function MusicPlayer({
               key={i}
               ref={(ref) => ctrl.current?.barRef(i)?.(ref)}
               className="w-0.5 shrink-0 bg-foreground"
-              style={{ minHeight: "4px" }} />
+              style={{ minHeight: "4px" }}
+            />
           );
         })}
       </button>
@@ -110,7 +118,9 @@ export function MusicPlayer({
               max={MAX_TEMPO}
               step={0.05}
               value={tempo}
-              onChange={(e) => ctrl.current?.setTempo(parseFloat(e.target.value))}
+              onChange={(e) =>
+                ctrl.current?.setTempo(parseFloat(e.target.value))
+              }
               className="w-28 accent-foreground"
               disabled={status === "loading"}
             />

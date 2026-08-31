@@ -228,3 +228,19 @@ li {
 .ease-eager {
   transition-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
 }
+
+body {
+  cursor: url("/images/cursor-1x.png"), auto;
+}
+
+body button,
+body a,
+body summary {
+  cursor: url("/images/cursor-2x.png"), auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    cursor: auto;
+  }
+}

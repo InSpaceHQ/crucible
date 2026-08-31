@@ -18,7 +18,7 @@ export function CTAButton(props: React.ComponentProps<typeof Button>) {
       )}
     >
       <span className="absolute z-10 inset-0" />
-      <span className="inline-block text-nowrap text-start flex-1">
+      <span className="inline-block text-nowrap text-center flex-1">
         {props.children}
       </span>
       <span
