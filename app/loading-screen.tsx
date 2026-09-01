@@ -193,7 +193,6 @@ function LoadingBar({ onComplete }: { onComplete: () => void }) {
     >
       <RetroProgressBar
         progress={progress}
-        interval={200}
         onAnimationEnd={() => {
           onComplete();
         }}

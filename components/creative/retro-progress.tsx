@@ -1,14 +1,27 @@
 import { range } from "effect/Array";
+import gsap from "gsap";
 import React from "react";
 
 const TOTAL = 24;
 
+function updateBars(bars: HTMLDivElement[], position: number) {
+  const floor = Math.floor(position);
+  for (let i = 0; i < bars.length; i++) {
+    if (i < floor) {
+      bars[i].style.opacity = "1";
+    } else if (i === floor) {
+      const frac = position - floor;
+      bars[i].style.opacity = String(0.2 + 0.8 * frac);
+    } else {
+      bars[i].style.opacity = "0.2";
+    }
+  }
+}
+
 export function RetroProgressBar({
   progress = 0,
-  interval = 500,
   onAnimationEnd,
 }: {
-  interval?: number;
   progress?: number;
   onAnimationEnd: VoidFunction;
 }) {
@@ -37,29 +50,33 @@ export function RetroProgressBar({
     };
   }, []);
 
-  // Animate toward target on progress change
+  // Lerp toward target on progress change
   React.useEffect(() => {
     const bars = barsRef.current;
     if (!bars.length) return;
 
     const target = Math.round((progress / 100) * TOTAL);
+    const proxy = { progress: displayedRef.current };
 
-    const id = setInterval(() => {
-      if (displayedRef.current === target) {
-        clearInterval(id);
+    const tween = gsap.to(proxy, {
+      progress: target,
+      ease: "power2.out",
+      duration: 0.5,
+      onUpdate: () => {
+        displayedRef.current = proxy.progress;
+        updateBars(bars, proxy.progress);
+      },
+      onComplete: () => {
+        displayedRef.current = target;
+        updateBars(bars, target);
         if (progress === 100) onAnimationEnd();
-        return;
-      }
+      },
+    });
 
-      displayedRef.current += displayedRef.current < target ? 1 : -1;
-
-      for (let i = 0; i < bars.length; i++) {
-        bars[i].classList.toggle("opacity-20", i >= displayedRef.current);
-      }
-    }, interval);
-
-    return () => clearInterval(id);
-  }, [progress, interval]);
+    return () => {
+      tween.kill();
+    };
+  }, [progress, onAnimationEnd]);
 
   return (
     <div className="flex flex-col gap-1">
