@@ -88,7 +88,7 @@ export function LoadingScreen() {
                     hidden: { opacity: 0 },
                     visible: { opacity: 1 },
                   }}
-                  className="max-w-[35ch] select-none text-foreground text-center"
+                  className="max-w-[35ch] px-4 select-none text-foreground text-center"
                 >
                   <RandomText>
                     Compete for NGN 400,000 as a team of 2 and the second place
