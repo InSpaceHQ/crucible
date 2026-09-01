@@ -35,16 +35,6 @@ export function LoadingScreen() {
     }, 2000);
   }, []);
 
-  React.useEffect(() => {
-    if (isFirstLoad !== "true") {
-      const timerId = setTimeout(() => {
-        closeLoadingScreen();
-      }, 2000);
-
-      return () => clearTimeout(timerId);
-    }
-  }, [isFirstLoad, closeLoadingScreen]);
-
   return (
     <>
       <PixelBackground
@@ -61,6 +51,9 @@ export function LoadingScreen() {
             <LoadingBar
               onComplete={() => {
                 setIsReady(true);
+                if (isFirstLoad !== "true") {
+                  closeLoadingScreen();
+                }
               }}
             />
           ) : (
@@ -176,7 +169,7 @@ function LoadingBar({ onComplete }: { onComplete: () => void }) {
           cancelAnimationFrame(rafId);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     return () => {
       cancelled = true;
