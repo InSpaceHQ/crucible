@@ -68,14 +68,14 @@ export function FAQs() {
         </h2>
 
         <div className="divide-y *:pb-4 divide-white/16">
-          {faqs.map((faq, i) => (
-            <details className="group" key={i} name="faqs">
+          {faqs.map((faq) => (
+            <details className="group" key={faq.question} name="faqs">
               <summary className="group-open:text-accent-foreground text-lg marker:opacity-0 cursor-pointer py-2">
                 {faq.question}
               </summary>
               <div className="pl-4 max-w-[60ch] space-y-4">
-                {faq.answer.map((line, j) => (
-                  <p key={j}>{line}</p>
+                {faq.answer.map((line) => (
+                  <p key={line}>{line}</p>
                 ))}
               </div>
             </details>

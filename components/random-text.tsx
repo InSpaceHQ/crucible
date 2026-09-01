@@ -28,7 +28,7 @@ export function RandomText({
 
   const startAnimation = (el: HTMLElement) => {
     if (viewport?.once === true && animateCount.current > 0) {
-      return () => { };
+      return () => {};
     }
 
     animateCount.current += 1;
@@ -78,7 +78,7 @@ export function RandomText({
     <p
       ref={ref}
       className="w-full"
-    // style={{ fontFamily: "Monaspace Krypton" }}
+      // style={{ fontFamily: "Monaspace Krypton" }}
     >
       {text}
     </p>

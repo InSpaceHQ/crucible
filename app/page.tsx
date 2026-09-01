@@ -1,4 +1,5 @@
 "use client";
+import { GridSlides } from "~/components/creative/grid-slider";
 
 import Link from "next/link";
 import { CompetitionsSection } from "~/components/competitions-section";
@@ -14,11 +15,21 @@ import { SkillsCard } from "~/components/skills-card";
 import { SponsorsSection } from "~/components/sponsors-section";
 import { Fit } from "~/components/ui/fit";
 import { FAQs } from "./faqs";
+import { range } from "effect/Array";
+
+const slideImages = range(1, 10).map((index) => ({
+  url: `/images/gallery-${index}.webp`,
+  width: 1000,
+  height: 1300,
+}));
 
 export default function Home() {
   return (
     <>
+      <GridSlides slideImages={slideImages} />
+
       <PlayerActivityPanel />
+
       <div className="fixed inset-0 scanline-root z-1">
         <div className="scanline-container inset-0" />
       </div>
@@ -113,11 +124,8 @@ function CompetitorsSection() {
 
         <div className="w-full">
           <CompetitorsList />
-          <Link
-            href="https://bit.ly/crucible-inspace">
-            <CTAButton className="w-full mt-4">
-              Join competition
-            </CTAButton>
+          <Link href="https://bit.ly/crucible-inspace">
+            <CTAButton className="w-full mt-4">Join competition</CTAButton>
           </Link>
         </div>
       </div>

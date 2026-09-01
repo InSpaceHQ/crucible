@@ -54,10 +54,14 @@ export function MusicPlayer({
 
   useEffect(function listenForLoadingScreen() {
     const ac = new AbortController();
-    window.addEventListener(STORAGE_KEY, () => {
-      if (localStorage.getItem(MUSIC_PREF_KEY) === "off") return;
-      ctrl.current?.play();
-    }, { signal: ac.signal });
+    window.addEventListener(
+      STORAGE_KEY,
+      () => {
+        if (localStorage.getItem(MUSIC_PREF_KEY) === "off") return;
+        ctrl.current?.play();
+      },
+      { signal: ac.signal },
+    );
     return () => ac.abort();
   }, []);
 
