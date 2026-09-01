@@ -13,22 +13,21 @@ function getRandomChar() {
   return RANDOM_CHARS[Math.floor(Math.random() * RANDOM_CHARS.length)];
 }
 
-export function RandomText({
-  children: text,
-  animate = "in-view",
-  viewport,
-}: {
+export function RandomText(props: {
   children: React.ReactNode;
   animate?: "in-view";
   viewport?: { once: boolean };
+  onComplete?: VoidFunction;
 }) {
+  const { children: text, animate = "in-view", viewport, onComplete } = props;
+
   const ref = React.useRef<HTMLParagraphElement>(null);
   const isInView = useInView(ref);
   const animateCount = React.useRef(0);
 
   const startAnimation = (el: HTMLElement) => {
     if (viewport?.once === true && animateCount.current > 0) {
-      return () => {};
+      return () => { };
     }
 
     animateCount.current += 1;
@@ -40,9 +39,21 @@ export function RandomText({
     const stepDelay = 0.03; // seconds between each char starting
 
     const ctx = gsap.context(() => {
-      chars.forEach((char, i) => {
+      const master = gsap.timeline();
+      const component = gsap.timeline({
+        onComplete: () => {
+          return onComplete?.();
+        },
+      });
+
+      for (const index in chars) {
+        const i = +index;
+        const char = chars[i];
+
         const target = char.textContent ?? "";
-        const tl = gsap.timeline({ delay: i * stepDelay });
+        const tl = gsap.timeline({
+          delay: i * stepDelay,
+        });
 
         for (let f = 0; f < jitterFrames; f++) {
           tl.call(() => {
@@ -54,7 +65,12 @@ export function RandomText({
         tl.call(() => {
           char.textContent = target === " " ? " " : target;
         });
-      });
+        master.add(tl, "0");
+      }
+
+      master.add(component, "+=1");
+
+      master.play();
     }, el);
 
     return () => {
@@ -78,7 +94,7 @@ export function RandomText({
     <p
       ref={ref}
       className="w-full"
-      // style={{ fontFamily: "Monaspace Krypton" }}
+    // style={{ fontFamily: "Monaspace Krypton" }}
     >
       {text}
     </p>

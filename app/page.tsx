@@ -1,9 +1,11 @@
 "use client";
-import { GridSlides } from "~/components/creative/grid-slider";
+import { range } from "effect/Array";
 
 import Link from "next/link";
 import { CompetitionsSection } from "~/components/competitions-section";
 import { CompetitorsList } from "~/components/competitors-list";
+import { GridSlides } from "~/components/creative/grid-slider";
+import { ImagePicker } from "~/components/creative/grid-slider-animator";
 import { CTAButton } from "~/components/cta-button";
 import { FlagCond } from "~/components/flag-cond";
 import { GameTabs } from "~/components/game-tabs";
@@ -15,18 +17,11 @@ import { SkillsCard } from "~/components/skills-card";
 import { SponsorsSection } from "~/components/sponsors-section";
 import { Fit } from "~/components/ui/fit";
 import { FAQs } from "./faqs";
-import { range } from "effect/Array";
-
-const slideImages = range(1, 10).map((index) => ({
-  url: `/images/gallery-${index}.webp`,
-  width: 1000,
-  height: 1300,
-}));
 
 export default function Home() {
   return (
     <>
-      <GridSlides slideImages={slideImages} />
+      <GridSlides />
 
       <PlayerActivityPanel />
 

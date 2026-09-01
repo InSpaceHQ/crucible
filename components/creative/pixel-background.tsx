@@ -36,6 +36,8 @@ export function PixelBackground({
   );
 
   const [mounted, setMounted] = React.useState(true);
+  const [isPixelRendered, setPixelRendered] = React.useState(false);
+
   // if (isVisible && !mounted) setMounted(true);
 
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -81,8 +83,10 @@ export function PixelBackground({
   React.useLayoutEffect(() => {
     const engine = engineRef.current;
     if (!engine) return;
-    if (isVisible) engine.show();
-    else engine.hide();
+    if (isVisible) {
+      engine.show();
+      setPixelRendered(true);
+    } else engine.hide();
   }, [mounted, isVisible]);
 
   React.useLayoutEffect(() => {
@@ -129,9 +133,20 @@ export function PixelBackground({
   if (!mounted) return null;
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={cn("fixed inset-0 z-50 pointer-events-auto", className)}
-    />
+    <div
+      className={cn("fixed inset-0", className)}
+      style={{
+        background: isPixelRendered ? "transparent" : undefined,
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        className={cn(
+          "fixed inset-0 z-50 pointer-events-auto",
+          className,
+          "bg-transparent",
+        )}
+      />
+    </div>
   );
 }

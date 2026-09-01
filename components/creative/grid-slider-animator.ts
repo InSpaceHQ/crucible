@@ -1,9 +1,9 @@
-import { animate } from "motion/react";
 import { Array as Arr, Chunk, Effect, Number as Numer, pipe } from "effect";
-import { safeStr } from "~/lib/data.helper";
 import { range } from "effect/Array";
-import { choice, shuffle } from "effect/Random";
 import { clamp } from "effect/Order";
+import { choice, shuffle } from "effect/Random";
+import { animate } from "motion/react";
+import { safeStr } from "~/lib/data.helper";
 
 export type Media = {
   url: string;
@@ -16,9 +16,13 @@ export class GridSliderAnimation {
 
   constructor(
     public params: {
+      /** Returns the root container element where images are appended. */
       root: () => HTMLElement;
+      /** Array of image media entries to animate through. */
       images: Media[];
+      /** Delay in seconds between each image enter animation. */
       transitionDelay?: number;
+      /** Duration in seconds for enter and exit animations. */
       enterDuration?: number;
     },
   ) {
@@ -168,11 +172,36 @@ export class GridSliderAnimation {
 export const delay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-export class ImageRandomizer {
+export class ImagePicker {
   private images: Media[];
+
+  get size() {
+    return this.images.length;
+  }
 
   constructor(images: Media[]) {
     this.images = pipe(shuffle(images), Effect.runSync, Chunk.toArray);
+  }
+
+  async loadImages(
+    onProgress?: (progress: { loaded: number; total: number }) => void,
+  ) {
+    let loaded = 0;
+    const total = this.images.length;
+    const promises = this.images.map(
+      (slide) =>
+        new Promise<void>((resolve) => {
+          const img = document.createElement("img");
+          img.onload = img.onerror = () => {
+            loaded++;
+            onProgress?.({ loaded, total });
+            resolve();
+          };
+          img.src = slide.url;
+          img.style.opacity = "0";
+        }),
+    );
+    await Promise.allSettled(promises);
   }
 
   randomTake(limit: number = 3) {

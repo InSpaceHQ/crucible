@@ -5,19 +5,10 @@ import type { Cause } from "effect/Cause";
 import { useInView } from "motion/react";
 import React from "react";
 import { useMediaQuery } from "usehooks-ts";
-import {
-  delay,
-  ImageRandomizer,
-  type Media,
-  RandomInt,
-  GridSliderAnimation,
-} from "./grid-slider-animator";
+import { slideImages } from "./gallery-images";
+import { delay, GridSliderAnimation, RandomInt } from "./grid-slider-animator";
 
-export type GridSlidesProps = { slideImages: Media[] };
-
-export function GridSlides(props: GridSlidesProps) {
-  const { slideImages } = props;
-
+export function GridSlides() {
   const ref = React.useRef<HTMLDivElement>(null);
   const is_in_view = useInView(ref);
   const isMobile = useMediaQuery("(max-width: 600px)", { defaultValue: true });
@@ -25,7 +16,7 @@ export function GridSlides(props: GridSlidesProps) {
   const mountables = React.useMemo(() => [4, 10, 7, 6, 12, 11], []);
 
   React.useEffect(() => {
-    if (!isMobile) return;
+    if (isMobile) return;
     if (!ref.current) return;
 
     if (!is_in_view) {
@@ -39,13 +30,12 @@ export function GridSlides(props: GridSlidesProps) {
     const containers = Array.from(entries);
 
     console.assert(
-      slideImages.length > 0,
+      slideImages.size > 0,
       "[GridSlides] Atleast one slide image needed",
     );
 
     if (containers.length === 0)
       return console.warn("No available slots to render slide");
-    const imageLoader = new ImageRandomizer(slideImages);
 
     let currentContainer: HTMLElement = containers[0],
       boxSwitchDelay = 1000,
@@ -102,7 +92,7 @@ export function GridSlides(props: GridSlidesProps) {
               root: () => box,
               transitionDelay: 0.2,
               enterDuration: 0.5,
-              images: imageLoader.randomTake(4),
+              images: slideImages.randomTake(4),
             });
 
             await delay(index * 500);
@@ -126,13 +116,13 @@ export function GridSlides(props: GridSlidesProps) {
           onFailure: (cause: Cause<unknown>) => {
             console.error("Stream failed", cause);
           },
-          onSuccess: (_: unknown) => { },
+          onSuccess: (_: unknown) => {},
         }),
       );
     });
 
     return () => abort_control.abort();
-  }, [slideImages, is_in_view, isMobile, mountables]);
+  }, [is_in_view, isMobile, mountables]);
 
   if (isMobile) return;
 

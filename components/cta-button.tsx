@@ -13,12 +13,12 @@ export function CTAButton(props: React.ComponentProps<typeof Button>) {
       variant="fill"
       {...props}
       className={cn(
-        "w-full gap-4 group hover:bg-foreground font-bold relative h-auto md:w-auto text-lg md:text-xl ps-4 py-1 pe-1",
+        "w-full gap-4 group hover:bg-foreground font-bold relative h-auto md:w-auto text-lg ps-4 py-1 pe-1",
         props.className,
       )}
     >
       <span className="absolute z-10 inset-0" />
-      <span className="inline-block text-nowrap text-center flex-1">
+      <span className="inline-block text-nowrap text-center font-mono flex-1">
         {props.children}
       </span>
       <span
