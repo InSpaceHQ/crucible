@@ -113,7 +113,7 @@ export function Header() {
         </div>
 
         <div className="grow hidden basis-1/3 md:flex justify-end items-center">
-          <Countdown targetDate={new Date("2026-08-01T00:00:00")} />
+          <Countdown targetDate={new Date("2026-10-31T00:00:00")} />
         </div>
       </header>
     </>
